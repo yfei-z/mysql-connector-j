@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2020, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.x;
@@ -49,6 +40,7 @@ import com.mysql.cj.x.protobuf.MysqlxConnection.Compression;
  * defined data size threshold.
  */
 public class CompressionSplittedOutputStream extends FilterOutputStream {
+
     private CompressorStreamsFactory compressorIoStreamsFactory;
 
     private byte[] frameHeader = new byte[HEADER_LENGTH];
@@ -74,7 +66,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Closes this stream.
-     * 
+     *
      * @see FilterOutputStream#close()
      */
     @Override
@@ -93,7 +85,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Forwards the write to {@link #write(byte[], int, int)};
-     * 
+     *
      * @see FilterOutputStream#write(int)
      */
     @Override
@@ -105,7 +97,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Forwards the write to {@link #write(byte[], int, int)};
-     * 
+     *
      * @see FilterOutputStream#write(byte[])
      */
     @Override
@@ -117,13 +109,13 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
     /**
      * Analyzes the given bytes as an X Protocol frame and, depending on its size, writes it as-is in the underlying {@link OutputStream} or rebuilds it as a
      * compressed X Protocol packet.
-     * 
+     *
      * @see java.io.FilterOutputStream#write(int)
      */
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         ensureOpen();
-        if ((off | len | (b.length - (len + off)) | (off + len)) < 0) { // Borrowed from FilterOutputStream.
+        if ((off | len | b.length - (len + off) | off + len) < 0) { // Borrowed from FilterOutputStream.
             throw new IndexOutOfBoundsException();
         }
 
@@ -161,7 +153,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Captures the first bytes of each X Protocol frame into a byte buffer.
-     * 
+     *
      * @param b
      *            the data.
      * @param off
@@ -187,7 +179,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Checks if there is a complete frame header already buffered.
-     * 
+     *
      * @return
      *         <code>true</code> if the frame header buffer is full, <code>false</code> otherwise.
      */
@@ -197,7 +189,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Checks if the entire frame X Protocol frame header has been fully written.
-     * 
+     *
      * @return
      *         <code>true</code> if the frame header was written, <code>false</code> otherwise.
      */
@@ -207,7 +199,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Checks if the X Protocol frame payload is ready to be written on the underlying {@link OutputStream}.
-     * 
+     *
      * @return
      *         <code>true</code> the payload can be written, <code>false</code> otherwise.
      */
@@ -217,7 +209,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Checks if current X Protocol frame has been fully written.
-     * 
+     *
      * @return
      *         <code>true</code> if the frame currently in progress was fully written, <code>false</code> otherwise.
      */
@@ -228,7 +220,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
     /**
      * Finalizes the writing of the compressed {@link OutputStream}, if one is currently in use, by flushing it into a temporary buffer and reassembling the
      * original X Protocol frame into a compressed one. Finally, writes the entire compressed frame into the underlying {@link OutputStream}.
-     * 
+     *
      * @throws IOException
      *             if any of the underlying I/O operations fail.
      */
@@ -265,7 +257,7 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
 
     /**
      * Ensures that this {@link OutputStream} wasn't closed yet.
-     * 
+     *
      * @throws IOException
      *             if this {@link OutputStream} was closed.
      */
@@ -274,4 +266,5 @@ public class CompressionSplittedOutputStream extends FilterOutputStream {
             throw new IOException("Stream closed");
         }
     }
+
 }

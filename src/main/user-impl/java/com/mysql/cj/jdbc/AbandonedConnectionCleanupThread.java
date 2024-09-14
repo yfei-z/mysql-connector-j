@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2013, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2013, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -48,6 +39,7 @@ import com.mysql.cj.protocol.NetworkResources;
  * There is only one instance of this class and there is a single thread to do this task. This thread's executor is statically referenced in this same class.
  */
 public class AbandonedConnectionCleanupThread implements Runnable {
+
     private static final Set<ConnectionFinalizerPhantomReference> connectionFinalizerPhantomRefs = ConcurrentHashMap.newKeySet();
     private static final ReferenceQueue<MysqlConnection> referenceQueue = new ReferenceQueue<>();
 
@@ -84,6 +76,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
     private AbandonedConnectionCleanupThread() {
     }
 
+    @Override
     public void run() {
         for (;;) {
             try {
@@ -129,7 +122,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
 
     /**
      * Checks if the context ClassLoaders from this and the caller thread are the same.
-     * 
+     *
      * @return true if both threads share the same context ClassLoader, false otherwise
      */
     private static boolean consistentClassLoaders() {
@@ -148,7 +141,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
 
     /**
      * Shuts down this thread either checking or not the context ClassLoaders from the involved threads.
-     * 
+     *
      * @param checked
      *            does a checked shutdown if true, unchecked otherwise
      */
@@ -180,7 +173,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
 
     /**
      * Returns true if the working thread is alive. It is alive if it was initialized successfully and wasn't shutdown yet.
-     * 
+     *
      * @return true if the working thread is alive; false otherwise.
      */
     public static boolean isAlive() {
@@ -194,7 +187,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
 
     /**
      * Tracks the finalization of a {@link MysqlConnection} object and keeps a reference to its {@link NetworkResources} so that they can be later released.
-     * 
+     *
      * @param conn
      *            the Connection object to track for finalization
      * @param io
@@ -217,7 +210,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
 
     /**
      * Release resources from the given {@link ConnectionFinalizerPhantomReference} and remove it from the references set.
-     * 
+     *
      * @param reference
      *            the {@link ConnectionFinalizerPhantomReference} to finalize.
      */
@@ -235,6 +228,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
      * This class holds a reference to the Connection's {@link NetworkResources} so they it can be later closed.
      */
     private static class ConnectionFinalizerPhantomReference extends PhantomReference<MysqlConnection> {
+
         private NetworkResources networkResources;
 
         ConnectionFinalizerPhantomReference(MysqlConnection conn, NetworkResources networkResources, ReferenceQueue<? super MysqlConnection> refQueue) {
@@ -251,5 +245,7 @@ public class AbandonedConnectionCleanupThread implements Runnable {
                 }
             }
         }
+
     }
+
 }

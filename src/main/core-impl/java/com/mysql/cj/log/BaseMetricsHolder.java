@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2017, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2017, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.log;
@@ -76,8 +67,7 @@ public class BaseMetricsHolder {
     private double queryTimeMean;
 
     private void createInitialHistogram(long[] breakpoints, long lowerBound, long upperBound) {
-
-        double bucketSize = (((double) upperBound - (double) lowerBound) / HISTOGRAM_BUCKETS) * 1.25;
+        double bucketSize = ((double) upperBound - (double) lowerBound) / HISTOGRAM_BUCKETS * 1.25;
 
         if (bucketSize < 1) {
             bucketSize = 1;
@@ -152,7 +142,7 @@ public class BaseMetricsHolder {
         addToPerformanceHistogram(queryTimeMs, 1);
 
         if (queryTimeMs < this.shortestQueryTimeMs) {
-            this.shortestQueryTimeMs = (queryTimeMs == 0) ? 1 : queryTimeMs;
+            this.shortestQueryTimeMs = queryTimeMs == 0 ? 1 : queryTimeMs;
         }
 
         this.numberOfQueriesIssued++;
@@ -161,7 +151,6 @@ public class BaseMetricsHolder {
     }
 
     private void repartitionHistogram(int[] histCounts, long[] histBreakpoints, long currentLowerBound, long currentUpperBound) {
-
         if (this.oldHistCounts == null) {
             this.oldHistCounts = new int[histCounts.length];
             this.oldHistBreakpoints = new long[histBreakpoints.length];
@@ -198,7 +187,7 @@ public class BaseMetricsHolder {
         logMessage.append("** Performance Metrics Report **\n");
         logMessage.append("\nLongest reported query: " + this.longestQueryTimeMs + " ms");
         logMessage.append("\nShortest reported query: " + this.shortestQueryTimeMs + " ms");
-        logMessage.append("\nAverage query execution time: " + (this.totalQueryTimeMs / this.numberOfQueriesIssued) + " ms");
+        logMessage.append("\nAverage query execution time: " + this.totalQueryTimeMs / this.numberOfQueriesIssued + " ms");
         logMessage.append("\nNumber of statements executed: " + this.numberOfQueriesIssued);
         logMessage.append("\nNumber of result sets created: " + this.numberOfResultSetsCreated);
         logMessage.append("\nNumber of statements prepared: " + this.numberOfPrepares);
@@ -209,7 +198,7 @@ public class BaseMetricsHolder {
             int maxNumPoints = 20;
             int highestCount = Integer.MIN_VALUE;
 
-            for (int i = 0; i < (HISTOGRAM_BUCKETS); i++) {
+            for (int i = 0; i < HISTOGRAM_BUCKETS; i++) {
                 if (this.perfMetricsHistCounts[i] > highestCount) {
                     highestCount = this.perfMetricsHistCounts[i];
                 }
@@ -219,7 +208,7 @@ public class BaseMetricsHolder {
                 highestCount = 1; // avoid DIV/0
             }
 
-            for (int i = 0; i < (HISTOGRAM_BUCKETS - 1); i++) {
+            for (int i = 0; i < HISTOGRAM_BUCKETS - 1; i++) {
 
                 if (i == 0) {
                     logMessage.append("\n\tless than " + this.perfMetricsHistBreakpoints[i + 1] + " ms: \t" + this.perfMetricsHistCounts[i]);
@@ -256,7 +245,7 @@ public class BaseMetricsHolder {
             int maxNumPoints = 20;
             int highestCount = Integer.MIN_VALUE;
 
-            for (int i = 0; i < (HISTOGRAM_BUCKETS); i++) {
+            for (int i = 0; i < HISTOGRAM_BUCKETS; i++) {
                 if (this.numTablesMetricsHistCounts[i] > highestCount) {
                     highestCount = this.numTablesMetricsHistCounts[i];
                 }
@@ -266,7 +255,7 @@ public class BaseMetricsHolder {
                 highestCount = 1; // avoid DIV/0
             }
 
-            for (int i = 0; i < (HISTOGRAM_BUCKETS - 1); i++) {
+            for (int i = 0; i < HISTOGRAM_BUCKETS - 1; i++) {
 
                 if (i == 0) {
                     logMessage.append("\n\t" + this.numTablesMetricsHistBreakpoints[i + 1] + " tables or less: \t\t" + this.numTablesMetricsHistCounts[i]);
@@ -348,8 +337,8 @@ public class BaseMetricsHolder {
     public void reportQueryTime(long millisOrNanos) {
         this.queryTimeCount++;
         this.queryTimeSum += millisOrNanos;
-        this.queryTimeSumSquares += (millisOrNanos * millisOrNanos);
-        this.queryTimeMean = ((this.queryTimeMean * (this.queryTimeCount - 1)) + millisOrNanos) / this.queryTimeCount;
+        this.queryTimeSumSquares += millisOrNanos * millisOrNanos;
+        this.queryTimeMean = (this.queryTimeMean * (this.queryTimeCount - 1) + millisOrNanos) / this.queryTimeCount;
     }
 
     /**
@@ -357,7 +346,7 @@ public class BaseMetricsHolder {
      * and return the estimation result for millisOrNanos value.
      * <p>
      * Used in case autoSlowLog=true.
-     * 
+     *
      * @param millisOrNanos
      *            query execution time
      * @return true if millisOrNanos is outside the 99th percentile?
@@ -365,11 +354,11 @@ public class BaseMetricsHolder {
     public boolean checkAbonormallyLongQuery(long millisOrNanos) {
         boolean res = false;
         if (this.queryTimeCount > 14) { // need a minimum amount for this to make sense
-            double stddev = Math.sqrt((this.queryTimeSumSquares - ((this.queryTimeSum * this.queryTimeSum) / this.queryTimeCount)) / (this.queryTimeCount - 1));
-            res = millisOrNanos > (this.queryTimeMean + 5 * stddev);
+            double stddev = Math.sqrt((this.queryTimeSumSquares - this.queryTimeSum * this.queryTimeSum / this.queryTimeCount) / (this.queryTimeCount - 1));
+            res = millisOrNanos > this.queryTimeMean + 5 * stddev;
         }
         reportQueryTime(millisOrNanos);
         return res;
-
     }
+
 }

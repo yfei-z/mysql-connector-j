@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc.ha;
@@ -64,13 +55,13 @@ import com.mysql.cj.protocol.ServerSessionStateController;
 
 /**
  * Each instance of MultiHostMySQLConnection is coupled with a MultiHostConnectionProxy instance.
- * 
+ *
  * While this class implements MySQLConnection directly, MultiHostConnectionProxy does the same but via a dynamic proxy.
- * 
+ *
  * Most of the methods in this class refer directly to the active connection from its MultiHostConnectionProxy pair, providing a non-proxied access to the
  * current active connection managed by this multi-host structure. The remaining methods either implement some local behavior or refer to the proxy itself
  * instead of the sub-connection.
- * 
+ *
  * Referring to the higher level proxy connection is needed when some operation needs to be extended to all open sub-connections existing in this multi-host
  * structure as opposed to just refer to the active current connection, such as with close() which is most likely required to close all sub-connections as
  * well.
@@ -759,4 +750,5 @@ public class MultiHostMySQLConnection implements JdbcConnection {
     public ServerSessionStateController getServerSessionStateController() {
         return getActiveMySQLConnection().getServerSessionStateController();
     }
+
 }

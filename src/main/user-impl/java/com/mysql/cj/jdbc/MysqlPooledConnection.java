@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -77,7 +68,7 @@ public class MysqlPooledConnection implements PooledConnection {
 
     /**
      * Construct a new MysqlPooledConnection and set instance variables
-     * 
+     *
      * @param connection
      *            physical connection to db
      */
@@ -90,7 +81,6 @@ public class MysqlPooledConnection implements PooledConnection {
 
     @Override
     public synchronized void addConnectionEventListener(ConnectionEventListener connectioneventlistener) {
-
         if (this.connectionEventListeners != null) {
             this.connectionEventListeners.put(connectioneventlistener, connectioneventlistener);
         }
@@ -98,7 +88,6 @@ public class MysqlPooledConnection implements PooledConnection {
 
     @Override
     public synchronized void removeConnectionEventListener(ConnectionEventListener connectioneventlistener) {
-
         if (this.connectionEventListeners != null) {
             this.connectionEventListeners.remove(connectioneventlistener);
         }
@@ -107,7 +96,6 @@ public class MysqlPooledConnection implements PooledConnection {
     @Override
     public synchronized Connection getConnection() throws SQLException {
         return getConnection(true, false);
-
     }
 
     protected synchronized Connection getConnection(boolean resetServerState, boolean forXa) throws SQLException {
@@ -166,7 +154,7 @@ public class MysqlPooledConnection implements PooledConnection {
      * Instantiates a new ConnectionEvent which wraps sqlException and invokes
      * either connectionClose or connectionErrorOccurred on listener as
      * appropriate.
-     * 
+     *
      * @param eventType
      *            value indicating whether connectionClosed or
      *            connectionErrorOccurred called
@@ -174,7 +162,6 @@ public class MysqlPooledConnection implements PooledConnection {
      *            the exception being thrown
      */
     protected synchronized void callConnectionEventListeners(int eventType, SQLException sqlException) {
-
         if (this.connectionEventListeners == null) {
 
             return;

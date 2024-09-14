@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj;
@@ -47,12 +38,13 @@ import com.mysql.cj.protocol.Protocol;
 import com.mysql.cj.protocol.ResultBuilder;
 import com.mysql.cj.protocol.ServerSession;
 import com.mysql.cj.result.Row;
+import com.mysql.cj.telemetry.TelemetryHandler;
 
 /**
  * {@link Session} exposes logical level which user API uses internally to call {@link Protocol} methods.
  * It's a higher-level abstraction than MySQL server session ({@link ServerSession}). {@link Protocol} and {@link ServerSession} methods
  * should never be used directly from user API.
- * 
+ *
  */
 public interface Session {
 
@@ -62,14 +54,14 @@ public interface Session {
 
     /**
      * Re-authenticates as the given user and password
-     * 
+     *
      * @param userName
      *            DB user name
      * @param password
      *            DB user password
      * @param database
      *            database name
-     * 
+     *
      */
     void changeUser(String userName, String password, String database);
 
@@ -79,7 +71,7 @@ public interface Session {
 
     /**
      * Log-off of the MySQL server and close the socket.
-     * 
+     *
      */
     void quit();
 
@@ -91,7 +83,7 @@ public interface Session {
     /**
      * Does the version of the MySQL server we are connected to meet the given
      * minimums?
-     * 
+     *
      * @param major
      *            major version number
      * @param minor
@@ -108,17 +100,37 @@ public interface Session {
 
     /**
      * Returns the log mechanism that should be used to log information from/for this Session.
-     * 
+     *
      * @return the Log instance to use for logging messages.
      */
     Log getLog();
 
     /**
      * Returns the current ProfilerEventHandler or initializes a new one if none exists.
-     * 
+     *
      * @return the {@link ProfilerEventHandler} object.
      */
     ProfilerEventHandler getProfilerEventHandler();
+
+    /**
+     * Returns the comment that will be prepended to all statements sent to the server.
+     *
+     * @return query comment string
+     */
+    String getQueryComment();
+
+    /**
+     * Sets the comment that will be prepended to all statements sent to the server. Do not use slash-star or star-slash tokens in the comment as these will be
+     * added by the driver itself.
+     *
+     * @param comment
+     *            query comment string
+     */
+    void setQueryComment(String comment);
+
+    void setTelemetryHandler(TelemetryHandler telemetryHandler);
+
+    TelemetryHandler getTelemetryHandler();
 
     HostInfo getHostInfo();
 
@@ -134,7 +146,7 @@ public interface Session {
 
     /**
      * Add listener for this session status changes.
-     * 
+     *
      * @param l
      *            {@link SessionEventListener} instance.
      */
@@ -142,18 +154,20 @@ public interface Session {
 
     /**
      * Remove session listener.
-     * 
+     *
      * @param l
      *            {@link SessionEventListener} instance.
      */
     void removeListener(SessionEventListener l);
 
     public static interface SessionEventListener {
+
         void handleNormalClose();
 
         void handleReconnect();
 
         void handleCleanup(Throwable whyCleanedUp);
+
     }
 
     boolean isClosed();
@@ -164,7 +178,7 @@ public interface Session {
 
     /**
      * Synchronously query database with applying rows filtering and mapping.
-     * 
+     *
      * @param message
      *            query message
      * @param rowFilter
@@ -187,7 +201,7 @@ public interface Session {
 
     /**
      * Synchronously query database.
-     * 
+     *
      * @param message
      *            query message
      * @param resultBuilder
@@ -204,7 +218,7 @@ public interface Session {
 
     /**
      * Asynchronously query database.
-     * 
+     *
      * @param message
      *            query message
      * @param resultBuilder

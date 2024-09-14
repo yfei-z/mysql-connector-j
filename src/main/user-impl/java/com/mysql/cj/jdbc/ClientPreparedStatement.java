@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -81,16 +72,20 @@ import com.mysql.cj.protocol.ColumnDefinition;
 import com.mysql.cj.protocol.Message;
 import com.mysql.cj.protocol.a.NativePacketPayload;
 import com.mysql.cj.result.Field;
+import com.mysql.cj.telemetry.TelemetryAttribute;
+import com.mysql.cj.telemetry.TelemetryScope;
+import com.mysql.cj.telemetry.TelemetrySpan;
+import com.mysql.cj.telemetry.TelemetrySpanName;
 import com.mysql.cj.util.Util;
 
 /**
  * A SQL Statement is pre-compiled and stored in a PreparedStatement object. This object can then be used to efficiently execute this statement multiple times.
- * 
+ *
  * <p>
  * <B>Note:</B> The setXXX methods for setting IN parameter values must specify types that are compatible with the defined SQL type of the input parameter. For
  * instance, if the IN parameter has SQL type Integer, then setInt should be used.
  * </p>
- * 
+ *
  * <p>
  * If arbitrary parameter type conversions are required, then the setObject method should be used with a target SQL type.
  * </p>
@@ -99,7 +94,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Does the batch (if any) contain "plain" statements added by Statement.addBatch(String)?
-     * 
+     *
      * If so, we can't re-write it to use multi-value or multi-queries.
      */
     protected boolean batchHasPlainStatements = false;
@@ -118,7 +113,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Creates a prepared statement instance
-     * 
+     *
      * @param conn
      *            the connection creating this statement
      * @param sql
@@ -135,7 +130,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Creates a prepared statement instance
-     * 
+     *
      * @param conn
      *            the connection creating this statement
      * @param sql
@@ -159,12 +154,12 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Constructor used by server-side prepared statements
-     * 
+     *
      * @param conn
      *            the connection that created us
      * @param db
      *            the database in use when we were created
-     * 
+     *
      * @throws SQLException
      *             if an error occurs
      */
@@ -177,14 +172,14 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Constructor for the PreparedStatement class.
-     * 
+     *
      * @param conn
      *            the connection creating this statement
      * @param sql
      *            the SQL for this statement
      * @param db
      *            the database this statement should be issued against
-     * 
+     *
      * @throws SQLException
      *             if a database error occurs.
      */
@@ -194,7 +189,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Creates a new PreparedStatement object.
-     * 
+     *
      * @param conn
      *            the connection creating this statement
      * @param sql
@@ -203,7 +198,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
      *            the database this statement should be issued against
      * @param cachedQueryInfo
      *            already created {@link QueryInfo} or null.
-     * 
+     *
      * @throws SQLException
      *             if a database access error occurs
      */
@@ -230,7 +225,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Returns this PreparedStatement represented as a string.
-     * 
+     *
      * @return this PreparedStatement represented as a string.
      */
     @Override
@@ -280,7 +275,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Check to see if the statement is safe for read-only replicas after failover.
-     * 
+     *
      * @return true if safe for read-only.
      * @throws SQLException
      *             if a database access error occurs or this method is called on a closed PreparedStatement
@@ -295,146 +290,175 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
     @Override
     public boolean execute() throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
+            TelemetrySpan span = getSession().getTelemetryHandler().startSpan(TelemetrySpanName.STMT_EXECUTE_PREPARED);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                String dbOperation = getQueryInfo().getStatementKeyword();
+                span.setAttribute(TelemetryAttribute.DB_NAME, getCurrentDatabase());
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, dbOperation);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, dbOperation + TelemetryAttribute.STATEMENT_SUFFIX);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, this.connection.getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-            JdbcConnection locallyScopedConn = this.connection;
+                JdbcConnection locallyScopedConn = this.connection;
 
-            if (!this.doPingInstead && !checkReadOnlySafeStatement()) {
-                throw SQLError.createSQLException(Messages.getString("PreparedStatement.20") + Messages.getString("PreparedStatement.21"),
-                        MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, this.exceptionInterceptor);
-            }
+                if (!this.doPingInstead && !checkReadOnlySafeStatement()) {
+                    throw SQLError.createSQLException(Messages.getString("PreparedStatement.20") + Messages.getString("PreparedStatement.21"),
+                            MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, this.exceptionInterceptor);
+                }
 
-            ResultSetInternalMethods rs = null;
+                ResultSetInternalMethods rs = null;
 
-            this.lastQueryIsOnDupKeyUpdate = false;
+                this.lastQueryIsOnDupKeyUpdate = false;
 
-            if (this.retrieveGeneratedKeys) {
-                this.lastQueryIsOnDupKeyUpdate = containsOnDuplicateKeyUpdate();
-            }
+                if (this.retrieveGeneratedKeys) {
+                    this.lastQueryIsOnDupKeyUpdate = containsOnDuplicateKeyUpdate();
+                }
 
-            this.batchedGeneratedKeys = null;
+                this.batchedGeneratedKeys = null;
 
-            resetCancelledState();
+                resetCancelledState();
 
-            implicitlyCloseAllOpenResults();
+                implicitlyCloseAllOpenResults();
 
-            clearWarnings();
+                clearWarnings();
 
-            if (this.doPingInstead) {
-                doPingInstead();
+                if (this.doPingInstead) {
+                    doPingInstead();
 
-                return true;
-            }
+                    return true;
+                }
 
-            setupStreamingTimeout(locallyScopedConn);
+                setupStreamingTimeout(locallyScopedConn);
 
-            Message sendPacket = ((PreparedQuery) this.query).fillSendPacket(((PreparedQuery) this.query).getQueryBindings());
+                Message sendPacket = ((PreparedQuery) this.query).fillSendPacket(((PreparedQuery) this.query).getQueryBindings());
 
-            String oldDb = null;
+                String oldDb = null;
 
-            if (!locallyScopedConn.getDatabase().equals(this.getCurrentDatabase())) {
-                oldDb = locallyScopedConn.getDatabase();
-                locallyScopedConn.setDatabase(this.getCurrentDatabase());
-            }
+                if (!locallyScopedConn.getDatabase().equals(getCurrentDatabase())) {
+                    oldDb = locallyScopedConn.getDatabase();
+                    locallyScopedConn.setDatabase(getCurrentDatabase());
+                }
 
-            //
-            // Check if we have cached metadata for this query...
-            //
-            CachedResultSetMetaData cachedMetadata = null;
+                //
+                // Check if we have cached metadata for this query...
+                //
+                CachedResultSetMetaData cachedMetadata = null;
 
-            boolean cacheResultSetMetadata = locallyScopedConn.getPropertySet().getBooleanProperty(PropertyKey.cacheResultSetMetadata).getValue();
-            if (cacheResultSetMetadata) {
-                cachedMetadata = locallyScopedConn.getCachedMetaData(((PreparedQuery) this.query).getOriginalSql());
-            }
+                boolean cacheResultSetMetadata = locallyScopedConn.getPropertySet().getBooleanProperty(PropertyKey.cacheResultSetMetadata).getValue();
+                if (cacheResultSetMetadata) {
+                    cachedMetadata = locallyScopedConn.getCachedMetaData(((PreparedQuery) this.query).getOriginalSql());
+                }
 
-            //
-            // Only apply max_rows to selects
-            //
-            locallyScopedConn.setSessionMaxRows(getQueryInfo().getFirstStmtChar() == 'S' ? this.maxRows : -1);
+                //
+                // Only apply max_rows to selects
+                //
+                locallyScopedConn.setSessionMaxRows(getQueryInfo().getFirstStmtChar() == 'S' ? this.maxRows : -1);
 
-            rs = executeInternal(this.maxRows, sendPacket, createStreamingResultSet(), (getQueryInfo().getFirstStmtChar() == 'S'), cachedMetadata, false);
+                rs = executeInternal(this.maxRows, sendPacket, createStreamingResultSet(), getQueryInfo().getFirstStmtChar() == 'S', cachedMetadata, false);
 
-            if (cachedMetadata != null) {
-                locallyScopedConn.initializeResultsMetadataFromCache(((PreparedQuery) this.query).getOriginalSql(), cachedMetadata, rs);
-            } else {
-                if (rs.hasRows() && cacheResultSetMetadata) {
+                if (cachedMetadata != null) {
+                    locallyScopedConn.initializeResultsMetadataFromCache(((PreparedQuery) this.query).getOriginalSql(), cachedMetadata, rs);
+                } else if (rs.hasRows() && cacheResultSetMetadata) {
                     locallyScopedConn.initializeResultsMetadataFromCache(((PreparedQuery) this.query).getOriginalSql(), null /* will be created */, rs);
                 }
+
+                if (this.retrieveGeneratedKeys) {
+                    rs.setFirstCharOfQuery(getQueryInfo().getFirstStmtChar());
+                }
+
+                if (oldDb != null) {
+                    locallyScopedConn.setDatabase(oldDb);
+                }
+
+                if (rs != null) {
+                    this.lastInsertId = rs.getUpdateID();
+
+                    this.results = rs;
+                }
+
+                return rs != null && rs.hasRows();
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
             }
-
-            if (this.retrieveGeneratedKeys) {
-                rs.setFirstCharOfQuery(getQueryInfo().getFirstStmtChar());
-            }
-
-            if (oldDb != null) {
-                locallyScopedConn.setDatabase(oldDb);
-            }
-
-            if (rs != null) {
-                this.lastInsertId = rs.getUpdateID();
-
-                this.results = rs;
-            }
-
-            return ((rs != null) && rs.hasRows());
         }
     }
 
     @Override
     protected long[] executeBatchInternal() throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
+            TelemetrySpan span = getSession().getTelemetryHandler().startSpan(TelemetrySpanName.STMT_EXECUTE_BATCH_PREPARED);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                span.setAttribute(TelemetryAttribute.DB_NAME, getCurrentDatabase());
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_BATCH);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_BATCH);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, this.connection.getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-            if (this.connection.isReadOnly()) {
-                throw new SQLException(Messages.getString("PreparedStatement.25") + Messages.getString("PreparedStatement.26"),
-                        MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT);
-            }
-
-            if (this.query.getBatchedArgs() == null || this.query.getBatchedArgs().size() == 0) {
-                return new long[0];
-            }
-
-            // we timeout the entire batch, not individual statements
-            int batchTimeout = getTimeoutInMillis();
-            setTimeoutInMillis(0);
-
-            resetCancelledState();
-
-            try {
-                statementBegins();
-
-                clearWarnings();
-
-                if (!this.batchHasPlainStatements && this.rewriteBatchedStatements.getValue()) {
-
-                    if (getQueryInfo().isRewritableWithMultiValuesClause()) {
-                        return executeBatchWithMultiValuesClause(batchTimeout);
-                    }
-
-                    if (!this.batchHasPlainStatements && this.query.getBatchedArgs() != null
-                            && this.query.getBatchedArgs().size() > 3 /* cost of option setting rt-wise */) {
-                        return executePreparedBatchAsMultiStatement(batchTimeout);
-                    }
+                if (this.connection.isReadOnly()) {
+                    throw new SQLException(Messages.getString("PreparedStatement.25") + Messages.getString("PreparedStatement.26"),
+                            MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT);
                 }
 
-                return executeBatchSerially(batchTimeout);
-            } finally {
-                this.query.getStatementExecuting().set(false);
+                if (this.query.getBatchedArgs() == null || this.query.getBatchedArgs().size() == 0) {
+                    return new long[0];
+                }
 
-                clearBatch();
+                // we timeout the entire batch, not individual statements
+                long batchTimeout = getTimeoutInMillis();
+                setTimeoutInMillis(0);
+
+                resetCancelledState();
+
+                try {
+                    statementBegins();
+
+                    clearWarnings();
+
+                    if (!this.batchHasPlainStatements && this.rewriteBatchedStatements.getValue()) {
+
+                        if (getQueryInfo().isRewritableWithMultiValuesClause()) {
+                            return executeBatchWithMultiValuesClause(batchTimeout);
+                        }
+
+                        if (!this.batchHasPlainStatements && this.query.getBatchedArgs() != null
+                                && this.query.getBatchedArgs().size() > 3 /* cost of option setting rt-wise */) {
+                            return executePreparedBatchAsMultiStatement(batchTimeout);
+                        }
+                    }
+
+                    return executeBatchSerially(batchTimeout);
+                } finally {
+                    this.query.getStatementExecuting().set(false);
+
+                    clearBatch();
+                }
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
             }
         }
     }
 
     /**
      * Rewrites the already prepared statement into a multi-statement query and executes the entire batch using this new statement.
-     * 
+     *
      * @param batchTimeout
      *            timeout for the batch execution
      * @return update counts in the same fashion as executeBatch()
-     * 
+     *
      * @throws SQLException
      *             if a database access error occurs or this method is called on a closed PreparedStatement
      */
-    protected long[] executePreparedBatchAsMultiStatement(int batchTimeout) throws SQLException {
+    protected long[] executePreparedBatchAsMultiStatement(long batchTimeout) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
             // This is kind of an abuse, but it gets the job done
             if (this.batchedValuesClause == null) {
@@ -588,7 +612,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
         BindValue[] bindValues = ((QueryBindings) paramSet).getBindValues();
         QueryBindings batchedStatementBindings = ((PreparedQuery) ((ClientPreparedStatement) batchedStatement).getQuery()).getQueryBindings();
         for (int j = 0; j < bindValues.length; j++) {
-            batchedStatementBindings.setFromBindValue((batchedParamIndex++) - 1, bindValues[j]);
+            batchedStatementBindings.setFromBindValue(batchedParamIndex++ - 1, bindValues[j]);
         }
 
         return batchedParamIndex;
@@ -612,15 +636,15 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Rewrites the already prepared statement into a multi-values clause INSERT/REPLACE statement and executes the entire batch using this new statement.
-     * 
+     *
      * @param batchTimeout
      *            timeout for the batch execution
      * @return update counts in the same fashion as executeBatch()
-     * 
+     *
      * @throws SQLException
      *             if a database access error occurs or this method is called on a closed PreparedStatement
      */
-    protected long[] executeBatchWithMultiValuesClause(int batchTimeout) throws SQLException {
+    protected long[] executeBatchWithMultiValuesClause(long batchTimeout) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
             JdbcConnection locallyScopedConn = this.connection;
 
@@ -741,15 +765,14 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Executes the current batch of statements by executing them one-by-one.
-     * 
+     *
      * @param batchTimeout
      *            timeout for the batch execution
      * @return a list of update counts
      * @throws SQLException
      *             if an error occurs
      */
-    protected long[] executeBatchSerially(int batchTimeout) throws SQLException {
-
+    protected long[] executeBatchSerially(long batchTimeout) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
             if (this.connection == null) {
                 checkClosed();
@@ -839,18 +862,17 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
                 }
             }
 
-            return (updateCounts != null) ? updateCounts : new long[0];
+            return updateCounts != null ? updateCounts : new long[0];
         }
-
     }
 
     /**
      * Actually execute the prepared statement. This is here so server-side
      * PreparedStatements can re-use most of the code from this class.
-     * 
+     *
      * @param <M>
      *            extends {@link Message}
-     * 
+     *
      * @param maxRowsToRetrieve
      *            the max number of rows to return
      * @param sendPacket
@@ -863,9 +885,9 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
      *            use this metadata instead of the one provided on wire
      * @param isBatch
      *            is this a batch query?
-     * 
+     *
      * @return the results as a ResultSet
-     * 
+     *
      * @throws SQLException
      *             if an error occurs.
      */
@@ -919,73 +941,87 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
     @Override
     public java.sql.ResultSet executeQuery() throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
+            TelemetrySpan span = getSession().getTelemetryHandler().startSpan(TelemetrySpanName.STMT_EXECUTE_PREPARED);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                String dbOperation = getQueryInfo().getStatementKeyword();
+                span.setAttribute(TelemetryAttribute.DB_NAME, getCurrentDatabase());
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, dbOperation);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, dbOperation + TelemetryAttribute.STATEMENT_SUFFIX);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, this.connection.getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-            JdbcConnection locallyScopedConn = this.connection;
+                JdbcConnection locallyScopedConn = this.connection;
 
-            if (!this.doPingInstead) {
-                QueryReturnType queryReturnType = getQueryInfo().getQueryReturnType();
-                if (queryReturnType != QueryReturnType.PRODUCES_RESULT_SET && queryReturnType != QueryReturnType.MAY_PRODUCE_RESULT_SET) {
-                    throw SQLError.createSQLException(Messages.getString("Statement.57"), MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT,
-                            getExceptionInterceptor());
+                if (!this.doPingInstead) {
+                    QueryReturnType queryReturnType = getQueryInfo().getQueryReturnType();
+                    if (queryReturnType != QueryReturnType.PRODUCES_RESULT_SET && queryReturnType != QueryReturnType.MAY_PRODUCE_RESULT_SET) {
+                        throw SQLError.createSQLException(Messages.getString("Statement.57"), MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT,
+                                getExceptionInterceptor());
+                    }
                 }
-            }
 
-            this.batchedGeneratedKeys = null;
+                this.batchedGeneratedKeys = null;
 
-            resetCancelledState();
+                resetCancelledState();
 
-            implicitlyCloseAllOpenResults();
+                implicitlyCloseAllOpenResults();
 
-            clearWarnings();
+                clearWarnings();
 
-            if (this.doPingInstead) {
-                doPingInstead();
+                if (this.doPingInstead) {
+                    doPingInstead();
 
-                return this.results;
-            }
+                    return this.results;
+                }
 
-            setupStreamingTimeout(locallyScopedConn);
+                setupStreamingTimeout(locallyScopedConn);
 
-            Message sendPacket = ((PreparedQuery) this.query).fillSendPacket(((PreparedQuery) this.query).getQueryBindings());
+                Message sendPacket = ((PreparedQuery) this.query).fillSendPacket(((PreparedQuery) this.query).getQueryBindings());
 
-            String oldDb = null;
+                String oldDb = null;
 
-            if (!locallyScopedConn.getDatabase().equals(this.getCurrentDatabase())) {
-                oldDb = locallyScopedConn.getDatabase();
-                locallyScopedConn.setDatabase(this.getCurrentDatabase());
-            }
+                if (!locallyScopedConn.getDatabase().equals(getCurrentDatabase())) {
+                    oldDb = locallyScopedConn.getDatabase();
+                    locallyScopedConn.setDatabase(getCurrentDatabase());
+                }
 
-            //
-            // Check if we have cached metadata for this query...
-            //
-            CachedResultSetMetaData cachedMetadata = null;
-            boolean cacheResultSetMetadata = locallyScopedConn.getPropertySet().getBooleanProperty(PropertyKey.cacheResultSetMetadata).getValue();
+                //
+                // Check if we have cached metadata for this query...
+                //
+                CachedResultSetMetaData cachedMetadata = null;
+                boolean cacheResultSetMetadata = locallyScopedConn.getPropertySet().getBooleanProperty(PropertyKey.cacheResultSetMetadata).getValue();
 
-            String origSql = ((PreparedQuery) this.query).getOriginalSql();
+                String origSql = ((PreparedQuery) this.query).getOriginalSql();
 
-            if (cacheResultSetMetadata) {
-                cachedMetadata = locallyScopedConn.getCachedMetaData(origSql);
-            }
-
-            locallyScopedConn.setSessionMaxRows(this.maxRows);
-
-            this.results = executeInternal(this.maxRows, sendPacket, createStreamingResultSet(), true, cachedMetadata, false);
-
-            if (oldDb != null) {
-                locallyScopedConn.setDatabase(oldDb);
-            }
-
-            if (cachedMetadata != null) {
-                locallyScopedConn.initializeResultsMetadataFromCache(origSql, cachedMetadata, this.results);
-            } else {
                 if (cacheResultSetMetadata) {
+                    cachedMetadata = locallyScopedConn.getCachedMetaData(origSql);
+                }
+
+                locallyScopedConn.setSessionMaxRows(this.maxRows);
+
+                this.results = executeInternal(this.maxRows, sendPacket, createStreamingResultSet(), true, cachedMetadata, false);
+
+                if (oldDb != null) {
+                    locallyScopedConn.setDatabase(oldDb);
+                }
+
+                if (cachedMetadata != null) {
+                    locallyScopedConn.initializeResultsMetadataFromCache(origSql, cachedMetadata, this.results);
+                } else if (cacheResultSetMetadata) {
                     locallyScopedConn.initializeResultsMetadataFromCache(origSql, null /* will be created */, this.results);
                 }
+
+                this.lastInsertId = this.results.getUpdateID();
+
+                return this.results;
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
             }
-
-            this.lastInsertId = this.results.getUpdateID();
-
-            return this.results;
         }
     }
 
@@ -1012,75 +1048,90 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Added to allow batch-updates
-     * 
+     *
      * @param bindings
      *            bindings object
      * @param isReallyBatch
      *            is it a batched statement?
-     * 
+     *
      * @return the update count
-     * 
+     *
      * @throws SQLException
      *             if a database error occurs
      */
     protected long executeUpdateInternal(QueryBindings bindings, boolean isReallyBatch) throws SQLException {
-
         synchronized (checkClosed().getConnectionMutex()) {
+            TelemetrySpan span = getSession().getTelemetryHandler().startSpan(TelemetrySpanName.STMT_EXECUTE_PREPARED);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                String dbOperation = getQueryInfo().getStatementKeyword();
+                span.setAttribute(TelemetryAttribute.DB_NAME, getCurrentDatabase());
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, dbOperation);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, dbOperation + TelemetryAttribute.STATEMENT_SUFFIX);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, this.connection.getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-            JdbcConnection locallyScopedConn = this.connection;
+                JdbcConnection locallyScopedConn = this.connection;
 
-            if (locallyScopedConn.isReadOnly(false)) {
-                throw SQLError.createSQLException(Messages.getString("PreparedStatement.34") + Messages.getString("PreparedStatement.35"),
-                        MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, this.exceptionInterceptor);
-            }
-
-            if (!isNonResultSetProducingQuery()) {
-                throw SQLError.createSQLException(Messages.getString("PreparedStatement.37"), "01S03", this.exceptionInterceptor);
-            }
-
-            resetCancelledState();
-
-            implicitlyCloseAllOpenResults();
-
-            ResultSetInternalMethods rs = null;
-
-            Message sendPacket = ((PreparedQuery) this.query).fillSendPacket(bindings);
-
-            String oldDb = null;
-
-            if (!locallyScopedConn.getDatabase().equals(this.getCurrentDatabase())) {
-                oldDb = locallyScopedConn.getDatabase();
-                locallyScopedConn.setDatabase(this.getCurrentDatabase());
-            }
-
-            //
-            // Only apply max_rows to selects
-            //
-            locallyScopedConn.setSessionMaxRows(-1);
-
-            rs = executeInternal(-1, sendPacket, false, false, null, isReallyBatch);
-
-            if (this.retrieveGeneratedKeys) {
-                rs.setFirstCharOfQuery(getQueryInfo().getFirstStmtChar());
-            }
-
-            if (oldDb != null) {
-                locallyScopedConn.setDatabase(oldDb);
-            }
-
-            this.results = rs;
-
-            this.updateCount = rs.getUpdateCount();
-
-            if (containsOnDuplicateKeyUpdate() && this.compensateForOnDuplicateKeyUpdate) {
-                if (this.updateCount == 2 || this.updateCount == 0) {
-                    this.updateCount = 1;
+                if (locallyScopedConn.isReadOnly(false)) {
+                    throw SQLError.createSQLException(Messages.getString("PreparedStatement.34") + Messages.getString("PreparedStatement.35"),
+                            MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, this.exceptionInterceptor);
                 }
+
+                if (!isNonResultSetProducingQuery()) {
+                    throw SQLError.createSQLException(Messages.getString("PreparedStatement.37"), "01S03", this.exceptionInterceptor);
+                }
+
+                resetCancelledState();
+
+                implicitlyCloseAllOpenResults();
+
+                ResultSetInternalMethods rs = null;
+
+                Message sendPacket = ((PreparedQuery) this.query).fillSendPacket(bindings);
+
+                String oldDb = null;
+
+                if (!locallyScopedConn.getDatabase().equals(getCurrentDatabase())) {
+                    oldDb = locallyScopedConn.getDatabase();
+                    locallyScopedConn.setDatabase(getCurrentDatabase());
+                }
+
+                //
+                // Only apply max_rows to selects
+                //
+                locallyScopedConn.setSessionMaxRows(-1);
+
+                rs = executeInternal(-1, sendPacket, false, false, null, isReallyBatch);
+
+                if (this.retrieveGeneratedKeys) {
+                    rs.setFirstCharOfQuery(getQueryInfo().getFirstStmtChar());
+                }
+
+                if (oldDb != null) {
+                    locallyScopedConn.setDatabase(oldDb);
+                }
+
+                this.results = rs;
+
+                this.updateCount = rs.getUpdateCount();
+
+                if (containsOnDuplicateKeyUpdate() && this.compensateForOnDuplicateKeyUpdate) {
+                    if (this.updateCount == 2 || this.updateCount == 0) {
+                        this.updateCount = 1;
+                    }
+                }
+
+                this.lastInsertId = rs.getUpdateID();
+
+                return this.updateCount;
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
             }
-
-            this.lastInsertId = rs.getUpdateID();
-
-            return this.updateCount;
         }
     }
 
@@ -1090,7 +1141,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Returns a prepared statement for the number of batched parameters, used when re-writing batch INSERTs.
-     * 
+     *
      * @param localConn
      *            the connection creating this statement
      * @param numBatches
@@ -1102,7 +1153,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
     protected ClientPreparedStatement prepareBatchedInsertSQL(JdbcConnection localConn, int numBatches) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
             ClientPreparedStatement pstmt = new ClientPreparedStatement(localConn, "Rewritten batch of: " + ((PreparedQuery) this.query).getOriginalSql(),
-                    this.getCurrentDatabase(), getQueryInfo().getQueryInfoForBatch(numBatches));
+                    getCurrentDatabase(), getQueryInfo().getQueryInfoForBatch(numBatches));
             pstmt.setRetrieveGeneratedKeys(this.retrieveGeneratedKeys);
             pstmt.rewrittenBatchSize = numBatches;
 
@@ -1127,12 +1178,11 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     @Override
     public java.sql.ResultSetMetaData getMetaData() throws SQLException {
-
         synchronized (checkClosed().getConnectionMutex()) {
             //
             // We could just tack on a LIMIT 0 here no matter what the  statement, and check if a result set was returned or not, but I'm not comfortable with
             // that, myself, so we take the "safer" road, and only allow metadata for _actual_ SELECTS (but not SHOWs).
-            // 
+            //
             // CALL's are trapped further up and you end up with a  CallableStatement anyway.
             //
 
@@ -1145,8 +1195,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
             if (this.pstmtResultMetaData == null) {
                 try {
-                    mdStmt = new ClientPreparedStatement(this.connection, ((PreparedQuery) this.query).getOriginalSql(), this.getCurrentDatabase(),
-                            getQueryInfo());
+                    mdStmt = new ClientPreparedStatement(this.connection, ((PreparedQuery) this.query).getOriginalSql(), getCurrentDatabase(), getQueryInfo());
 
                     mdStmt.setMaxRows(1);
 
@@ -1202,7 +1251,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Checks if the given SQL query is a result set producing query.
-     * 
+     *
      * @return
      *         <code>true</code> if the query produces a result set, <code>false</code> otherwise.
      */
@@ -1213,7 +1262,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     /**
      * Checks if the given SQL query does not return a result set.
-     * 
+     *
      * @return
      *         <code>true</code> if the query does not produce a result set, <code>false</code> otherwise.
      */
@@ -1320,6 +1369,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
         return executeUpdateInternal(true, false);
     }
 
+    @Override
     public ParameterBindings getParameterBindings() throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
             return new ParameterBindingsImpl((PreparedQuery) this.query, this.session, this.resultSetFactory);
@@ -1329,7 +1379,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
     /**
      * For calling stored functions, this will be -1 as Connector/J does not count
      * the first '?' parameter marker, but JDBC counts it * as 1, otherwise it will return 0
-     * 
+     *
      * @return offset
      */
     protected int getParameterIndexOffset() {
@@ -1338,7 +1388,7 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
 
     protected void checkBounds(int paramIndex, int parameterIndexOffset) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
-            if ((paramIndex < 1)) {
+            if (paramIndex < 1) {
                 throw SQLError.createSQLException(Messages.getString("PreparedStatement.49") + paramIndex + Messages.getString("PreparedStatement.50"),
                         MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, this.exceptionInterceptor);
             } else if (paramIndex > ((PreparedQuery) this.query).getParameterCount()) {
@@ -1591,12 +1641,12 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
      * VARCHAR or LONGVARCHAR value with introducer _utf8 (depending on the
      * arguments size relative to the driver's limits on VARCHARs) when it sends
      * it to the database. If charset is set as utf8, this method just call setString.
-     * 
+     *
      * @param parameterIndex
      *            the first parameter is 1...
      * @param x
      *            the parameter value
-     * 
+     *
      * @exception SQLException
      *                if a database access error occurs
      */
@@ -1759,4 +1809,5 @@ public class ClientPreparedStatement extends com.mysql.cj.jdbc.StatementImpl imp
             ((PreparedQuery) this.query).getQueryBindings().getBindValues()[getCoreParameterIndex(parameterIndex)].setMysqlType(MysqlType.VARCHAR);
         }
     }
+
 }

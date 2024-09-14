@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -32,6 +23,8 @@ package com.mysql.cj.jdbc;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.DatabaseMetaData;
@@ -90,17 +83,20 @@ import com.mysql.cj.jdbc.result.ResultSetFactory;
 import com.mysql.cj.jdbc.result.ResultSetInternalMethods;
 import com.mysql.cj.jdbc.result.UpdatableResultSet;
 import com.mysql.cj.log.ProfilerEvent;
-import com.mysql.cj.log.StandardLogger;
 import com.mysql.cj.protocol.ServerSessionStateController;
 import com.mysql.cj.protocol.SocksProxySocketFactory;
 import com.mysql.cj.protocol.a.NativeProtocol;
+import com.mysql.cj.telemetry.TelemetryAttribute;
+import com.mysql.cj.telemetry.TelemetryScope;
+import com.mysql.cj.telemetry.TelemetrySpan;
+import com.mysql.cj.telemetry.TelemetrySpanName;
 import com.mysql.cj.util.LRUCache;
 import com.mysql.cj.util.StringUtils;
 import com.mysql.cj.util.Util;
 
 /**
  * A Connection represents a session with a specific database. Within the context of a Connection, SQL statements are executed and results are returned.
- * 
+ *
  * <P>
  * A Connection's database is able to provide information describing its tables, its supported SQL grammar, its stored procedures, the capabilities of this
  * connection, etc. This information is obtained with the getMetaData method.
@@ -140,7 +136,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     // this connection has to be proxied when using multi-host settings so that statements get routed to the right physical connection
     // (works as "logical" connection)
     private JdbcConnection getProxy() {
-        return (this.topProxy != null) ? this.topProxy : (JdbcConnection) this;
+        return this.topProxy != null ? this.topProxy : (JdbcConnection) this;
     }
 
     @Override
@@ -160,13 +156,14 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public Object getConnectionMutex() {
-        return (this.realProxy != null) ? this.realProxy : getProxy();
+        return this.realProxy != null ? this.realProxy : getProxy();
     }
 
     /**
      * Used as a key for caching callable/prepared statements which (may) depend on current database.
      */
     static class CompoundCacheKey {
+
         final String componentOne;
         final String componentTwo;
         final int hashCode;
@@ -199,10 +196,8 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         public int hashCode() {
             return this.hashCode;
         }
-    }
 
-    /** Default logger class name */
-    protected static final String DEFAULT_LOGGER_CLASS = StandardLogger.class.getName();
+    }
 
     /**
      * Map mysql transaction isolation level name to
@@ -228,7 +223,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     /**
      * Creates a connection instance.
-     * 
+     *
      * @param hostInfo
      *            {@link HostInfo} instance
      * @return new {@link ConnectionImpl} instance
@@ -354,6 +349,8 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     protected ResultSetFactory nullStatementResultSetFactory;
 
+    TelemetrySpan connectionSpan = null;
+
     /**
      * '
      * For the delegate only
@@ -363,7 +360,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     /**
      * Creates a connection to a MySQL Server.
-     * 
+     *
      * @param hostInfo
      *            the {@link HostInfo} instance that contains the host, user and connections attributes for this connection
      * @exception SQLException
@@ -388,74 +385,105 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
             this.nullStatementResultSetFactory = new ResultSetFactory(this, null);
             this.session = new NativeSession(hostInfo, this.propertySet);
             this.session.addListener(this); // listen for session status changes
-
-            // we can't cache fixed values here because properties are still not initialized with user provided values
-            this.autoReconnectForPools = this.propertySet.getBooleanProperty(PropertyKey.autoReconnectForPools);
-            this.cachePrepStmts = this.propertySet.getBooleanProperty(PropertyKey.cachePrepStmts);
-            this.autoReconnect = this.propertySet.getBooleanProperty(PropertyKey.autoReconnect);
-            this.useUsageAdvisor = this.propertySet.getBooleanProperty(PropertyKey.useUsageAdvisor);
-            this.reconnectAtTxEnd = this.propertySet.getBooleanProperty(PropertyKey.reconnectAtTxEnd);
-            this.emulateUnsupportedPstmts = this.propertySet.getBooleanProperty(PropertyKey.emulateUnsupportedPstmts);
-            this.ignoreNonTxTables = this.propertySet.getBooleanProperty(PropertyKey.ignoreNonTxTables);
-            this.pedantic = this.propertySet.getBooleanProperty(PropertyKey.pedantic);
-            this.prepStmtCacheSqlLimit = this.propertySet.getIntegerProperty(PropertyKey.prepStmtCacheSqlLimit);
-            this.useLocalSessionState = this.propertySet.getBooleanProperty(PropertyKey.useLocalSessionState);
-            this.useServerPrepStmts = this.propertySet.getBooleanProperty(PropertyKey.useServerPrepStmts);
-            this.processEscapeCodesForPrepStmts = this.propertySet.getBooleanProperty(PropertyKey.processEscapeCodesForPrepStmts);
-            this.useLocalTransactionState = this.propertySet.getBooleanProperty(PropertyKey.useLocalTransactionState);
-            this.disconnectOnExpiredPasswords = this.propertySet.getBooleanProperty(PropertyKey.disconnectOnExpiredPasswords);
-            this.readOnlyPropagatesToServer = this.propertySet.getBooleanProperty(PropertyKey.readOnlyPropagatesToServer);
-
-            String exceptionInterceptorClasses = this.propertySet.getStringProperty(PropertyKey.exceptionInterceptors).getStringValue();
-            if (exceptionInterceptorClasses != null && !"".equals(exceptionInterceptorClasses)) {
-                this.exceptionInterceptor = new ExceptionInterceptorChain(exceptionInterceptorClasses, this.props, this.session.getLog());
-            }
-            if (this.cachePrepStmts.getValue()) {
-                createPreparedStatementCaches();
-            }
-            if (this.propertySet.getBooleanProperty(PropertyKey.cacheCallableStmts).getValue()) {
-                this.parsedCallableStatementCache = new LRUCache<>(this.propertySet.getIntegerProperty(PropertyKey.callableStmtCacheSize).getValue());
-            }
-            if (this.propertySet.getBooleanProperty(PropertyKey.allowMultiQueries).getValue()) {
-                this.propertySet.getProperty(PropertyKey.cacheResultSetMetadata).setValue(false); // we don't handle this yet
-            }
-            if (this.propertySet.getBooleanProperty(PropertyKey.cacheResultSetMetadata).getValue()) {
-                this.resultSetMetadataCache = new LRUCache<>(this.propertySet.getIntegerProperty(PropertyKey.metadataCacheSize).getValue());
-            }
-            if (this.propertySet.getStringProperty(PropertyKey.socksProxyHost).getStringValue() != null) {
-                this.propertySet.getProperty(PropertyKey.socketFactory).setValue(SocksProxySocketFactory.class.getName());
-            }
-
-            if (this.propertySet.getBooleanProperty(PropertyKey.autoDeserialize.getKeyName()).getValue()) {
-                this.session.getLog().logWarn(Messages.getString("Connection.WarnAutoDeserialize"));
-            }
-
-            this.dbmd = getMetaData(false, false);
-            initializeSafeQueryInterceptors();
         } catch (CJException e) {
             throw SQLExceptionsMapping.translateException(e, getExceptionInterceptor());
         }
 
-        try {
-            createNewIO(false);
+        this.connectionSpan = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.CONNECTION_CREATE);
+        this.session.getTelemetryHandler().addLinkTarget(this.connectionSpan);
+        try (TelemetryScope scope = this.connectionSpan.makeCurrent()) {
+            this.connectionSpan.setAttribute(TelemetryAttribute.DB_CONNECTION_STRING, getURL());
+            this.connectionSpan.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+            this.connectionSpan.setAttribute(TelemetryAttribute.DB_USER, getUser());
+            this.connectionSpan.setAttribute(TelemetryAttribute.SERVER_ADDRESS, this.origHostToConnectTo);
+            this.connectionSpan.setAttribute(TelemetryAttribute.SERVER_PORT, this.origPortToConnectTo);
+            this.connectionSpan.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+            this.connectionSpan.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-            unSafeQueryInterceptors();
+            try {
+                String exceptionInterceptorClasses = this.propertySet.getStringProperty(PropertyKey.exceptionInterceptors).getStringValue();
+                if (exceptionInterceptorClasses != null && !"".equals(exceptionInterceptorClasses)) {
+                    this.exceptionInterceptor = new ExceptionInterceptorChain(exceptionInterceptorClasses, this.props, this.session.getLog());
+                }
 
-            AbandonedConnectionCleanupThread.trackConnection(this, this.getSession().getNetworkResources());
-        } catch (SQLException ex) {
-            cleanup(ex);
+                // we can't cache fixed values here because properties are still not initialized with user provided values
+                this.autoReconnectForPools = this.propertySet.getBooleanProperty(PropertyKey.autoReconnectForPools);
+                this.cachePrepStmts = this.propertySet.getBooleanProperty(PropertyKey.cachePrepStmts);
+                this.autoReconnect = this.propertySet.getBooleanProperty(PropertyKey.autoReconnect);
+                this.useUsageAdvisor = this.propertySet.getBooleanProperty(PropertyKey.useUsageAdvisor);
+                this.reconnectAtTxEnd = this.propertySet.getBooleanProperty(PropertyKey.reconnectAtTxEnd);
+                this.emulateUnsupportedPstmts = this.propertySet.getBooleanProperty(PropertyKey.emulateUnsupportedPstmts);
+                this.ignoreNonTxTables = this.propertySet.getBooleanProperty(PropertyKey.ignoreNonTxTables);
+                this.pedantic = this.propertySet.getBooleanProperty(PropertyKey.pedantic);
+                this.prepStmtCacheSqlLimit = this.propertySet.getIntegerProperty(PropertyKey.prepStmtCacheSqlLimit);
+                this.useLocalSessionState = this.propertySet.getBooleanProperty(PropertyKey.useLocalSessionState);
+                this.useServerPrepStmts = this.propertySet.getBooleanProperty(PropertyKey.useServerPrepStmts);
+                this.processEscapeCodesForPrepStmts = this.propertySet.getBooleanProperty(PropertyKey.processEscapeCodesForPrepStmts);
+                this.useLocalTransactionState = this.propertySet.getBooleanProperty(PropertyKey.useLocalTransactionState);
+                this.disconnectOnExpiredPasswords = this.propertySet.getBooleanProperty(PropertyKey.disconnectOnExpiredPasswords);
+                this.readOnlyPropagatesToServer = this.propertySet.getBooleanProperty(PropertyKey.readOnlyPropagatesToServer);
 
-            // don't clobber SQL exceptions
-            throw ex;
-        } catch (Exception ex) {
-            cleanup(ex);
+                if (this.cachePrepStmts.getValue()) {
+                    createPreparedStatementCaches();
+                }
+                if (this.propertySet.getBooleanProperty(PropertyKey.cacheCallableStmts).getValue()) {
+                    this.parsedCallableStatementCache = new LRUCache<>(this.propertySet.getIntegerProperty(PropertyKey.callableStmtCacheSize).getValue());
+                }
+                if (this.propertySet.getBooleanProperty(PropertyKey.allowMultiQueries).getValue()) {
+                    this.propertySet.getProperty(PropertyKey.cacheResultSetMetadata).setValue(false); // we don't handle this yet
+                }
+                if (this.propertySet.getBooleanProperty(PropertyKey.cacheResultSetMetadata).getValue()) {
+                    this.resultSetMetadataCache = new LRUCache<>(this.propertySet.getIntegerProperty(PropertyKey.metadataCacheSize).getValue());
+                }
+                if (this.propertySet.getStringProperty(PropertyKey.socksProxyHost).getStringValue() != null) {
+                    this.propertySet.getProperty(PropertyKey.socketFactory).setValue(SocksProxySocketFactory.class.getName());
+                }
 
-            throw SQLError
-                    .createSQLException(
-                            this.propertySet.getBooleanProperty(PropertyKey.paranoid).getValue() ? Messages.getString("Connection.0")
-                                    : Messages.getString("Connection.1",
-                                            new Object[] { this.session.getHostInfo().getHost(), this.session.getHostInfo().getPort() }),
-                            MysqlErrorNumbers.SQL_STATE_COMMUNICATION_LINK_FAILURE, ex, getExceptionInterceptor());
+                this.dbmd = getMetaData(false, false);
+                initializeSafeQueryInterceptors();
+            } catch (CJException e) {
+                throw SQLExceptionsMapping.translateException(e, getExceptionInterceptor());
+            }
+
+            try {
+                createNewIO(false);
+
+                unSafeQueryInterceptors();
+
+                AbandonedConnectionCleanupThread.trackConnection(this, this.getSession().getNetworkResources());
+
+                SocketAddress socketAddress = this.session.getRemoteSocketAddress();
+                if (InetSocketAddress.class.isInstance(socketAddress)) {
+                    InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+                    this.connectionSpan.setAttribute(TelemetryAttribute.NETWORK_PEER_ADDRESS, inetSocketAddress.getHostName());
+                    this.connectionSpan.setAttribute(TelemetryAttribute.NETWORK_PEER_PORT, inetSocketAddress.getPort());
+                    this.connectionSpan.setAttribute(TelemetryAttribute.NETWORK_TRANSPORT, TelemetryAttribute.NETWORK_TRANSPORT_TCP);
+                }
+                if (this.propertySet.getStringProperty(PropertyKey.socketFactory).getValue().equalsIgnoreCase("com.mysql.cj.protocol.NamedPipeSocketFactory")) {
+                    this.connectionSpan.setAttribute(TelemetryAttribute.NETWORK_TRANSPORT, TelemetryAttribute.NETWORK_TRANSPORT_PIPE);
+                } else if (StringUtils.indexOfIgnoreCase(socketAddress.getClass().getName(), "UNIXSocket") >= 0) {
+                    this.connectionSpan.setAttribute(TelemetryAttribute.NETWORK_TRANSPORT, TelemetryAttribute.NETWORK_TRANSPORT_UNIX);
+                }
+
+            } catch (SQLException ex) {
+                cleanup(ex);
+
+                // don't clobber SQL exceptions
+                throw ex;
+            } catch (Exception ex) {
+                cleanup(ex);
+
+                throw SQLError.createSQLException(
+                        this.propertySet.getBooleanProperty(PropertyKey.paranoid).getValue() ? Messages.getString("Connection.0")
+                                : Messages.getString("Connection.1",
+                                        new Object[] { this.session.getHostInfo().getHost(), this.session.getHostInfo().getPort() }),
+                        MysqlErrorNumbers.SQL_STATE_COMMUNICATION_LINK_FAILURE, ex, getExceptionInterceptor());
+            }
+        } catch (Throwable t) {
+            this.connectionSpan.setError(t);
+            throw t;
+        } finally {
+            this.connectionSpan.end();
         }
     }
 
@@ -526,7 +554,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         synchronized (getConnectionMutex()) {
             checkClosed();
 
-            if ((userName == null) || userName.equals("")) {
+            if (userName == null || userName.equals("")) {
                 userName = "";
             }
 
@@ -537,7 +565,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
             try {
                 this.session.changeUser(userName, newPassword, this.database);
             } catch (CJException ex) {
-                // After Bug#16241992 fix the server doesn't return to previous credentials if COM_CHANGE_USER attempt failed. 
+                // After Bug#16241992 fix the server doesn't return to previous credentials if COM_CHANGE_USER attempt failed.
                 if ("28000".equals(ex.getSQLState())) {
                     cleanup(ex);
                 }
@@ -547,9 +575,8 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
             this.password = newPassword;
 
             this.session.getServerSession().getCharsetSettings().configurePostHandshake(true);
-
             this.session.setSessionVariables();
-
+            handleAutoCommitDefaults();
             setupServerForTruncationChecks();
         }
     }
@@ -642,7 +669,6 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     public java.sql.PreparedStatement clientPrepareStatement(String sql, int resultSetType, int resultSetConcurrency, boolean processEscapeCodesIfNeeded)
             throws SQLException {
-
         String nativeSql = processEscapeCodesIfNeeded && this.processEscapeCodesForPrepStmts.getValue() ? nativeSQL(sql) : sql;
 
         ClientPreparedStatement pStmt = null;
@@ -669,10 +695,9 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public java.sql.PreparedStatement clientPrepareStatement(String sql, int[] autoGenKeyIndexes) throws SQLException {
-
         ClientPreparedStatement pStmt = (ClientPreparedStatement) clientPrepareStatement(sql);
 
-        pStmt.setRetrieveGeneratedKeys((autoGenKeyIndexes != null) && (autoGenKeyIndexes.length > 0));
+        pStmt.setRetrieveGeneratedKeys(autoGenKeyIndexes != null && autoGenKeyIndexes.length > 0);
 
         return pStmt;
     }
@@ -681,7 +706,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     public java.sql.PreparedStatement clientPrepareStatement(String sql, String[] autoGenKeyColNames) throws SQLException {
         ClientPreparedStatement pStmt = (ClientPreparedStatement) clientPrepareStatement(sql);
 
-        pStmt.setRetrieveGeneratedKeys((autoGenKeyColNames != null) && (autoGenKeyColNames.length > 0));
+        pStmt.setRetrieveGeneratedKeys(autoGenKeyColNames != null && autoGenKeyColNames.length > 0);
 
         return pStmt;
     }
@@ -716,7 +741,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     /**
      * Closes all currently open statements.
-     * 
+     *
      * @throws SQLException
      *             if a database access error occurs
      */
@@ -764,6 +789,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                                 this.stopIterating = true;
                             }
                         }
+
                     };
 
                     iter.doForAll();
@@ -782,7 +808,23 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                     }
                 }
 
-                this.session.execSQL(null, "commit", -1, null, false, this.nullStatementResultSetFactory, null, false);
+                TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.ROLLBACK);
+                try (TelemetryScope scope = span.makeCurrent()) {
+                    span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                    span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_ROLLBACK);
+                    span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_ROLLBACK);
+                    span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                    span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                    span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                    span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                    this.session.execSQL(null, "COMMIT", -1, null, false, this.nullStatementResultSetFactory, null, false);
+                } catch (Throwable t) {
+                    span.setError(t);
+                    throw t;
+                } finally {
+                    span.end();
+                }
             } catch (SQLException sqlException) {
                 if (MysqlErrorNumbers.SQL_STATE_COMMUNICATION_LINK_FAILURE.equals(sqlException.getSQLState())) {
                     throw SQLError.createSQLException(Messages.getString("Connection.4"), MysqlErrorNumbers.SQL_STATE_TRANSACTION_RESOLUTION_UNKNOWN,
@@ -824,7 +866,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
         Exception connectionException = null;
 
-        for (int attemptCount = 0; (attemptCount < this.propertySet.getIntegerProperty(PropertyKey.maxReconnects).getValue())
+        for (int attemptCount = 0; attemptCount < this.propertySet.getIntegerProperty(PropertyKey.maxReconnects).getValue()
                 && !connectionGood; attemptCount++) {
             try {
                 this.session.forceClose();
@@ -934,7 +976,6 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         Exception connectionNotEstablishedBecause = null;
 
         try {
-
             JdbcConnection c = getProxy();
             this.session.connect(this.origHostInfo, this.user, this.password, this.database, getLoginTimeout(), c);
 
@@ -1021,6 +1062,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
             if (this.useServerPrepStmts.getValue()) {
                 this.serverSideStatementCheckCache = new LRUCache<>(cacheSize);
                 this.serverSideStatementCache = new LRUCache<CompoundCacheKey, ServerPreparedStatement>(cacheSize) {
+
                     private static final long serialVersionUID = 7692318650375988114L;
 
                     @Override
@@ -1041,6 +1083,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                         }
                         return removeIt;
                     }
+
                 };
             }
         }
@@ -1053,7 +1096,6 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public java.sql.Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-
         StatementImpl stmt = new StatementImpl(getMultiHostSafeProxy(), this.database);
         stmt.setResultSetType(resultSetType);
         stmt.setResultSetConcurrency(resultSetConcurrency);
@@ -1113,7 +1155,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
      * NOT JDBC-Compliant, but clients can use this method to determine how long
      * this connection has been idle. This time (reported in milliseconds) is
      * updated once a query has completed.
-     * 
+     *
      * @return number of ms that this connection has been idle, 0 if the driver
      *         is busy retrieving results.
      */
@@ -1171,11 +1213,10 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public int getTransactionIsolation() throws SQLException {
-
         synchronized (getConnectionMutex()) {
             if (!this.useLocalSessionState.getValue()) {
                 String s = this.session.queryServerVariable(
-                        versionMeetsMinimum(8, 0, 3) || (versionMeetsMinimum(5, 7, 20) && !versionMeetsMinimum(8, 0, 0)) ? "@@session.transaction_isolation"
+                        versionMeetsMinimum(8, 0, 3) || versionMeetsMinimum(5, 7, 20) && !versionMeetsMinimum(8, 0, 0) ? "@@session.transaction_isolation"
                                 : "@@session.tx_isolation");
 
                 if (s != null) {
@@ -1237,9 +1278,8 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     }
 
     /**
-     * Sets varying properties that depend on server information. Called once we
-     * have connected to the server.
-     * 
+     * Sets varying properties that depend on server information. Called once we have connected to the server.
+     *
      * @throws SQLException
      *             if a database access error occurs
      */
@@ -1290,7 +1330,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     /**
      * Resets a default auto-commit value of 0 to 1, as required by JDBC specification.
      * Takes into account that the default auto-commit value of 0 may have been changed on the server via init_connect.
-     * 
+     *
      * @throws SQLException
      *             if a database access error occurs
      */
@@ -1358,7 +1398,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         if (useSessionStatus && !this.session.isClosed() && versionMeetsMinimum(5, 6, 5) && !this.useLocalSessionState.getValue()
                 && this.readOnlyPropagatesToServer.getValue()) {
             String s = this.session.queryServerVariable(
-                    versionMeetsMinimum(8, 0, 3) || (versionMeetsMinimum(5, 7, 20) && !versionMeetsMinimum(8, 0, 0)) ? "@@session.transaction_read_only"
+                    versionMeetsMinimum(8, 0, 3) || versionMeetsMinimum(5, 7, 20) && !versionMeetsMinimum(8, 0, 0) ? "@@session.transaction_read_only"
                             : "@@session.tx_read_only");
             if (s != null) {
                 return Integer.parseInt(s) != 0; // mysql has a habit of tri+ state booleans
@@ -1385,7 +1425,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                 directCompare = false;
             } else if (otherHost != null && otherHost.indexOf(',') == -1 && otherHost.indexOf(':') == -1) {
                 // need to check port numbers
-                directCompare = (((ConnectionImpl) otherConnection).origPortToConnectTo == this.origPortToConnectTo);
+                directCompare = ((ConnectionImpl) otherConnection).origPortToConnectTo == this.origPortToConnectTo;
             }
 
             if (directCompare) {
@@ -1474,41 +1514,61 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public java.sql.CallableStatement prepareCall(String sql) throws SQLException {
-
         return prepareCall(sql, DEFAULT_RESULT_SET_TYPE, DEFAULT_RESULT_SET_CONCURRENCY);
     }
 
     @Override
     public java.sql.CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        CallableStatement cStmt = null;
+        synchronized (getConnectionMutex()) {
+            checkClosed();
 
-        if (!this.propertySet.getBooleanProperty(PropertyKey.cacheCallableStmts).getValue()) {
+            TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.ROUTINE_PREPARE);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                CallableStatement cStmt = null;
 
-            cStmt = parseCallableStatement(sql);
-        } else {
-            synchronized (this.parsedCallableStatementCache) {
-                CompoundCacheKey key = new CompoundCacheKey(getDatabase(), sql);
+                if (!this.propertySet.getBooleanProperty(PropertyKey.cacheCallableStmts).getValue()) {
 
-                CallableStatement.CallableStatementParamInfo cachedParamInfo = this.parsedCallableStatementCache.get(key);
-
-                if (cachedParamInfo != null) {
-                    cStmt = CallableStatement.getInstance(getMultiHostSafeProxy(), cachedParamInfo);
-                } else {
                     cStmt = parseCallableStatement(sql);
+                } else {
+                    synchronized (this.parsedCallableStatementCache) {
+                        CompoundCacheKey key = new CompoundCacheKey(getDatabase(), sql);
 
-                    synchronized (cStmt) {
-                        cachedParamInfo = cStmt.paramInfo;
+                        CallableStatement.CallableStatementParamInfo cachedParamInfo = this.parsedCallableStatementCache.get(key);
+
+                        if (cachedParamInfo != null) {
+                            cStmt = CallableStatement.getInstance(getMultiHostSafeProxy(), cachedParamInfo);
+                        } else {
+                            cStmt = parseCallableStatement(sql);
+
+                            synchronized (cStmt) {
+                                cachedParamInfo = cStmt.paramInfo;
+                            }
+
+                            this.parsedCallableStatementCache.put(key, cachedParamInfo);
+                        }
                     }
-
-                    this.parsedCallableStatementCache.put(key, cachedParamInfo);
                 }
+
+                cStmt.setResultSetType(resultSetType);
+                cStmt.setResultSetConcurrency(resultSetConcurrency);
+
+                String dbOperation = cStmt.getQueryInfo().getStatementKeyword();
+                span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, dbOperation);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, dbOperation + TelemetryAttribute.STATEMENT_SUFFIX);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                return cStmt;
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
             }
         }
-
-        cStmt.setResultSetType(resultSetType);
-        cStmt.setResultSetConcurrency(resultSetConcurrency);
-
-        return cStmt;
     }
 
     @Override
@@ -1543,75 +1603,92 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         synchronized (getConnectionMutex()) {
             checkClosed();
 
-            //
-            // FIXME: Create warnings if can't create results of the given type or concurrency
-            //
-            ClientPreparedStatement pStmt = null;
+            TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.STMT_PREPARE);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                //
+                // FIXME: Create warnings if can't create results of the given type or concurrency
+                //
+                ClientPreparedStatement pStmt = null;
 
-            boolean canServerPrepare = true;
+                boolean canServerPrepare = true;
 
-            String nativeSql = this.processEscapeCodesForPrepStmts.getValue() ? nativeSQL(sql) : sql;
+                String nativeSql = this.processEscapeCodesForPrepStmts.getValue() ? nativeSQL(sql) : sql;
 
-            if (this.useServerPrepStmts.getValue() && this.emulateUnsupportedPstmts.getValue()) {
-                canServerPrepare = canHandleAsServerPreparedStatement(nativeSql);
-            }
+                if (this.useServerPrepStmts.getValue() && this.emulateUnsupportedPstmts.getValue()) {
+                    canServerPrepare = canHandleAsServerPreparedStatement(nativeSql);
+                }
 
-            if (this.useServerPrepStmts.getValue() && canServerPrepare) {
-                if (this.cachePrepStmts.getValue()) {
-                    synchronized (this.serverSideStatementCache) {
-                        pStmt = this.serverSideStatementCache.remove(new CompoundCacheKey(this.database, sql));
+                if (this.useServerPrepStmts.getValue() && canServerPrepare) {
+                    if (this.cachePrepStmts.getValue()) {
+                        synchronized (this.serverSideStatementCache) {
+                            pStmt = this.serverSideStatementCache.remove(new CompoundCacheKey(this.database, sql));
 
-                        if (pStmt != null) {
-                            ((com.mysql.cj.jdbc.ServerPreparedStatement) pStmt).setClosed(false);
-                            pStmt.clearParameters();
-                            pStmt.setResultSetType(resultSetType);
-                            pStmt.setResultSetConcurrency(resultSetConcurrency);
-                        }
-
-                        if (pStmt == null) {
-                            try {
-                                pStmt = ServerPreparedStatement.getInstance(getMultiHostSafeProxy(), nativeSql, this.database, resultSetType,
-                                        resultSetConcurrency);
-                                if (sql.length() < this.prepStmtCacheSqlLimit.getValue()) {
-                                    ((com.mysql.cj.jdbc.ServerPreparedStatement) pStmt).isCacheable = true;
-                                }
-
+                            if (pStmt != null) {
+                                ((com.mysql.cj.jdbc.ServerPreparedStatement) pStmt).setClosed(false);
+                                pStmt.clearParameters();
                                 pStmt.setResultSetType(resultSetType);
                                 pStmt.setResultSetConcurrency(resultSetConcurrency);
-                            } catch (SQLException sqlEx) {
-                                // Punt, if necessary
-                                if (this.emulateUnsupportedPstmts.getValue()) {
-                                    pStmt = (ClientPreparedStatement) clientPrepareStatement(nativeSql, resultSetType, resultSetConcurrency, false);
+                            }
 
+                            if (pStmt == null) {
+                                try {
+                                    pStmt = ServerPreparedStatement.getInstance(getMultiHostSafeProxy(), nativeSql, this.database, resultSetType,
+                                            resultSetConcurrency);
                                     if (sql.length() < this.prepStmtCacheSqlLimit.getValue()) {
-                                        this.serverSideStatementCheckCache.put(sql, Boolean.FALSE);
+                                        ((com.mysql.cj.jdbc.ServerPreparedStatement) pStmt).isCacheable = true;
                                     }
-                                } else {
-                                    throw sqlEx;
+
+                                    pStmt.setResultSetType(resultSetType);
+                                    pStmt.setResultSetConcurrency(resultSetConcurrency);
+                                } catch (SQLException sqlEx) {
+                                    // Punt, if necessary
+                                    if (this.emulateUnsupportedPstmts.getValue()) {
+                                        pStmt = (ClientPreparedStatement) clientPrepareStatement(nativeSql, resultSetType, resultSetConcurrency, false);
+
+                                        if (sql.length() < this.prepStmtCacheSqlLimit.getValue()) {
+                                            this.serverSideStatementCheckCache.put(sql, Boolean.FALSE);
+                                        }
+                                    } else {
+                                        throw sqlEx;
+                                    }
                                 }
+                            }
+                        }
+                    } else {
+                        try {
+                            pStmt = ServerPreparedStatement.getInstance(getMultiHostSafeProxy(), nativeSql, this.database, resultSetType, resultSetConcurrency);
+
+                            pStmt.setResultSetType(resultSetType);
+                            pStmt.setResultSetConcurrency(resultSetConcurrency);
+                        } catch (SQLException sqlEx) {
+                            // Punt, if necessary
+                            if (this.emulateUnsupportedPstmts.getValue()) {
+                                pStmt = (ClientPreparedStatement) clientPrepareStatement(nativeSql, resultSetType, resultSetConcurrency, false);
+                            } else {
+                                throw sqlEx;
                             }
                         }
                     }
                 } else {
-                    try {
-                        pStmt = ServerPreparedStatement.getInstance(getMultiHostSafeProxy(), nativeSql, this.database, resultSetType, resultSetConcurrency);
-
-                        pStmt.setResultSetType(resultSetType);
-                        pStmt.setResultSetConcurrency(resultSetConcurrency);
-                    } catch (SQLException sqlEx) {
-                        // Punt, if necessary
-                        if (this.emulateUnsupportedPstmts.getValue()) {
-                            pStmt = (ClientPreparedStatement) clientPrepareStatement(nativeSql, resultSetType, resultSetConcurrency, false);
-                        } else {
-                            throw sqlEx;
-                        }
-                    }
+                    pStmt = (ClientPreparedStatement) clientPrepareStatement(nativeSql, resultSetType, resultSetConcurrency, false);
                 }
-            } else {
-                pStmt = (ClientPreparedStatement) clientPrepareStatement(nativeSql, resultSetType, resultSetConcurrency, false);
-            }
 
-            return pStmt;
+                String dbOperation = pStmt.getQueryInfo().getStatementKeyword();
+                span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, dbOperation);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, dbOperation + TelemetryAttribute.STATEMENT_SUFFIX);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                return pStmt;
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
+            }
         }
     }
 
@@ -1630,7 +1707,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     public java.sql.PreparedStatement prepareStatement(String sql, int[] autoGenKeyIndexes) throws SQLException {
         java.sql.PreparedStatement pStmt = prepareStatement(sql);
 
-        ((ClientPreparedStatement) pStmt).setRetrieveGeneratedKeys((autoGenKeyIndexes != null) && (autoGenKeyIndexes.length > 0));
+        ((ClientPreparedStatement) pStmt).setRetrieveGeneratedKeys(autoGenKeyIndexes != null && autoGenKeyIndexes.length > 0);
 
         return pStmt;
     }
@@ -1639,7 +1716,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     public java.sql.PreparedStatement prepareStatement(String sql, String[] autoGenKeyColNames) throws SQLException {
         java.sql.PreparedStatement pStmt = prepareStatement(sql);
 
-        ((ClientPreparedStatement) pStmt).setRetrieveGeneratedKeys((autoGenKeyColNames != null) && (autoGenKeyColNames.length > 0));
+        ((ClientPreparedStatement) pStmt).setRetrieveGeneratedKeys(autoGenKeyColNames != null && autoGenKeyColNames.length > 0);
 
         return pStmt;
     }
@@ -1704,12 +1781,12 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
             this.queryInterceptors = null;
             this.exceptionInterceptor = null;
             this.nullStatementResultSetFactory = null;
+            this.session.getTelemetryHandler().removeLinkTarget(this.connectionSpan);
         }
 
         if (sqlEx != null) {
             throw sqlEx;
         }
-
     }
 
     @Override
@@ -1747,14 +1824,48 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     }
 
     @Override
-    public void releaseSavepoint(Savepoint arg0) throws SQLException {
-        // this is a no-op
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        synchronized (getConnectionMutex()) {
+            checkClosed();
+
+            StringBuilder releaseSavepointQuery = new StringBuilder("RELEASE SAVEPOINT ");
+            releaseSavepointQuery
+                    .append(StringUtils.quoteIdentifier(savepoint.getSavepointName(), this.session.getIdentifierQuoteString(), this.pedantic.getValue()));
+            java.sql.Statement stmt = null;
+            try {
+                stmt = getMetadataSafeStatement();
+                stmt.executeUpdate(releaseSavepointQuery.toString());
+            } finally {
+                closeStatement(stmt);
+            }
+        }
     }
 
     @Override
     public void resetServerState() throws SQLException {
-        if (!this.propertySet.getBooleanProperty(PropertyKey.paranoid).getValue() && (this.session != null)) {
-            changeUser(this.user, this.password);
+        if (!this.propertySet.getBooleanProperty(PropertyKey.paranoid).getValue() && this.session != null) {
+            TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.CONNECTION_RESET);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                span.setAttribute(TelemetryAttribute.DB_CONNECTION_STRING, getURL());
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                span.setAttribute(TelemetryAttribute.SERVER_ADDRESS, this.origHostToConnectTo);
+                span.setAttribute(TelemetryAttribute.SERVER_PORT, this.origPortToConnectTo);
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                this.session.getServerSession().getCharsetSettings().configurePreHandshake(true);
+                this.session.resetSessionState();
+                this.session.getServerSession().getCharsetSettings().configurePostHandshake(true);
+                this.session.setSessionVariables();
+                handleAutoCommitDefaults();
+                setupServerForTruncationChecks();
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
+            }
         }
     }
 
@@ -1774,6 +1885,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                                 this.stopIterating = true;
                             }
                         }
+
                     };
 
                     iter.doForAll();
@@ -1790,7 +1902,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                     rollbackNoChecks();
                 } catch (SQLException sqlEx) {
                     // We ignore non-transactional tables if told to do so
-                    if (this.ignoreNonTxTables.getInitialValue() && (sqlEx.getErrorCode() == MysqlErrorNumbers.ER_WARNING_NOT_COMPLETE_ROLLBACK)) {
+                    if (this.ignoreNonTxTables.getInitialValue() && sqlEx.getErrorCode() == MysqlErrorNumbers.ER_WARNING_NOT_COMPLETE_ROLLBACK) {
                         return;
                     }
                     throw sqlEx;
@@ -1811,7 +1923,6 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public void rollback(final Savepoint savepoint) throws SQLException {
-
         synchronized (getConnectionMutex()) {
             checkClosed();
 
@@ -1826,6 +1937,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                                 this.stopIterating = true;
                             }
                         }
+
                     };
 
                     iter.doForAll();
@@ -1836,25 +1948,18 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                 }
 
                 StringBuilder rollbackQuery = new StringBuilder("ROLLBACK TO SAVEPOINT ");
-                rollbackQuery.append('`');
-                rollbackQuery.append(savepoint.getSavepointName());
-                rollbackQuery.append('`');
-
+                rollbackQuery
+                        .append(StringUtils.quoteIdentifier(savepoint.getSavepointName(), this.session.getIdentifierQuoteString(), this.pedantic.getValue()));
                 java.sql.Statement stmt = null;
-
                 try {
                     stmt = getMetadataSafeStatement();
-
                     stmt.executeUpdate(rollbackQuery.toString());
                 } catch (SQLException sqlEx) {
                     int errno = sqlEx.getErrorCode();
-
                     if (errno == 1181) {
                         String msg = sqlEx.getMessage();
-
                         if (msg != null) {
                             int indexOfError153 = msg.indexOf("153");
-
                             if (indexOfError153 != -1) {
                                 throw SQLError.createSQLException(Messages.getString("Connection.22", new Object[] { savepoint.getSavepointName() }),
                                         MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, errno, getExceptionInterceptor());
@@ -1863,7 +1968,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                     }
 
                     // We ignore non-transactional tables if told to do so
-                    if (this.ignoreNonTxTables.getValue() && (sqlEx.getErrorCode() != MysqlErrorNumbers.ER_WARNING_NOT_COMPLETE_ROLLBACK)) {
+                    if (this.ignoreNonTxTables.getValue() && sqlEx.getErrorCode() != MysqlErrorNumbers.ER_WARNING_NOT_COMPLETE_ROLLBACK) {
                         throw sqlEx;
                     }
 
@@ -1890,7 +1995,23 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                 }
             }
 
-            this.session.execSQL(null, "rollback", -1, null, false, this.nullStatementResultSetFactory, null, false);
+            TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.ROLLBACK);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_ROLLBACK);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_ROLLBACK);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                this.session.execSQL(null, "ROLLBACK", -1, null, false, this.nullStatementResultSetFactory, null, false);
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
+            }
 
         }
     }
@@ -1936,10 +2057,9 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public java.sql.PreparedStatement serverPrepareStatement(String sql, int[] autoGenKeyIndexes) throws SQLException {
-
         ClientPreparedStatement pStmt = (ClientPreparedStatement) serverPrepareStatement(sql);
 
-        pStmt.setRetrieveGeneratedKeys((autoGenKeyIndexes != null) && (autoGenKeyIndexes.length > 0));
+        pStmt.setRetrieveGeneratedKeys(autoGenKeyIndexes != null && autoGenKeyIndexes.length > 0);
 
         return pStmt;
     }
@@ -1948,7 +2068,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     public java.sql.PreparedStatement serverPrepareStatement(String sql, String[] autoGenKeyColNames) throws SQLException {
         ClientPreparedStatement pStmt = (ClientPreparedStatement) serverPrepareStatement(sql);
 
-        pStmt.setRetrieveGeneratedKeys((autoGenKeyColNames != null) && (autoGenKeyColNames.length > 0));
+        pStmt.setRetrieveGeneratedKeys(autoGenKeyColNames != null && autoGenKeyColNames.length > 0);
 
         return pStmt;
     }
@@ -1968,6 +2088,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                             this.stopIterating = true;
                         }
                     }
+
                 };
 
                 iter.doForAll();
@@ -1996,8 +2117,24 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                 this.session.getServerSession().setAutoCommit(autoCommitFlag);
 
                 if (needsSetOnServer) {
-                    this.session.execSQL(null, autoCommitFlag ? "SET autocommit=1" : "SET autocommit=0", -1, null, false, this.nullStatementResultSetFactory,
-                            null, false);
+                    TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.SET_VARIABLE, "autocommit");
+                    try (TelemetryScope scope = span.makeCurrent()) {
+                        span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                        span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_SET);
+                        span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_SET + TelemetryAttribute.STATEMENT_SUFFIX);
+                        span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                        span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                        span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                        span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                        this.session.execSQL(null, autoCommitFlag ? "SET autocommit=1" : "SET autocommit=0", -1, null, false,
+                                this.nullStatementResultSetFactory, null, false);
+                    } catch (Throwable t) {
+                        span.setError(t);
+                        throw t;
+                    } finally {
+                        span.end();
+                    }
                 }
             } catch (CJCommunicationsException e) {
                 throw e;
@@ -2023,6 +2160,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         }
     }
 
+    @Override
     public void setDatabase(final String db) throws SQLException {
         synchronized (getConnectionMutex()) {
             checkClosed();
@@ -2041,6 +2179,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                             this.stopIterating = true;
                         }
                     }
+
                 };
 
                 iter.doForAll();
@@ -2055,25 +2194,35 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                     if (this.database.equalsIgnoreCase(db)) {
                         return;
                     }
-                } else {
-                    if (this.database.equals(db)) {
-                        return;
-                    }
+                } else if (this.database.equals(db)) {
+                    return;
                 }
             }
 
-            String quotedId = this.session.getIdentifierQuoteString();
+            TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.USE_DATABASE);
+            try (TelemetryScope scope = span.makeCurrent()) {
+                span.setAttribute(TelemetryAttribute.DB_NAME, db);
+                span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_USE);
+                span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_USE + TelemetryAttribute.STATEMENT_SUFFIX);
+                span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-            if ((quotedId == null) || quotedId.equals(" ")) {
-                quotedId = "";
+                String quotedId = this.session.getIdentifierQuoteString();
+
+                StringBuilder query = new StringBuilder("USE ");
+                query.append(StringUtils.quoteIdentifier(db, quotedId, this.pedantic.getValue()));
+
+                this.session.execSQL(null, query.toString(), -1, null, false, this.nullStatementResultSetFactory, null, false);
+
+                this.database = db;
+            } catch (Throwable t) {
+                span.setError(t);
+                throw t;
+            } finally {
+                span.end();
             }
-
-            StringBuilder query = new StringBuilder("USE ");
-            query.append(StringUtils.quoteIdentifier(db, quotedId, this.pedantic.getValue()));
-
-            this.session.execSQL(null, query.toString(), -1, null, false, this.nullStatementResultSetFactory, null, false);
-
-            this.database = db;
         }
     }
 
@@ -2101,7 +2250,6 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public void setReadOnly(boolean readOnlyFlag) throws SQLException {
-
         setReadOnlyInternal(readOnlyFlag);
     }
 
@@ -2110,9 +2258,27 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         synchronized (getConnectionMutex()) {
             // note this this is safe even inside a transaction
             if (this.readOnlyPropagatesToServer.getValue() && versionMeetsMinimum(5, 6, 5)) {
-                if (!this.useLocalSessionState.getValue() || (readOnlyFlag != this.readOnly)) {
-                    this.session.execSQL(null, "set session transaction " + (readOnlyFlag ? "read only" : "read write"), -1, null, false,
-                            this.nullStatementResultSetFactory, null, false);
+                if (!this.useLocalSessionState.getValue() || readOnlyFlag != this.readOnly) {
+                    TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.SET_TRANSACTION_ACCESS_MODE,
+                            readOnlyFlag ? "read-only" : "read-write");
+                    try (TelemetryScope scope = span.makeCurrent()) {
+                        span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                        span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_SET);
+                        span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_SET + TelemetryAttribute.STATEMENT_SUFFIX);
+                        span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                        span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                        span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                        span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                        this.session.execSQL(null, "SET SESSION TRANSACTION " + (readOnlyFlag ? "READ ONLY" : "READ WRITE"), -1, null, false,
+                                this.nullStatementResultSetFactory, null, false);
+                    } catch (Throwable t) {
+                        span.setError(t);
+                        throw t;
+                    } finally {
+                        span.end();
+                    }
+
                 }
             }
 
@@ -2123,27 +2289,19 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     @Override
     public java.sql.Savepoint setSavepoint() throws SQLException {
         MysqlSavepoint savepoint = new MysqlSavepoint(getExceptionInterceptor());
-
         setSavepoint(savepoint);
-
         return savepoint;
     }
 
     private void setSavepoint(MysqlSavepoint savepoint) throws SQLException {
-
         synchronized (getConnectionMutex()) {
             checkClosed();
 
             StringBuilder savePointQuery = new StringBuilder("SAVEPOINT ");
-            savePointQuery.append('`');
-            savePointQuery.append(savepoint.getSavepointName());
-            savePointQuery.append('`');
-
+            savePointQuery.append(StringUtils.quoteIdentifier(savepoint.getSavepointName(), this.session.getIdentifierQuoteString(), this.pedantic.getValue()));
             java.sql.Statement stmt = null;
-
             try {
                 stmt = getMetadataSafeStatement();
-
                 stmt.executeUpdate(savePointQuery.toString());
             } finally {
                 closeStatement(stmt);
@@ -2155,9 +2313,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     public java.sql.Savepoint setSavepoint(String name) throws SQLException {
         synchronized (getConnectionMutex()) {
             MysqlSavepoint savepoint = new MysqlSavepoint(name, getExceptionInterceptor());
-
             setSavepoint(savepoint);
-
             return savepoint;
         }
     }
@@ -2173,10 +2329,8 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
             if (this.propertySet.getBooleanProperty(PropertyKey.alwaysSendSetIsolation).getValue()) {
                 shouldSendSet = true;
-            } else {
-                if (level != this.isolationLevel) {
-                    shouldSendSet = true;
-                }
+            } else if (level != this.isolationLevel) {
+                shouldSendSet = true;
             }
 
             if (this.useLocalSessionState.getValue()) {
@@ -2184,38 +2338,55 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
             }
 
             if (shouldSendSet) {
-                switch (level) {
-                    case java.sql.Connection.TRANSACTION_NONE:
-                        throw SQLError.createSQLException(Messages.getString("Connection.24"), getExceptionInterceptor());
+                TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.SET_TRANSACTION_ISOLATION);
+                try (TelemetryScope scope = span.makeCurrent()) {
+                    span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                    span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_SET);
+                    span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_SET + TelemetryAttribute.STATEMENT_SUFFIX);
+                    span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                    span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                    span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                    span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-                    case java.sql.Connection.TRANSACTION_READ_COMMITTED:
-                        sql = "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED";
+                    switch (level) {
+                        case java.sql.Connection.TRANSACTION_NONE:
+                            throw SQLError.createSQLException(Messages.getString("Connection.24"), getExceptionInterceptor());
 
-                        break;
+                        case java.sql.Connection.TRANSACTION_READ_COMMITTED:
+                            sql = "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED";
 
-                    case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
-                        sql = "SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
+                            break;
 
-                        break;
+                        case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
+                            sql = "SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
 
-                    case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
-                        sql = "SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ";
+                            break;
 
-                        break;
+                        case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
+                            sql = "SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ";
 
-                    case java.sql.Connection.TRANSACTION_SERIALIZABLE:
-                        sql = "SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE";
+                            break;
 
-                        break;
+                        case java.sql.Connection.TRANSACTION_SERIALIZABLE:
+                            sql = "SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE";
 
-                    default:
-                        throw SQLError.createSQLException(Messages.getString("Connection.25", new Object[] { level }),
-                                MysqlErrorNumbers.SQL_STATE_DRIVER_NOT_CAPABLE, getExceptionInterceptor());
+                            break;
+
+                        default:
+                            throw SQLError.createSQLException(Messages.getString("Connection.25", new Object[] { level }),
+                                    MysqlErrorNumbers.SQL_STATE_DRIVER_NOT_CAPABLE, getExceptionInterceptor());
+                    }
+
+                    this.session.execSQL(null, sql, -1, null, false, this.nullStatementResultSetFactory, null, false);
+
+                    this.isolationLevel = level;
+                } catch (Throwable t) {
+                    span.setError(t);
+                    throw t;
+                } finally {
+                    span.end();
                 }
 
-                this.session.execSQL(null, sql, -1, null, false, this.nullStatementResultSetFactory, null, false);
-
-                this.isolationLevel = level;
             }
         }
     }
@@ -2236,18 +2407,34 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                 boolean strictTransTablesIsSet = StringUtils.indexOfIgnoreCase(currentSqlMode, "STRICT_TRANS_TABLES") != -1;
 
                 if (currentSqlMode == null || currentSqlMode.length() == 0 || !strictTransTablesIsSet) {
-                    StringBuilder commandBuf = new StringBuilder("SET sql_mode='");
+                    TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.SET_VARIABLE, "sql_mode");
+                    try (TelemetryScope scope = span.makeCurrent()) {
+                        span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                        span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_SET);
+                        span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_SET + TelemetryAttribute.STATEMENT_SUFFIX);
+                        span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                        span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                        span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                        span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-                    if (currentSqlMode != null && currentSqlMode.length() > 0) {
-                        commandBuf.append(currentSqlMode);
-                        commandBuf.append(",");
+                        StringBuilder commandBuf = new StringBuilder("SET sql_mode='");
+
+                        if (currentSqlMode != null && currentSqlMode.length() > 0) {
+                            commandBuf.append(currentSqlMode);
+                            commandBuf.append(",");
+                        }
+
+                        commandBuf.append("STRICT_TRANS_TABLES'");
+
+                        this.session.execSQL(null, commandBuf.toString(), -1, null, false, this.nullStatementResultSetFactory, null, false);
+
+                        jdbcCompliantTruncation.setValue(false); // server's handling this for us now
+                    } catch (Throwable t) {
+                        span.setError(t);
+                        throw t;
+                    } finally {
+                        span.end();
                     }
-
-                    commandBuf.append("STRICT_TRANS_TABLES'");
-
-                    this.session.execSQL(null, commandBuf.toString(), -1, null, false, this.nullStatementResultSetFactory, null, false);
-
-                    jdbcCompliantTruncation.setValue(false); // server's handling this for us now
                 } else if (strictTransTablesIsSet) {
                     // We didn't set it, but someone did, so we piggy back on it
                     jdbcCompliantTruncation.setValue(false); // server's handling this for us now
@@ -2292,7 +2479,6 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public void initializeResultsMetadataFromCache(String sql, CachedResultSetMetaData cachedMetaData, ResultSetInternalMethods resultSet) throws SQLException {
-
         if (cachedMetaData == null) {
 
             // read from results
@@ -2321,12 +2507,12 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public String getStatementComment() {
-        return this.session.getProtocol().getQueryComment();
+        return this.session.getQueryComment();
     }
 
     @Override
     public void setStatementComment(String comment) {
-        this.session.getProtocol().setQueryComment(comment);
+        this.session.setQueryComment(comment);
     }
 
     @Override
@@ -2383,9 +2569,26 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
         synchronized (getConnectionMutex()) {
             checkClosed();
             if (this.session.getSessionMaxRows() != max) {
-                this.session.setSessionMaxRows(max);
-                this.session.execSQL(null, "SET SQL_SELECT_LIMIT=" + (this.session.getSessionMaxRows() == -1 ? "DEFAULT" : this.session.getSessionMaxRows()),
-                        -1, null, false, this.nullStatementResultSetFactory, null, false);
+                TelemetrySpan span = this.session.getTelemetryHandler().startSpan(TelemetrySpanName.SET_VARIABLE, "sql_select_limit");
+                try (TelemetryScope scope = span.makeCurrent()) {
+                    span.setAttribute(TelemetryAttribute.DB_NAME, getDatabase());
+                    span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_SET);
+                    span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_SET + TelemetryAttribute.STATEMENT_SUFFIX);
+                    span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                    span.setAttribute(TelemetryAttribute.DB_USER, getUser());
+                    span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                    span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
+
+                    this.session.setSessionMaxRows(max);
+                    this.session.execSQL(null,
+                            "SET sql_select_limit=" + (this.session.getSessionMaxRows() == -1 ? "DEFAULT" : this.session.getSessionMaxRows()), -1, null, false,
+                            this.nullStatementResultSetFactory, null, false);
+                } catch (Throwable t) {
+                    span.setError(t);
+                    throw t;
+                } finally {
+                    span.end();
+                }
             }
         }
     }
@@ -2418,15 +2621,11 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
             throw SQLError.createSQLException(Messages.getString("Connection.26"), MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, getExceptionInterceptor());
         }
 
-        executor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    abortInternal();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+        executor.execute(() -> {
+            try {
+                abortInternal();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -2451,6 +2650,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
     }
 
     private static class NetworkTimeoutSetter implements Runnable {
+
         private final WeakReference<JdbcConnection> connRef;
         private final int milliseconds;
 
@@ -2468,6 +2668,7 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
                 }
             }
         }
+
     }
 
     @Override
@@ -2616,7 +2817,6 @@ public class ConnectionImpl implements JdbcConnection, SessionEventListener, Ser
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-
         // This works for classes that aren't actually wrapping
         // anything
         return iface.isInstance(this);

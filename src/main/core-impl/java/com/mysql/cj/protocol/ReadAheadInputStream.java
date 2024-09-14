@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol;
@@ -156,7 +147,7 @@ public class ReadAheadInputStream extends InputStream {
             }
         }
 
-        int bytesActuallyRead = (avail < len) ? avail : len;
+        int bytesActuallyRead = avail < len ? avail : len;
 
         System.arraycopy(this.buf, this.currentPosition, b, off, bytesActuallyRead);
 
@@ -168,7 +159,7 @@ public class ReadAheadInputStream extends InputStream {
     @Override
     public synchronized int read(byte b[], int off, int len) throws IOException {
         checkClosed(); // Check for closed stream
-        if ((off | len | (off + len) | (b.length - (off + len))) < 0) {
+        if ((off | len | off + len | b.length - (off + len)) < 0) {
             throw new IndexOutOfBoundsException();
         } else if (len == 0) {
             return 0;
@@ -191,12 +182,8 @@ public class ReadAheadInputStream extends InputStream {
             totalBytesRead += bytesReadThisRound;
 
             // Read _at_least_ enough bytes
-            if (totalBytesRead >= len) {
-                break;
-            }
-
             // Nothing to read?
-            if (this.underlyingStream.available() <= 0) {
+            if (totalBytesRead >= len || this.underlyingStream.available() <= 0) {
                 break;
             }
         }
@@ -222,11 +209,10 @@ public class ReadAheadInputStream extends InputStream {
     public int available() throws IOException {
         checkClosed();
 
-        return this.underlyingStream.available() + (this.endOfCurrentData - this.currentPosition);
+        return this.underlyingStream.available() + this.endOfCurrentData - this.currentPosition;
     }
 
     private void checkClosed() throws IOException {
-
         if (this.buf == null) {
             throw new IOException("Stream closed");
         }
@@ -279,8 +265,9 @@ public class ReadAheadInputStream extends InputStream {
             }
         }
 
-        long bytesSkipped = (bytesAvailInBuffer < n) ? bytesAvailInBuffer : n;
+        long bytesSkipped = bytesAvailInBuffer < n ? bytesAvailInBuffer : n;
         this.currentPosition += bytesSkipped;
         return bytesSkipped;
     }
+
 }

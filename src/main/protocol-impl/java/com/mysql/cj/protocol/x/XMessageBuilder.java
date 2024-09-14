@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.x;
@@ -49,6 +40,7 @@ import com.google.protobuf.ByteString;
 import com.mysql.cj.MessageBuilder;
 import com.mysql.cj.Messages;
 import com.mysql.cj.PreparedQuery;
+import com.mysql.cj.Query;
 import com.mysql.cj.QueryBindings;
 import com.mysql.cj.Session;
 import com.mysql.cj.exceptions.CJOperationNotSupportedException;
@@ -103,6 +95,7 @@ import com.mysql.cj.xdevapi.UpdateParams;
 import com.mysql.cj.xdevapi.UpdateSpec;
 
 public class XMessageBuilder implements MessageBuilder<XMessage> {
+
     private static final String XPLUGIN_NAMESPACE = "mysqlx";
 
     public XMessage buildCapabilitiesGet() {
@@ -131,7 +124,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a non-prepared doc insert operation.
-     * 
+     *
      * @param schemaName
      *            the schema name
      * @param collectionName
@@ -153,8 +146,8 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     /**
-     * Initialize a {@link Insert.Builder} for table data model with common data for prepared and non-prepared executions.
-     * 
+     * Initialize a {@link com.mysql.cj.x.protobuf.MysqlxCrud.Insert.Builder} for table data model with common data for prepared and non-prepared executions.
+     *
      * @param schemaName
      *            the schema name
      * @param tableName
@@ -162,7 +155,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
      * @param insertParams
      *            the parameters to insert
      * @return
-     *         an initialized {@link Insert.Builder} instance
+     *         an initialized {@link com.mysql.cj.x.protobuf.MysqlxCrud.Insert.Builder} instance
      */
     @SuppressWarnings("unchecked")
     private Insert.Builder commonRowInsertBuilder(String schemaName, String tableName, InsertParams insertParams) {
@@ -175,7 +168,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a non-prepared row insert operation.
-     * 
+     *
      * @param schemaName
      *            the schema name
      * @param tableName
@@ -193,14 +186,15 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     /**
-     * Initialize an {@link Update.Builder} for collection data model with common data for prepared and non-prepared executions.
-     * 
+     * Initialize an {@link com.mysql.cj.x.protobuf.MysqlxCrud.Update.Builder} for collection data model with common data for prepared and non-prepared
+     * executions.
+     *
      * @param filterParams
      *            the filter parameters
      * @param updates
      *            the updates specifications to perform
      * @return
-     *         an initialized {@link Update.Builder} instance
+     *         an initialized {@link com.mysql.cj.x.protobuf.MysqlxCrud.Update.Builder} instance
      */
     private Update.Builder commonDocUpdateBuilder(FilterParams filterParams, List<UpdateSpec> updates) {
         Update.Builder builder = Update.newBuilder().setCollection((Collection) filterParams.getCollection());
@@ -218,7 +212,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a non-prepared doc update operation.
-     * 
+     *
      * @param filterParams
      *            the filter parameters
      * @param updates
@@ -234,7 +228,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a prepared doc update operation.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id
      * @param filterParams
@@ -254,14 +248,14 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     /**
-     * Initialize an {@link Update.Builder} for table data model with common data for prepared and non-prepared executions.
-     * 
+     * Initialize an {@link com.mysql.cj.x.protobuf.MysqlxCrud.Update.Builder} for table data model with common data for prepared and non-prepared executions.
+     *
      * @param filterParams
      *            the filter parameters
      * @param updateParams
      *            the update parameters
      * @return
-     *         an initialized {@link Update.Builder} instance
+     *         an initialized {@link com.mysql.cj.x.protobuf.MysqlxCrud.Update.Builder} instance
      */
     @SuppressWarnings("unchecked")
     private Update.Builder commonRowUpdateBuilder(FilterParams filterParams, UpdateParams updateParams) {
@@ -274,7 +268,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a non-prepared row update operation.
-     * 
+     *
      * @param filterParams
      *            the filter parameters
      * @param updateParams
@@ -290,7 +284,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a prepared row update operation.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id
      * @param filterParams
@@ -310,12 +304,12 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     /**
-     * Initialize a {@link Find.Builder} for collection data model with common data for prepared and non-prepared executions.
-     * 
+     * Initialize a {@link com.mysql.cj.x.protobuf.MysqlxCrud.Find.Builder} for collection data model with common data for prepared and non-prepared executions.
+     *
      * @param filterParams
      *            the filter parameters
      * @return
-     *         an initialized {@link Find.Builder} instance
+     *         an initialized {@link com.mysql.cj.x.protobuf.MysqlxCrud.Find.Builder} instance
      */
     @SuppressWarnings("unchecked")
     private Find.Builder commonFindBuilder(FilterParams filterParams) {
@@ -341,7 +335,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a non-prepared find operation.
-     * 
+     *
      * @param filterParams
      *            the filter parameters
      * @return
@@ -355,7 +349,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a prepared find operation.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id
      * @param filterParams
@@ -373,12 +367,12 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     /**
-     * Initialize a {@link Delete.Builder} with common data for prepared and non-prepared executions.
-     * 
+     * Initialize a {@link com.mysql.cj.x.protobuf.MysqlxCrud.Delete.Builder} with common data for prepared and non-prepared executions.
+     *
      * @param filterParams
      *            the filter parameters
      * @return
-     *         an initialized {@link Delete.Builder} instance
+     *         an initialized {@link com.mysql.cj.x.protobuf.MysqlxCrud.Delete.Builder} instance
      */
     private Delete.Builder commonDeleteBuilder(FilterParams filterParams) {
         Delete.Builder builder = Delete.newBuilder().setCollection((Collection) filterParams.getCollection());
@@ -387,7 +381,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a non-prepared delete operation.
-     * 
+     *
      * @param filterParams
      *            the filter parameters
      * @return
@@ -401,7 +395,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for a prepared delete operation.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id
      * @param filterParams
@@ -419,12 +413,12 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     /**
-     * Initialize a {@link StmtExecute.Builder} with common data for prepared and non-prepared executions.
-     * 
+     * Initialize a {@link com.mysql.cj.x.protobuf.MysqlxSql.StmtExecute.Builder} with common data for prepared and non-prepared executions.
+     *
      * @param statement
      *            the SQL statement
      * @return
-     *         an initialized {@link StmtExecute.Builder} instance
+     *         an initialized {@link com.mysql.cj.x.protobuf.MysqlxSql.StmtExecute.Builder} instance
      */
     private StmtExecute.Builder commonSqlStatementBuilder(String statement) {
         StmtExecute.Builder builder = StmtExecute.newBuilder();
@@ -435,24 +429,26 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build a <i>StmtExecute</i> message for a SQL statement.
-     * 
+     *
      * @param statement
      *            SQL statement string
      * @return {@link XMessage} wrapping {@link StmtExecute}
      */
+    @Override
     public XMessage buildSqlStatement(String statement) {
         return buildSqlStatement(statement, null);
     }
 
     /**
      * Build a <i>StmtExecute</i> message for a SQL statement.
-     * 
+     *
      * @param statement
      *            SQL statement string
      * @param args
      *            list of {@link Object} arguments
      * @return {@link XMessage} wrapping {@link StmtExecute}
      */
+    @Override
     public XMessage buildSqlStatement(String statement, List<Object> args) {
         StmtExecute.Builder builder = commonSqlStatementBuilder(statement);
         if (args != null) {
@@ -463,7 +459,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build a <i>Prepare</i> message for a SQL statement.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id
      * @param statement
@@ -480,7 +476,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Apply the given filter params to the builder object (represented by the setter methods).
-     * 
+     *
      * Abstract the process of setting the filter params on the operation message builder.
      *
      * @param filterParams
@@ -519,7 +515,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     /**
      * Apply the given filter params to the builder object (represented by the setter methods) using the variant that takes a <code>LimitExpr</code> and no
      * <code>Args</code>. This variant is suitable for building prepared statements prepare messages.
-     * 
+     *
      * Abstract the process of setting the filter params on the operation message builder.
      *
      * @param filterParams
@@ -552,7 +548,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for executing a prepared statement with the given filters.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id
      * @param filterParams
@@ -578,7 +574,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
 
     /**
      * Build an {@link XMessage} for deallocating a prepared statement.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id
      * @return
@@ -692,6 +688,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
                         .build()));
     }
 
+    @Override
     public XMessage buildClose() {
         return new XMessage(Close.getDefaultInstance());
     }
@@ -706,9 +703,9 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
      * | some_view           | VIEW       |
      * | xprotocol_test_test | TABLE      |
      * </pre>
-     * 
+     *
      * .
-     * 
+     *
      * @param schemaName
      *            schema name
      * @param pattern
@@ -763,7 +760,7 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
      * |---------------------+---------------|
      * | warnings            | 1             |
      * </pre>
-     * 
+     *
      * @return XMessage
      */
     public XMessage buildListNotices() {
@@ -910,19 +907,17 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     public XMessage buildPlainAuthStart(String user, String password, String database) {
         // SASL requests information from the app through callbacks. We provide the username and password by these callbacks. This implementation works for
         // PLAIN and would also work for CRAM-MD5. Additional standardized methods may require additional callbacks.
-        CallbackHandler callbackHandler = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
-                for (Callback c : callbacks) {
-                    if (NameCallback.class.isAssignableFrom(c.getClass())) {
-                        // we get a name callback and provide the username
-                        ((NameCallback) c).setName(user);
-                    } else if (PasswordCallback.class.isAssignableFrom(c.getClass())) {
-                        // we get  password callback and provide the password
-                        ((PasswordCallback) c).setPassword(password == null ? new char[0] : password.toCharArray());
-                    } else {
-                        // otherwise, thrown an exception
-                        throw new UnsupportedCallbackException(c);
-                    }
+        CallbackHandler callbackHandler = callbacks -> {
+            for (Callback c : callbacks) {
+                if (NameCallback.class.isAssignableFrom(c.getClass())) {
+                    // we get a name callback and provide the username
+                    ((NameCallback) c).setName(user);
+                } else if (PasswordCallback.class.isAssignableFrom(c.getClass())) {
+                    // we get  password callback and provide the password
+                    ((PasswordCallback) c).setPassword(password == null ? new char[0] : password.toCharArray());
+                } else {
+                    // otherwise, thrown an exception
+                    throw new UnsupportedCallbackException(c);
                 }
             }
         };
@@ -950,18 +945,16 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     public XMessage buildExternalAuthStart(String database) {
-        CallbackHandler callbackHandler = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
-                for (Callback c : callbacks) {
-                    if (NameCallback.class.isAssignableFrom(c.getClass())) {
-                        // TODO ((NameCallback) c).setName(user);
-                        throw new UnsupportedCallbackException(c);
-                    } else if (PasswordCallback.class.isAssignableFrom(c.getClass())) {
-                        // TODO ((PasswordCallback) c).setPassword(password.toCharArray());
-                        throw new UnsupportedCallbackException(c);
-                    } else {
-                        throw new UnsupportedCallbackException(c);
-                    }
+        CallbackHandler callbackHandler = callbacks -> {
+            for (Callback c : callbacks) {
+                if (NameCallback.class.isAssignableFrom(c.getClass())) {
+                    // TODO ((NameCallback) c).setName(user);
+                    throw new UnsupportedCallbackException(c);
+                } else if (PasswordCallback.class.isAssignableFrom(c.getClass())) {
+                    // TODO ((PasswordCallback) c).setPassword(password.toCharArray());
+                    throw new UnsupportedCallbackException(c);
+                } else {
+                    throw new UnsupportedCallbackException(c);
                 }
             }
         };
@@ -1002,7 +995,13 @@ public class XMessageBuilder implements MessageBuilder<XMessage> {
     }
 
     @Override
+    public XMessage buildComQuery(XMessage sharedPacket, Session sess, String query, Query callingQuery, String characterEncoding) {
+        throw ExceptionFactory.createException(CJOperationNotSupportedException.class, "Not supported");
+    }
+
+    @Override
     public XMessage buildComQuery(XMessage sharedPacket, Session sess, PreparedQuery preparedQuery, QueryBindings bindings, String characterEncoding) {
         throw ExceptionFactory.createException(CJOperationNotSupportedException.class, "Not supported");
     }
+
 }

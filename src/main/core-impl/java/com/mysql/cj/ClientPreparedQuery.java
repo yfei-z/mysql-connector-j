@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2017, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2017, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj;
@@ -65,26 +56,32 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
         super.closeQuery();
     }
 
+    @Override
     public QueryInfo getQueryInfo() {
         return this.queryInfo;
     }
 
+    @Override
     public void setQueryInfo(QueryInfo queryInfo) {
         this.queryInfo = queryInfo;
     }
 
+    @Override
     public String getOriginalSql() {
         return this.originalSql;
     }
 
+    @Override
     public void setOriginalSql(String originalSql) {
         this.originalSql = originalSql;
     }
 
+    @Override
     public int getParameterCount() {
         return this.parameterCount;
     }
 
+    @Override
     public void setParameterCount(int parameterCount) {
         this.parameterCount = parameterCount;
     }
@@ -99,10 +96,12 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
         this.queryBindings = queryBindings;
     }
 
+    @Override
     public int getBatchCommandIndex() {
         return this.batchCommandIndex;
     }
 
+    @Override
     public void setBatchCommandIndex(int batchCommandIndex) {
         this.batchCommandIndex = batchCommandIndex;
     }
@@ -110,11 +109,12 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
     /**
      * Computes the optimum number of batched parameter lists to send
      * without overflowing max_allowed_packet.
-     * 
+     *
      * @param numBatchedArgs
      *            original batch size
      * @return computed batch size
      */
+    @Override
     public int computeBatchSize(int numBatchedArgs) {
         long[] combinedValues = computeMaxParameterSetSizeAndBatchSize(numBatchedArgs);
 
@@ -130,13 +130,14 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
 
     /**
      * Method checkNullOrEmptyQuery.
-     * 
+     *
      * @param sql
      *            the SQL to check
-     * 
+     *
      * @throws WrongArgumentException
      *             if query is null or empty.
      */
+    @Override
     public void checkNullOrEmptyQuery(String sql) {
         if (sql == null) {
             throw ExceptionFactory.createException(WrongArgumentException.class, Messages.getString("PreparedQuery.0"), this.session.getExceptionInterceptor());
@@ -147,6 +148,7 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
         }
     }
 
+    @Override
     public String asSql() {
         StringBuilder buf = new StringBuilder();
         Object batchArg = null;
@@ -162,7 +164,7 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
                 buf.append((String) batchArg);
                 continue;
             }
-            val = this.batchCommandIndex == -1 ? (this.queryBindings == null ? null : this.queryBindings.getBindValues()[i].getString())
+            val = this.batchCommandIndex == -1 ? this.queryBindings == null ? null : this.queryBindings.getBindValues()[i].getString()
                     : ((QueryBindings) batchArg).getBindValues()[i].getString();
             buf.append(val == null ? "** NOT SPECIFIED **" : val);
         }
@@ -174,7 +176,7 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
     /**
      * Computes the maximum parameter set size, and entire batch size given
      * the number of arguments in the batch.
-     * 
+     *
      * @param numBatchedArgs
      *            number of batched arguments
      * @return new long[] { maxSizeOfParameterSet, sizeOfEntireBatch }
@@ -222,4 +224,5 @@ public class ClientPreparedQuery extends AbstractQuery implements PreparedQuery 
         return (M) this.session.getProtocol().getMessageBuilder().buildComQuery(this.session.getSharedSendPacket(), this.session, this, bindings,
                 this.charEncoding);
     }
+
 }

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.a;
@@ -43,6 +34,7 @@ import com.mysql.cj.util.StringUtils;
  * Used to de-compress packets from the MySQL server when protocol-level compression is turned on.
  */
 public class CompressedInputStream extends InputStream {
+
     /** The packet data after it has been un-compressed */
     private byte[] buffer;
 
@@ -69,7 +61,7 @@ public class CompressedInputStream extends InputStream {
     /**
      * Creates a new CompressedInputStream that reads the given stream from the
      * server.
-     * 
+     *
      * @param streamFromServer
      *            original server InputStream
      * @param traceProtocol
@@ -106,7 +98,7 @@ public class CompressedInputStream extends InputStream {
     /**
      * Retrieves and un-compressed (if necessary) the next packet from the
      * server.
-     * 
+     *
      * @throws IOException
      *             if an I/O error occurs
      */
@@ -119,11 +111,10 @@ public class CompressedInputStream extends InputStream {
             throw new IOException("Unexpected end of input stream");
         }
 
-        int compressedPacketLength = ((this.packetHeaderBuffer[0] & 0xff)) + (((this.packetHeaderBuffer[1] & 0xff)) << 8)
-                + (((this.packetHeaderBuffer[2] & 0xff)) << 16);
+        int compressedPacketLength = (this.packetHeaderBuffer[0] & 0xff) + ((this.packetHeaderBuffer[1] & 0xff) << 8)
+                + ((this.packetHeaderBuffer[2] & 0xff) << 16);
 
-        int uncompressedLength = ((this.packetHeaderBuffer[4] & 0xff)) + (((this.packetHeaderBuffer[5] & 0xff)) << 8)
-                + (((this.packetHeaderBuffer[6] & 0xff)) << 16);
+        int uncompressedLength = (this.packetHeaderBuffer[4] & 0xff) + ((this.packetHeaderBuffer[5] & 0xff) << 8) + ((this.packetHeaderBuffer[6] & 0xff) << 16);
 
         boolean doTrace = this.traceProtocol.getValue();
 
@@ -153,7 +144,7 @@ public class CompressedInputStream extends InputStream {
                 this.log.logTrace("Packet didn't meet compression threshold, not uncompressing...");
             }
 
-            //	
+            //
             // Read data, note this this code is reached when using compressed packets that have not been compressed, as well
             //
             uncompressedLength = compressedPacketLength;
@@ -173,7 +164,7 @@ public class CompressedInputStream extends InputStream {
             }
         }
 
-        if ((this.buffer != null) && (this.pos < this.buffer.length)) {
+        if (this.buffer != null && this.pos < this.buffer.length) {
             if (doTrace) {
                 this.log.logTrace("Combining remaining packet with new: ");
             }
@@ -196,15 +187,15 @@ public class CompressedInputStream extends InputStream {
     /**
      * Determines if another packet needs to be read from the server to be able
      * to read numBytes from the stream.
-     * 
+     *
      * @param numBytes
      *            the number of bytes to be read
-     * 
+     *
      * @throws IOException
      *             if an I/O error occors.
      */
     private void getNextPacketIfRequired(int numBytes) throws IOException {
-        if ((this.buffer == null) || ((this.pos + numBytes) > this.buffer.length)) {
+        if (this.buffer == null || this.pos + numBytes > this.buffer.length) {
             getNextPacketFromServer();
         }
     }
@@ -229,7 +220,7 @@ public class CompressedInputStream extends InputStream {
     public int read(byte[] b, int off, int len) throws IOException {
         if (b == null) {
             throw new NullPointerException();
-        } else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+        } else if (off < 0 || off > b.length || len < 0 || off + len > b.length || off + len < 0) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -288,4 +279,5 @@ public class CompressedInputStream extends InputStream {
 
         return count;
     }
+
 }

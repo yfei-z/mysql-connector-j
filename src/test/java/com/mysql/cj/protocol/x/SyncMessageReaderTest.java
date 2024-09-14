@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.x;
@@ -56,6 +47,7 @@ import com.mysql.cj.x.protobuf.Mysqlx.ServerMessages;
  * Tests for {@link SyncMessageReader}.
  */
 public class SyncMessageReaderTest {
+
     private SyncMessageReader reader;
 
     private static final byte[] okMsgPacket = serializeMessage(Ok.newBuilder().build(), ServerMessages.Type.OK_VALUE);
@@ -64,7 +56,7 @@ public class SyncMessageReaderTest {
 
     /**
      * Serialize a message for testing.
-     * 
+     *
      * @param msg
      * @param type
      * @return a byte array
@@ -127,7 +119,7 @@ public class SyncMessageReaderTest {
 
     /**
      * This is a 'mini'-stress test that encompasses the check of <i>clearHeader()</i> being called correctly.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -170,9 +162,9 @@ public class SyncMessageReaderTest {
 
     /**
      * Verification test to help prevent bugs in the typecode/class/parser mapping tables. We check that all classes that are mapped have a parser.
-     * 
+     *
      * @throws InvalidProtocolBufferException
-     * 
+     *
      * @todo Test in the other direction also
      */
     @Test
@@ -186,4 +178,5 @@ public class SyncMessageReaderTest {
             assertEquals(messageClass, partiallyParsed.getClass(), "Parsed class should equal the class that mapped to it via type tag");
         }
     }
+
 }

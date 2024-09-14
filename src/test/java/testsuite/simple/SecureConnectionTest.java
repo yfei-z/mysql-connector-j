@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.simple;
@@ -40,7 +31,6 @@ import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +50,7 @@ import testsuite.BaseTestCase;
  * Tests SSL functionality in the driver.
  */
 public class SecureConnectionTest extends BaseTestCase {
+
     private String sslFreeBaseUrl = "";
 
     @BeforeEach
@@ -120,7 +111,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests SSL Connection
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -152,10 +143,10 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Test authentication with a user that requires an SSL connection.
-     * 
+     *
      * This test requires the CA truststore and the client keystore available in src/test/config/ssl-test-certs.
      * The server needs to be configured with the CA and server certificates from src/test/config/ssl-test-certs.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -182,11 +173,9 @@ public class SecureConnectionTest extends BaseTestCase {
          */
         props.setProperty(PropertyKey.sslMode.getKeyName(), SslMode.DISABLED.name());
         props.setProperty(PropertyKey.allowPublicKeyRetrieval.getKeyName(), "true");
-        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", new Callable<Void>() {
-            public Void call() throws Exception {
-                getConnectionWithProps(props);
-                return null;
-            }
+        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", () -> {
+            getConnectionWithProps(props);
+            return null;
         });
 
         /*
@@ -244,10 +233,10 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Test authentication with a user that requires an SSL connection and an authorized client certificate.
-     * 
+     *
      * This test requires the CA truststore and the client keystore available in src/test/config/ssl-test-certs.
      * The server needs to be configured with the CA and server certificates from src/test/config/ssl-test-certs.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -274,22 +263,18 @@ public class SecureConnectionTest extends BaseTestCase {
          */
         props.setProperty(PropertyKey.sslMode.getKeyName(), SslMode.DISABLED.name());
         props.setProperty(PropertyKey.allowPublicKeyRetrieval.getKeyName(), "true");
-        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", new Callable<Void>() {
-            public Void call() throws Exception {
-                getConnectionWithProps(props);
-                return null;
-            }
+        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", () -> {
+            getConnectionWithProps(props);
+            return null;
         });
 
         /*
          * SSL: no server certificate validation & no client certificate.
          */
         props.setProperty(PropertyKey.sslMode.getKeyName(), SslMode.REQUIRED.name());
-        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", new Callable<Void>() {
-            public Void call() throws Exception {
-                getConnectionWithProps(props);
-                return null;
-            }
+        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", () -> {
+            getConnectionWithProps(props);
+            return null;
         });
 
         /*
@@ -299,11 +284,9 @@ public class SecureConnectionTest extends BaseTestCase {
         props.setProperty(PropertyKey.trustCertificateKeyStoreUrl.getKeyName(), "file:src/test/config/ssl-test-certs/ca-truststore");
         props.setProperty(PropertyKey.trustCertificateKeyStoreType.getKeyName(), "JKS");
         props.setProperty(PropertyKey.trustCertificateKeyStorePassword.getKeyName(), "password");
-        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", new Callable<Void>() {
-            public Void call() throws Exception {
-                getConnectionWithProps(props);
-                return null;
-            }
+        assertThrows(SQLException.class, "Access denied for user '" + user + "'@.*", () -> {
+            getConnectionWithProps(props);
+            return null;
         });
 
         /*
@@ -336,7 +319,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests that given SSL/TLS related connection properties values are processed as expected.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -407,7 +390,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests connection property 'testFallbackToSystemTrustStore' behavior.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -500,7 +483,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests connection property 'testFallbackToSystemKeyStore' behavior.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -590,7 +573,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests WL#14835, Align TLS option checking across connectors
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -707,7 +690,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests connection property 'fipsCompliantJsse' behavior.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -809,7 +792,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests connection property 'keyManagerFactoryProvider' behavior.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -832,7 +815,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests connection property 'trustManagerFactoryProvider' behavior.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -855,7 +838,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests connection property 'keyStoreProvider' behavior.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -880,7 +863,7 @@ public class SecureConnectionTest extends BaseTestCase {
 
     /**
      * Tests connection property 'sslContextProvider' behavior.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -899,4 +882,5 @@ public class SecureConnectionTest extends BaseTestCase {
         assertThrows(SQLNonTransientConnectionException.class, "Specified SSLContext Provider is invalid\\. Ensure it is property registered\\.",
                 () -> getConnectionWithProps(this.sslFreeBaseUrl, props));
     }
+
 }

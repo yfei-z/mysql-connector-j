@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -128,7 +119,6 @@ public class MysqlSQLXML implements SQLXML {
         this.owningResultSet = null;
         this.workingWithResult = false;
         this.isClosed = true;
-
     }
 
     @Override
@@ -349,7 +339,6 @@ public class MysqlSQLXML implements SQLXML {
     }
 
     private Reader binaryInputStreamStreamToReader(ByteArrayOutputStream out) {
-
         try {
             // There's got to be an easier way to do this, but I don't feel like coding up Appendix F of the XML Spec myself, when there's a reusable way to do
             // it, and we can warn folks away from BINARY xml streams that have to be parsed to determine the character encoding :P
@@ -477,16 +466,16 @@ public class MysqlSQLXML implements SQLXML {
      * The SimpleSaxToReader class is an adaptation of the SAX "Writer"
      * example from the Apache XercesJ-2 Project. The license for this
      * code is as follows:
-     * 
+     *
      * Licensed to the Apache Software Foundation (ASF) under one or more
      * contributor license agreements. See the NOTICE file distributed with
      * this work for additional information regarding copyright ownership.
      * The ASF licenses this file to You under the Apache License, Version 2.0
      * (the "License"); you may not use this file except in compliance with
      * the License. You may obtain a copy of the License at
-     * 
+     *
      * http://www.apache.org/licenses/LICENSE-2.0
-     * 
+     *
      * Unless required by applicable law or agreed to in writing, software
      * distributed under the License is distributed on an "AS IS" BASIS,
      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -495,6 +484,7 @@ public class MysqlSQLXML implements SQLXML {
      */
 
     class SimpleSaxToReader extends DefaultHandler {
+
         StringBuilder buf = new StringBuilder();
 
         @Override
@@ -509,7 +499,6 @@ public class MysqlSQLXML implements SQLXML {
 
         @Override
         public void startElement(String namespaceURI, String sName, String qName, Attributes attrs) throws SAXException {
-
             this.buf.append("<");
             this.buf.append(qName);
 
@@ -578,7 +567,6 @@ public class MysqlSQLXML implements SQLXML {
         }
 
         private void escapeCharsForXml(char[] buffer, int offset, int len, boolean isAttributeData) {
-
             if (buffer == null) {
                 return;
             }
@@ -618,7 +606,7 @@ public class MysqlSQLXML implements SQLXML {
 
                 default:
 
-                    if (((c >= 0x01 && c <= 0x1F && c != 0x09 && c != 0x0A) || (c >= 0x7F && c <= 0x9F) || c == 0x2028)
+                    if (c >= 0x01 && c <= 0x1F && c != 0x09 && c != 0x0A || c >= 0x7F && c <= 0x9F || c == 0x2028
                             || isAttributeData && (c == 0x09 || c == 0x0A)) {
                         this.buf.append("&#x");
                         this.buf.append(Integer.toHexString(c).toUpperCase());
@@ -628,5 +616,7 @@ public class MysqlSQLXML implements SQLXML {
                     }
             }
         }
+
     }
+
 }

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol;
@@ -50,18 +41,20 @@ import com.mysql.cj.log.Log;
  * A socket factory for named pipes (on Windows)
  */
 public class NamedPipeSocketFactory implements SocketFactory {
+
     private static final int DEFAULT_TIMEOUT = 100;
 
     /**
      * A socket that encapsulates named pipes on Windows
      */
     class NamedPipeSocket extends Socket {
+
         private boolean isClosed = false;
 
         private RandomAccessFile namedPipeFile;
 
         NamedPipeSocket(String filePath, int timeout) throws IOException {
-            if ((filePath == null) || (filePath.length() == 0)) {
+            if (filePath == null || filePath.length() == 0) {
                 throw new IOException(Messages.getString("NamedPipeSocketFactory.4"));
             }
 
@@ -125,12 +118,14 @@ public class NamedPipeSocketFactory implements SocketFactory {
         public void shutdownInput() throws IOException {
             // no-op
         }
+
     }
 
     /**
      * Enables OutputStream-type functionality for a RandomAccessFile
      */
     class RandomAccessFileInputStream extends InputStream {
+
         RandomAccessFile raFile;
 
         RandomAccessFileInputStream(RandomAccessFile file) {
@@ -176,12 +171,14 @@ public class NamedPipeSocketFactory implements SocketFactory {
         public int read(byte[] b, int off, int len) throws IOException {
             return this.raFile.read(b, off, len);
         }
+
     }
 
     /**
      * Enables OutputStream-type functionality for a RandomAccessFile
      */
     class RandomAccessFileOutputStream extends OutputStream {
+
         RandomAccessFile raFile;
 
         RandomAccessFileOutputStream(RandomAccessFile file) {
@@ -218,6 +215,7 @@ public class NamedPipeSocketFactory implements SocketFactory {
         @Override
         public void write(int b) throws IOException {
         }
+
     }
 
     private Socket namedPipeSocket;
@@ -258,7 +256,7 @@ public class NamedPipeSocketFactory implements SocketFactory {
         }
 
         int connectTimeout = props.getIntegerProperty(PropertyKey.connectTimeout.getKeyName()).getValue();
-        int timeout = (connectTimeout > 0 && loginTimeout > 0) ? Math.min(connectTimeout, loginTimeout) : connectTimeout + loginTimeout;
+        int timeout = connectTimeout > 0 && loginTimeout > 0 ? Math.min(connectTimeout, loginTimeout) : connectTimeout + loginTimeout;
 
         this.namedPipeSocket = new NamedPipeSocket(namedPipePath, timeout);
 
@@ -270,4 +268,5 @@ public class NamedPipeSocketFactory implements SocketFactory {
         // Until I learn otherwise (or learn how to detect it), I assume that we are
         return true;
     }
+
 }

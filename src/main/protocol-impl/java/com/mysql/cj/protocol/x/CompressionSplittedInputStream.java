@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2020, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2020, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.x;
@@ -51,6 +42,7 @@ import com.mysql.cj.x.protobuf.MysqlxConnection.Compression;
  * knows how to rebuild uncompressed X Protocol frames from compressed ones.
  */
 public class CompressionSplittedInputStream extends FilterInputStream {
+
     private CompressorStreamsFactory compressorIoStreamsFactory;
 
     private byte[] frameHeader = new byte[HEADER_LENGTH];
@@ -73,9 +65,9 @@ public class CompressionSplittedInputStream extends FilterInputStream {
     /**
      * Same as {@link InputStream#available()}, except that the exact number of bytes that can be read from the underlying {@link InputStream} may not be
      * accurate until it is known if the next bytes contain compressed data or not.
-     * 
+     *
      * @return an approximate number of available bytes to read.
-     * 
+     *
      * @see FilterInputStream#available()
      */
     @Override
@@ -89,7 +81,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Closes this stream.
-     * 
+     *
      * @see FilterInputStream#close()
      */
     @Override
@@ -107,7 +99,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Forwards the read to {@link #read(byte[], int, int)}.
-     * 
+     *
      * @see FilterInputStream#read()
      */
     @Override
@@ -122,7 +114,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Forwards the read to {@link #read(byte[], int, int)}.
-     * 
+     *
      * @see FilterInputStream#read(byte[])
      */
     @Override
@@ -134,7 +126,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
     /**
      * Reads bytes from the underlying {@link InputStream} either from the one that gets data directly from the original source {@link InputStream} or from
      * a compressor able {@link InputStream}, if reading of a compressed X Protocol frame is in progress.
-     * 
+     *
      * @see FilterInputStream#read(byte[], int, int)
      */
     @Override
@@ -179,7 +171,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
     /**
      * Checks the header of the next X Protocol frame and, depending on its type, sets up this class to read from an alternative compressor able underlying
      * {@link InputStream}.
-     * 
+     *
      * @throws IOException
      *             if any of the underlying I/O operations fail.
      */
@@ -208,7 +200,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Checks if current X Protocol frame is compressed.
-     * 
+     *
      * @return
      *         <code>true</code> if the type of current frame is {@link com.mysql.cj.x.protobuf.Mysqlx.ServerMessages.Type#COMPRESSION}, <code>false</code>
      *         otherwise.
@@ -219,7 +211,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Parses the next X Protocol message as a compressed one.
-     * 
+     *
      * @return
      *         The Protobuf {@link Compression} message.
      */
@@ -244,7 +236,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Checks if there is data available to be consumed.
-     * 
+     *
      * @return
      *         <code>true</code> if this frame's bytes weren't all consumed yet, <code>false</code> otherwise.
      *
@@ -258,7 +250,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Checks if there is data available in the compressed {@link InputStream} to be consumed.
-     * 
+     *
      * @return
      *         <code>true</code> if there is compressed data available, <code>false</code> otherwise.
      *
@@ -271,7 +263,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Checks if all data from the compressed {@link InputStream} was fully consumed.
-     * 
+     *
      * @return
      *         <code>true</code> if all compressed data was consumed, <code>false</code> otherwise.
      *
@@ -284,7 +276,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Checks if the X Protocol frame header was fully consumed.
-     * 
+     *
      * @return
      *         <code>true</code> if the frame header was fully consumed, <code>false</code> otherwise.
      */
@@ -294,7 +286,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Reads the number of bytes required to fill the given buffer from the underlying {@link InputStream}, blocking if needed.
-     * 
+     *
      * @param b
      *            the buffer into which the data is read.
      * @return the total number of bytes read into the buffer, or <code>-1</code> if there is no more data because the end of the stream has been reached.
@@ -307,7 +299,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Reads the exact number of requested bytes from the underlying {@link InputStream}, blocking if needed.
-     * 
+     *
      * @param b
      *            the buffer into which the data is read.
      * @param off
@@ -324,7 +316,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Reads the exact number of requested bytes from the given {@link InputStream}, blocking if needed.
-     * 
+     *
      * @param inStream
      *            input stream to read from
      * @param b
@@ -356,7 +348,7 @@ public class CompressionSplittedInputStream extends FilterInputStream {
 
     /**
      * Ensures that this {@link InputStream} wasn't closed yet.
-     * 
+     *
      * @throws IOException
      *             if this {@link InputStream} was closed.
      */
@@ -365,4 +357,5 @@ public class CompressionSplittedInputStream extends FilterInputStream {
             throw new IOException("Stream closed");
         }
     }
+
 }

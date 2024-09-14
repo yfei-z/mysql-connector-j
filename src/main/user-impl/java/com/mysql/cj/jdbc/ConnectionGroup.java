@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2010, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2010, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -42,6 +33,7 @@ import com.mysql.cj.jdbc.exceptions.SQLError;
 import com.mysql.cj.jdbc.ha.LoadBalancedConnectionProxy;
 
 public class ConnectionGroup {
+
     private String groupName;
     private long connections = 0;
     private long activeConnections = 0;
@@ -72,7 +64,6 @@ public class ConnectionGroup {
         this.activeConnections++;
 
         return currentConnectionId;
-
     }
 
     public String getGroupName() {
@@ -141,12 +132,11 @@ public class ConnectionGroup {
         this.connectionProxies.remove(Long.valueOf(proxy.getConnectionGroupProxyID()));
         this.closedProxyTotalPhysicalConnections += proxy.getTotalPhysicalConnectionCount();
         this.closedProxyTotalTransactions += proxy.getTransactionCount();
-
     }
 
     /**
      * Remove the given host (host:port pair) from this Connection Group.
-     * 
+     *
      * @param hostPortPair
      *            The host:port pair to remove.
      * @throws SQLException
@@ -158,7 +148,7 @@ public class ConnectionGroup {
 
     /**
      * Remove the given host (host:port pair) from this Connection Group.
-     * 
+     *
      * @param hostPortPair
      *            The host:port pair to remove.
      * @param removeExisting
@@ -172,7 +162,7 @@ public class ConnectionGroup {
 
     /**
      * Remove the given host (host:port pair) from this Connection Group and, consequently, from all the load-balanced connections it holds.
-     * 
+     *
      * @param hostPortPair
      *            The host:port pair to remove.
      * @param removeExisting
@@ -214,7 +204,7 @@ public class ConnectionGroup {
 
     /**
      * Add the given host (host:port pair) to this Connection Group.
-     * 
+     *
      * @param hostPortPair
      *            The host:port pair to add.
      */
@@ -224,7 +214,7 @@ public class ConnectionGroup {
 
     /**
      * Add the given host (host:port pair) to this Connection Group and, consequently, to all the load-balanced connections it holds.
-     * 
+     *
      * @param hostPortPair
      *            The host:port pair to add.
      * @param forExisting
@@ -251,4 +241,5 @@ public class ConnectionGroup {
             proxy.addHost(hostPortPair);
         }
     }
+
 }

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.xdevapi;
@@ -62,7 +53,7 @@ public class SessionImpl implements Session {
 
     /**
      * Constructor.
-     * 
+     *
      * @param hostInfo
      *            {@link HostInfo} instance
      */
@@ -83,6 +74,7 @@ public class SessionImpl implements Session {
     protected SessionImpl() {
     }
 
+    @Override
     public List<Schema> getSchemas() {
         Function<Row, String> rowToName = r -> r.getValue(0, new StringValueFactory(this.session.getPropertySet()));
         Function<Row, Schema> rowToSchema = rowToName.andThen(n -> new SchemaImpl(this.session, this, n));
@@ -90,14 +82,17 @@ public class SessionImpl implements Session {
                 Collectors.toList());
     }
 
+    @Override
     public Schema getSchema(String schemaName) {
         return new SchemaImpl(this.session, this, schemaName);
     }
 
+    @Override
     public String getDefaultSchemaName() {
         return this.defaultSchemaName;
     }
 
+    @Override
     public Schema getDefaultSchema() {
         if (this.defaultSchemaName == null || this.defaultSchemaName.length() == 0) {
             return null;
@@ -105,6 +100,7 @@ public class SessionImpl implements Session {
         return new SchemaImpl(this.session, this, this.defaultSchemaName);
     }
 
+    @Override
     public Schema createSchema(String schemaName) {
         StringBuilder stmtString = new StringBuilder("CREATE DATABASE ");
         stmtString.append(StringUtils.quoteIdentifier(schemaName, true));
@@ -112,6 +108,7 @@ public class SessionImpl implements Session {
         return getSchema(schemaName);
     }
 
+    @Override
     public Schema createSchema(String schemaName, boolean reuseExistingObject) {
         try {
             return createSchema(schemaName);
@@ -123,20 +120,24 @@ public class SessionImpl implements Session {
         }
     }
 
+    @Override
     public void dropSchema(String schemaName) {
         StringBuilder stmtString = new StringBuilder("DROP DATABASE ");
         stmtString.append(StringUtils.quoteIdentifier(schemaName, true));
         this.session.query(this.xbuilder.buildSqlStatement(stmtString.toString()), new UpdateResultBuilder<>());
     }
 
+    @Override
     public void startTransaction() {
         this.session.query(this.xbuilder.buildSqlStatement("START TRANSACTION"), new UpdateResultBuilder<>());
     }
 
+    @Override
     public void commit() {
         this.session.query(this.xbuilder.buildSqlStatement("COMMIT"), new UpdateResultBuilder<>());
     }
 
+    @Override
     public void rollback() {
         this.session.query(this.xbuilder.buildSqlStatement("ROLLBACK"), new UpdateResultBuilder<>());
     }
@@ -174,6 +175,7 @@ public class SessionImpl implements Session {
         this.session.query(this.xbuilder.buildSqlStatement("RELEASE SAVEPOINT " + StringUtils.quoteIdentifier(name, true)), new UpdateResultBuilder<>());
     }
 
+    @Override
     public String getUri() {
         PropertySet pset = this.session.getPropertySet();
 
@@ -206,17 +208,19 @@ public class SessionImpl implements Session {
         // TODO modify for multi-host connections
 
         return sb.toString();
-
     }
 
+    @Override
     public boolean isOpen() {
         return !this.session.isClosed();
     }
 
+    @Override
     public void close() {
         this.session.quit();
     }
 
+    @Override
     public SqlStatementImpl sql(String sql) {
         return new SqlStatementImpl(this.session, sql);
     }
@@ -224,4 +228,5 @@ public class SessionImpl implements Session {
     public MysqlxSession getSession() {
         return this.session;
     }
+
 }

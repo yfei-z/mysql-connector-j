@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2016, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2016, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.x.devapi;
@@ -57,11 +48,12 @@ import com.mysql.cj.xdevapi.Session;
  * Tests for Session client side failover features.
  */
 public class SessionFailoverTest extends DevApiBaseTestCase {
+
     private String testsHost = "";
 
     /**
      * Builds a connection string with the given hosts while setting priorities according to their positions.
-     * 
+     *
      * @param hosts
      *            the hosts list, 1st has priority=100, 2nd has priority=99, and so on
      * @return a single host or a multi-host connection string
@@ -102,7 +94,7 @@ public class SessionFailoverTest extends DevApiBaseTestCase {
 
     /**
      * Assures that failover support doesn't affect single host connections.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -121,7 +113,7 @@ public class SessionFailoverTest extends DevApiBaseTestCase {
 
     /**
      * Tests basic failover while getting a {@link Session} instance.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -153,6 +145,7 @@ public class SessionFailoverTest extends DevApiBaseTestCase {
      * A fake server that counts how many connection attempts were made.
      */
     private class ConnectionsCounterFakeServer implements Callable<Void> {
+
         ExecutorService executor = null;
         ServerSocket serverSocket = null;
         int connectionsCounter = 0;
@@ -197,25 +190,26 @@ public class SessionFailoverTest extends DevApiBaseTestCase {
             }
             return null;
         }
+
     }
 
     /**
      * Tests xdevapi.connect-timeout and connectTimeout functionality.
-     * 
+     *
      * The real socket connect timeout can be revealed only when trying to connect to the unavailable remote host
      * pointed by IP address. Neither localhost IP nor domain names are working, they fail much faster then the timeout
      * is reached.
      * If default 10.77.77.77:37070 doesn't work in a particular testing setup (if the ip address is available)
      * please add this variable to ant call:
      * -Dcom.mysql.cj.testsuite.unavailable.host=unavailable_ip:port
-     * 
+     *
      * @throws Exception
      */
     @Test
     @Disabled("This test doesn't execute deterministically on some systems. It can be run manually in local systems when needed.")
     public void testConnectionTimeout() throws Exception {
         String customFakeHost = System.getProperty(PropertyDefinitions.SYSP_testsuite_unavailable_host);
-        String fakeHost = (customFakeHost != null && customFakeHost.trim().length() != 0) ? customFakeHost : "10.77.77.77:37070";
+        String fakeHost = customFakeHost != null && customFakeHost.trim().length() != 0 ? customFakeHost : "10.77.77.77:37070";
 
         // TS1_1 Create a session to a Server using explicit "xdevapi.connect-timeout" overriding implicit "connectTimeout".
         testConnectionTimeout_assertFailureTimeout(buildConnectionString(fakeHost) + "?" + makeParam(PropertyKey.xdevapiConnectTimeout, "500", true), 500,
@@ -307,4 +301,5 @@ public class SessionFailoverTest extends DevApiBaseTestCase {
         long end = System.currentTimeMillis() - begin;
         assertTrue(end >= expLowLimit && end < expUpLimit, "Expected: " + expLowLimit + ".." + expUpLimit + ". Got " + end);
     }
+
 }

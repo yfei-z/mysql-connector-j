@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -51,6 +42,7 @@ import com.mysql.cj.util.TimeUtil;
  * EscapeProcessor performs all escape code processing as outlined in the JDBC spec by JavaSoft.
  */
 class EscapeProcessor {
+
     private static Map<String, String> JDBC_CONVERT_TO_MYSQL_TYPE_MAP;
 
     static {
@@ -81,7 +73,7 @@ class EscapeProcessor {
 
     /**
      * Escape process one string
-     * 
+     *
      * @param sql
      *            the SQL to escape process.
      * @param connectionTimeZone
@@ -92,14 +84,14 @@ class EscapeProcessor {
      *            flag indicating if server truncates fractional seconds (sql_mode contains TIME_TRUNCATE_FRACTIONAL)
      * @param exceptionInterceptor
      *            exception interceptor
-     * 
+     *
      * @return the SQL after it has been escape processed.
-     * 
+     *
      * @throws SQLException
      *             if error occurs
      */
-    public static final Object escapeSQL(String sql, TimeZone connectionTimeZone, boolean serverSupportsFractionalSecond, boolean serverTruncatesFractionalSecond,
-            ExceptionInterceptor exceptionInterceptor) throws java.sql.SQLException {
+    public static final Object escapeSQL(String sql, TimeZone connectionTimeZone, boolean serverSupportsFractionalSecond,
+            boolean serverTruncatesFractionalSecond, ExceptionInterceptor exceptionInterceptor) throws java.sql.SQLException {
         boolean replaceEscapeSequence = false;
         String escapeSequence = null;
 
@@ -111,7 +103,7 @@ class EscapeProcessor {
          * Short circuit this code if we don't have a matching pair of "{}". - Suggested by Ryan Gustafason
          */
         int beginBrace = sql.indexOf('{');
-        int nextEndBrace = (beginBrace == -1) ? (-1) : sql.indexOf('}', beginBrace);
+        int nextEndBrace = beginBrace == -1 ? -1 : sql.indexOf('}', beginBrace);
 
         if (nextEndBrace == -1) {
             return sql;
@@ -187,7 +179,10 @@ class EscapeProcessor {
                             newSql.append(token); // it's just part of the query, push possible syntax errors onto server's shoulders
                         }
                     } else if (StringUtils.startsWithIgnoreCase(collapsedToken, "{fn")) {
-                        int startPos = token.toLowerCase().indexOf("fn ") + 3;
+                        int startPos = token.toLowerCase().indexOf("fn") + 2;
+                        if (token.charAt(startPos) == ' ') {
+                            startPos++;
+                        }
                         int endPos = token.length() - 1; // no }
 
                         String fnToken = token.substring(startPos, endPos);
@@ -204,7 +199,7 @@ class EscapeProcessor {
                         int startPos = token.indexOf('\'') + 1;
                         int endPos = token.lastIndexOf('\''); // no }
 
-                        if ((startPos == -1) || (endPos == -1)) {
+                        if (startPos == -1 || endPos == -1) {
                             newSql.append(token); // it's just part of the query, push possible syntax errors onto server's shoulders
                         } else {
 
@@ -306,7 +301,7 @@ class EscapeProcessor {
         int startPos = token.indexOf('\'') + 1;
         int endPos = token.lastIndexOf('\''); // no }
 
-        if ((startPos == -1) || (endPos == -1)) {
+        if (startPos == -1 || endPos == -1) {
             newSql.append(token); // it's just part of the query, push possible syntax errors onto server's shoulders
         } else {
 
@@ -346,7 +341,7 @@ class EscapeProcessor {
         int startPos = token.indexOf('\'') + 1;
         int endPos = token.lastIndexOf('\''); // no }
 
-        if ((startPos == -1) || (endPos == -1)) {
+        if (startPos == -1 || endPos == -1) {
             newSql.append(token); // it's just part of the query, push possible syntax errors onto server's shoulders
         } else {
 
@@ -377,7 +372,7 @@ class EscapeProcessor {
 
     /**
      * Re-writes {fn convert (expr, type)} as cast(expr AS type)
-     * 
+     *
      * @param functionToken
      *            token
      * @param exceptionInterceptor
@@ -475,16 +470,15 @@ class EscapeProcessor {
         castRewrite.append(")");
 
         return castRewrite.toString();
-
     }
 
     /**
      * Removes all whitespace from the given String. We use this to make escape
      * token comparison white-space ignorant.
-     * 
+     *
      * @param toCollapse
      *            the string to remove the whitespace from
-     * 
+     *
      * @return a string with _no_ whitespace.
      */
     private static String removeWhitespace(String toCollapse) {
@@ -506,4 +500,5 @@ class EscapeProcessor {
 
         return collapsed.toString();
     }
+
 }

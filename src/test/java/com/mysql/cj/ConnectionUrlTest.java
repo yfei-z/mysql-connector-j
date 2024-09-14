@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2016, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2016, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj;
@@ -77,6 +68,7 @@ import com.mysql.cj.exceptions.InvalidConnectionAttributeException;
 import com.mysql.cj.exceptions.WrongArgumentException;
 
 public class ConnectionUrlTest {
+
     protected static <EX extends Throwable> EX assertThrows(Class<EX> throwable, Callable<?> testRoutine) {
         return assertThrows("", throwable, null, testRoutine);
     }
@@ -113,7 +105,9 @@ public class ConnectionUrlTest {
      * Internal class for generating hundreds of thousands of connection strings.
      */
     private static class ConnectionStringGenerator implements Iterator<String>, Iterable<String> {
+
         enum UrlMode {
+
             SINGLE_HOST(1), OUTER_HOSTS_LIST(2), INNER_HOSTS_LIST(2);
 
             private int hostsCount;
@@ -125,6 +119,7 @@ public class ConnectionUrlTest {
             int getHostsCount() {
                 return this.hostsCount;
             }
+
         }
 
         private static final String[] PROTOCOL = new String[] { "jdbc:mysql:", "mysqlx:" };
@@ -171,7 +166,7 @@ public class ConnectionUrlTest {
 
         /**
          * Create an instance of {@link ConnectionStringGenerator} and initializes internal data for the iterator.
-         * 
+         *
          * @param urlMode
          */
         public ConnectionStringGenerator(UrlMode urlMode) {
@@ -220,7 +215,7 @@ public class ConnectionUrlTest {
 
         /**
          * Increments the counter recursively for each connection string part.
-         * 
+         *
          * @param i
          *            the part where to increment the counter
          * @return false if the counter reaches the end, true otherwise
@@ -239,7 +234,7 @@ public class ConnectionUrlTest {
 
         /**
          * Builds a connection string with the parts corresponding to the current counter position.
-         * 
+         *
          * @return the connection string built from the current counter position
          */
         private String buildConnectionString() {
@@ -286,7 +281,7 @@ public class ConnectionUrlTest {
 
         /**
          * Returns the protocol part (scheme) for the current position.
-         * 
+         *
          * @return the protocol part
          */
         public String getProtocol() {
@@ -296,7 +291,7 @@ public class ConnectionUrlTest {
 
         /**
          * Returns the user info part for the current position and the given host.
-         * 
+         *
          * @param fromHostIndex
          *            the host from where to get user info
          * @return the user info part
@@ -316,7 +311,7 @@ public class ConnectionUrlTest {
 
         /**
          * Returns the host info part for the current position and the given host.
-         * 
+         *
          * @param fromHostIndex
          *            the host from where to get host info
          * @return the host info part
@@ -338,7 +333,7 @@ public class ConnectionUrlTest {
 
         /**
          * Returns the database part for the current position.
-         * 
+         *
          * @return the database part
          */
         public String getDatabase() {
@@ -353,7 +348,7 @@ public class ConnectionUrlTest {
 
         /**
          * Returns the connection parameters part for the current position.
-         * 
+         *
          * @return the connection parameter part
          */
         public String getParams() {
@@ -368,7 +363,7 @@ public class ConnectionUrlTest {
 
         /**
          * Checks if current host info contains the given key & value parameter.
-         * 
+         *
          * @param hostIndex
          *            the host from where the given information will be checked against
          * @param key
@@ -387,7 +382,7 @@ public class ConnectionUrlTest {
 
         /**
          * Returns the number of host specific parameters existing in the current position and the given host.
-         * 
+         *
          * @param hostIndex
          *            the host from where to get the count
          * @return the number of host specific parameters
@@ -404,7 +399,7 @@ public class ConnectionUrlTest {
 
         /**
          * Checks if the current connection properties contain the given key & value.
-         * 
+         *
          * @param key
          *            the key to check
          * @param value
@@ -421,7 +416,7 @@ public class ConnectionUrlTest {
 
         /**
          * Returns the number of connection parameters existing the the current position.
-         * 
+         *
          * @return the number of connection parameters
          */
         public int getParamsCount() {
@@ -434,7 +429,7 @@ public class ConnectionUrlTest {
 
         /**
          * Utility method to URL decode the given string.
-         * 
+         *
          * @param text
          *            the text to decode
          * @return the decoded text
@@ -463,6 +458,7 @@ public class ConnectionUrlTest {
             sb.append(", connectionString: \"").append(buildConnectionString()).append("\"}");
             return sb.toString();
         }
+
     }
 
     /**
@@ -666,7 +662,7 @@ public class ConnectionUrlTest {
 
     /**
      * Tests the {@link ConnectionUrlParser} and {@link ConnectionUrl} with non standard, but accepted, connection strings.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -994,12 +990,15 @@ public class ConnectionUrlTest {
     }
 
     public static class ConnectionPropertiesTest implements ConnectionPropertiesTransform {
+
+        @Override
         public Properties transformProperties(Properties props) {
             if (props.containsKey("stars")) {
                 props.setProperty("stars", props.getProperty("stars") + props.getProperty("stars"));
             }
             return props;
         }
+
     }
 
     /**
@@ -1665,4 +1664,5 @@ public class ConnectionUrlTest {
             assertEquals("sql_mode='IGNORE_SPACE,ANSI',FOREIGN_KEY_CHECKS=0", hi.getHostProperties().get("sessionVariables"));
         }
     }
+
 }

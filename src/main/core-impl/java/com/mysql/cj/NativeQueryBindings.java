@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2017, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2017, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj;
@@ -53,6 +44,7 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -133,7 +125,7 @@ public class NativeQueryBindings implements QueryBindings {
 
         if (this.bindValues != null) {
             for (int i = 0; i < this.bindValues.length; i++) {
-                if ((this.bindValues[i] != null) && this.bindValues[i].isStream()) {
+                if (this.bindValues[i] != null && this.bindValues[i].isStream()) {
                     hadLongData = true;
                 }
                 this.bindValues[i].reset();
@@ -151,28 +143,34 @@ public class NativeQueryBindings implements QueryBindings {
         }
     }
 
+    @Override
     public void checkAllParametersSet() {
         for (int i = 0; i < this.bindValues.length; i++) {
             checkParameterSet(i);
         }
     }
 
+    @Override
     public int getNumberOfExecutions() {
         return this.numberOfExecutions;
     }
 
+    @Override
     public void setNumberOfExecutions(int numberOfExecutions) {
         this.numberOfExecutions = numberOfExecutions;
     }
 
+    @Override
     public boolean isLongParameterSwitchDetected() {
         return this.longParameterSwitchDetected;
     }
 
+    @Override
     public void setLongParameterSwitchDetected(boolean longParameterSwitchDetected) {
         this.longParameterSwitchDetected = longParameterSwitchDetected;
     }
 
+    @Override
     public AtomicBoolean getSendTypesToServer() {
         return this.sendTypesToServer;
     }
@@ -180,13 +178,14 @@ public class NativeQueryBindings implements QueryBindings {
     /**
      * Returns the structure representing the value that (can be)/(is)
      * bound at the given parameter index.
-     * 
+     *
      * @param parameterIndex
      *            0-based
      * @param forLongData
      *            is this for a stream?
      * @return BindValue
      */
+    @Override
     public BindValue getBinding(int parameterIndex, boolean forLongData) {
         if (this.bindValues[parameterIndex] != null && this.bindValues[parameterIndex].isStream() && !forLongData) {
             this.longParameterSwitchDetected = true;
@@ -194,6 +193,7 @@ public class NativeQueryBindings implements QueryBindings {
         return this.bindValues[parameterIndex];
     }
 
+    @Override
     public void setFromBindValue(int parameterIndex, BindValue bv) {
         BindValue binding = getBinding(parameterIndex, false);
         binding.setBinding(bv.getValue(), bv.getMysqlType(), this.numberOfExecutions, this.sendTypesToServer);
@@ -205,7 +205,7 @@ public class NativeQueryBindings implements QueryBindings {
         binding.setScaleOrLength(bv.getScaleOrLength());
     }
 
-    static Map<Class<?>, MysqlType> DEFAULT_MYSQL_TYPES = new HashMap<>();
+    private static final Map<Class<?>, MysqlType> DEFAULT_MYSQL_TYPES = new HashMap<>();
     static {
         DEFAULT_MYSQL_TYPES.put(BigDecimal.class, MysqlType.DECIMAL);
         DEFAULT_MYSQL_TYPES.put(BigInteger.class, MysqlType.BIGINT);
@@ -246,7 +246,6 @@ public class NativeQueryBindings implements QueryBindings {
         BindValue binding = getBinding(parameterIndex, true);
         binding.setBinding(x, MysqlType.TEXT, this.numberOfExecutions, this.sendTypesToServer); // TODO use length to find right TEXT type
         binding.setScaleOrLength(length);
-
     }
 
     @Override
@@ -442,7 +441,6 @@ public class NativeQueryBindings implements QueryBindings {
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar targetCalendar, Field field, MysqlType targetMysqlType) {
-
         if (x == null) {
             setNull(parameterIndex);
             return;
@@ -472,7 +470,7 @@ public class NativeQueryBindings implements QueryBindings {
         MysqlType defaultMysqlType = DEFAULT_MYSQL_TYPES.get(parameterObj.getClass());
         if (defaultMysqlType == null) {
             Optional<MysqlType> mysqlType = DEFAULT_MYSQL_TYPES.entrySet().stream().filter(m -> m.getKey().isAssignableFrom(parameterObj.getClass()))
-                    .map(m -> m.getValue()).findFirst();
+                    .map(Entry::getValue).findFirst();
             if (mysqlType.isPresent()) {
                 defaultMysqlType = mysqlType.get();
             }
@@ -482,10 +480,10 @@ public class NativeQueryBindings implements QueryBindings {
 
     /**
      * Set the value of a parameter using an object; use the java.lang equivalent objects for integral values.
-     * 
+     *
      * <P>
      * The given Java object will be converted to the targetMysqlType before being sent to the database.
-     * 
+     *
      * @param parameterIndex
      *            the first parameter is 1...
      * @param parameterObj
@@ -497,6 +495,7 @@ public class NativeQueryBindings implements QueryBindings {
      *            this is the number of digits after the decimal. For all other
      *            types this value will be ignored.
      */
+    @Override
     public void setObject(int parameterIndex, Object parameterObj, MysqlType targetMysqlType, int scaleOrLength) {
         if (parameterObj == null) {
             setNull(parameterIndex);
@@ -528,7 +527,7 @@ public class NativeQueryBindings implements QueryBindings {
 
     /**
      * Sets the value for the placeholder as a serialized Java object (used by various forms of setObject()
-     * 
+     *
      * @param parameterIndex
      *            parameter index
      * @param parameterObj
@@ -554,8 +553,10 @@ public class NativeQueryBindings implements QueryBindings {
         }
     }
 
+    @Override
     public byte[] getBytesRepresentation(int parameterIndex) {
         byte[] parameterVal = this.bindValues[parameterIndex].getByteValue();
         return parameterVal == null ? null : this.bindValues[parameterIndex].isStream() ? parameterVal : StringUtils.unquoteBytes(parameterVal);
     }
+
 }

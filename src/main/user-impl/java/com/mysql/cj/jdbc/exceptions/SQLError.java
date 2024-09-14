@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc.exceptions;
@@ -49,17 +40,17 @@ import com.mysql.cj.util.Util;
  * SQLError is a utility class that maps MySQL error codes to SQL error codes as is required by the JDBC spec.
  */
 public class SQLError {
+
     /*
      * SQL State Class SQLNonTransientException Subclass 08
      * SQLNonTransientConnectionException 22 SQLDataException 23
      * SQLIntegrityConstraintViolationException N/A
      * SQLInvalidAuthorizationException 42 SQLSyntaxErrorException
-     * 
+     *
      * SQL State Class SQLTransientException Subclass 08
      * SQLTransientConnectionException 40 SQLTransactionRollbackException N/A
      * SQLTimeoutException
      */
-
     public static SQLException createSQLException(String message, String sqlState, ExceptionInterceptor interceptor) {
         return createSQLException(message, sqlState, 0, interceptor);
     }
@@ -155,7 +146,6 @@ public class SQLError {
 
     public static SQLException createCommunicationsException(JdbcConnection conn, PacketSentTimeHolder packetSentTimeHolder,
             PacketReceivedTimeHolder packetReceivedTimeHolder, Exception underlyingException, ExceptionInterceptor interceptor) {
-
         SQLException exToReturn = new CommunicationsException(conn, packetSentTimeHolder, packetReceivedTimeHolder, underlyingException);
 
         if (underlyingException != null) {
@@ -187,7 +177,7 @@ public class SQLError {
 
     /**
      * Run exception through an ExceptionInterceptor chain.
-     * 
+     *
      * @param exInterceptor
      *            exception interceptor
      * @param sqlEx
@@ -207,7 +197,7 @@ public class SQLError {
 
     /**
      * Create a BatchUpdateException.
-     * 
+     *
      * @param underlyingEx
      *            underlying exception
      * @param updateCounts
@@ -228,7 +218,7 @@ public class SQLError {
 
     /**
      * Create a SQLFeatureNotSupportedException or a NotImplemented exception according to the JDBC version in use.
-     * 
+     *
      * @return SQLException
      */
     public static SQLException createSQLFeatureNotSupportedException() {
@@ -237,7 +227,7 @@ public class SQLError {
 
     /**
      * Create a SQLFeatureNotSupportedException or a NotImplemented exception according to the JDBC version in use.
-     * 
+     *
      * @param message
      *            error message
      * @param sqlState
@@ -252,4 +242,5 @@ public class SQLError {
         SQLException newEx = new SQLFeatureNotSupportedException(message, sqlState);
         return runThroughExceptionInterceptor(interceptor, newEx);
     }
+
 }

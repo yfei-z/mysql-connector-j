@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.util;
@@ -33,15 +24,20 @@ package com.mysql.cj.util;
  * EscapeTokenizer breaks up an SQL statement into SQL and escape code parts.
  */
 public class EscapeTokenizer {
-    private static final char CHR_ESCAPE = '\\';
+
+    private static final char CHR_BACKSLASH = '\\';
+    private static final char CHR_SLASH = '/';
     private static final char CHR_SGL_QUOTE = '\'';
     private static final char CHR_DBL_QUOTE = '"';
     private static final char CHR_LF = '\n';
     private static final char CHR_CR = '\r';
-    private static final char CHR_COMMENT = '-';
+    private static final char CHR_DASH = '-';
+    private static final char CHR_HASH = '#';
+    private static final char CHR_STAR = '*';
     private static final char CHR_BEGIN_TOKEN = '{';
     private static final char CHR_END_TOKEN = '}';
     private static final char CHR_VARIABLE = '@';
+    private static final char CHR_SPACE = ' ';
 
     private String source = null;
     private int sourceLength = 0;
@@ -55,7 +51,7 @@ public class EscapeTokenizer {
 
     /**
      * Creates a new EscapeTokenizer object.
-     * 
+     *
      * @param source
      *            the string to tokenize
      */
@@ -67,16 +63,16 @@ public class EscapeTokenizer {
 
     /**
      * Does this tokenizer have more tokens available?
-     * 
+     *
      * @return if this tokenizer has more tokens available
      */
     public synchronized boolean hasMoreTokens() {
-        return (this.pos < this.sourceLength);
+        return this.pos < this.sourceLength;
     }
 
     /**
      * Returns the next token
-     * 
+     *
      * @return the next token.
      */
     public synchronized String nextToken() {
@@ -93,7 +89,7 @@ public class EscapeTokenizer {
             char c = this.source.charAt(this.pos);
 
             // process escape char: (\)
-            if (c == CHR_ESCAPE) {
+            if (c == CHR_BACKSLASH) {
                 tokenBuf.append(c);
                 backslashEscape = !backslashEscape;
                 continue;
@@ -105,7 +101,7 @@ public class EscapeTokenizer {
                 if (this.inQuotes) {
                     if (c == this.quoteChar) {
                         // look ahead for doubled quote
-                        if ((this.pos + 1 < this.sourceLength) && (this.source.charAt(this.pos + 1) == this.quoteChar)) {
+                        if (this.pos + 1 < this.sourceLength && this.source.charAt(this.pos + 1) == this.quoteChar) {
                             tokenBuf.append(c);
                             this.pos++; // consume following char '\'' or '"'
                         } else {
@@ -120,18 +116,49 @@ public class EscapeTokenizer {
             }
 
             // process new line: (\n|\r)
-            if ((c == CHR_LF) || (c == CHR_CR)) {
+            if (c == CHR_LF || c == CHR_CR) {
                 tokenBuf.append(c);
                 backslashEscape = false;
                 continue;
             }
 
             if (!this.inQuotes && !backslashEscape) {
-                // process comments: (--)
-                if (c == CHR_COMMENT) {
+                // process slash-star comments: (/* */)
+                if (c == CHR_SLASH) {
                     tokenBuf.append(c);
-                    // look ahead for double hyphen
-                    if ((this.pos + 1 < this.sourceLength) && (this.source.charAt(this.pos + 1) == CHR_COMMENT)) {
+                    // look ahead for asterisk
+                    if (this.pos + 1 < this.sourceLength && this.source.charAt(this.pos + 1) == CHR_STAR) {
+                        // consume following chars until end of comment
+                        while (++this.pos < this.sourceLength - 1) {
+                            c = this.source.charAt(this.pos);
+                            tokenBuf.append(c);
+                            if (c == CHR_STAR && this.source.charAt(this.pos + 1) == CHR_SLASH) {
+                                tokenBuf.append(CHR_SLASH);
+                                this.pos++;
+                                break;
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                // process hash comment char: (#)
+                if (c == CHR_HASH) {
+                    tokenBuf.append(c);
+                    // consume following chars until new line or end of string
+                    while (++this.pos < this.sourceLength && c != CHR_LF && c != CHR_CR) {
+                        c = this.source.charAt(this.pos);
+                        tokenBuf.append(c);
+                    }
+                    this.pos--;
+                    continue;
+                }
+
+                // process comments: (--)
+                if (c == CHR_DASH) {
+                    tokenBuf.append(c);
+                    // look ahead for double hyphen and a space
+                    if (this.pos + 2 < this.sourceLength && this.source.charAt(this.pos + 1) == CHR_DASH && this.source.charAt(this.pos + 2) == CHR_SPACE) {
                         // consume following chars until new line or end of string
                         while (++this.pos < this.sourceLength && c != CHR_LF && c != CHR_CR) {
                             c = this.source.charAt(this.pos);
@@ -181,10 +208,11 @@ public class EscapeTokenizer {
     /**
      * Returns true if a variable reference was found. Note that this information isn't accurate until finishing to
      * process all tokens from source String. It also can't be used as per token basis.
-     * 
+     *
      * @return true if a variable reference was found.
      */
     public boolean sawVariableUse() {
         return this.sawVariableUse;
     }
+
 }

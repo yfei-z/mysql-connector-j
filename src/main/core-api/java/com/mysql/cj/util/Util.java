@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.util;
@@ -60,6 +51,7 @@ import com.mysql.cj.exceptions.WrongArgumentException;
  * Various utility methods for the driver.
  */
 public class Util {
+
     private static int jvmVersion = 8; // use default base version supported
 
     private static int jvmUpdateNumber = -1;
@@ -103,7 +95,7 @@ public class Util {
 
     /**
      * Checks whether the given server version string is a MySQL Community edition.
-     * 
+     *
      * @param serverVersion
      *            full server version string
      * @return
@@ -115,7 +107,7 @@ public class Util {
 
     /**
      * Checks whether the given server version string is a MySQL Enterprise/Commercial edition.
-     * 
+     *
      * @param serverVersion
      *            full server version string
      * @return
@@ -127,10 +119,10 @@ public class Util {
 
     /**
      * Converts a nested exception into a nicer message.
-     * 
+     *
      * @param ex
      *            the exception to expand into a message.
-     * 
+     *
      * @return
      *         a message containing the exception, the message (if any), and a stacktrace.
      */
@@ -161,7 +153,7 @@ public class Util {
 
     /**
      * Creates an instance of the specified class name through reflection using the given arguments, as long as the class implements the return type specified.
-     * 
+     *
      * @param <T>
      *            The return type of the new instance.
      * @param returnType
@@ -197,10 +189,10 @@ public class Util {
 
     /**
      * Handles constructing new instance with the given constructor and wrapping (or not, as required) the exceptions that could possibly be generated.
-     * 
+     *
      * @param <T>
      *            The type of the new class instance to return.
-     * 
+     *
      * @param ctor
      *            constructor
      * @param args
@@ -256,13 +248,13 @@ public class Util {
             } else if (value1 instanceof Short) {
                 diffMap.put(key, Short.valueOf((short) (((Short) value2).shortValue() - ((Short) value1).shortValue())));
             } else if (value1 instanceof Integer) {
-                diffMap.put(key, Integer.valueOf((((Integer) value2).intValue() - ((Integer) value1).intValue())));
+                diffMap.put(key, Integer.valueOf(((Integer) value2).intValue() - ((Integer) value1).intValue()));
             } else if (value1 instanceof Long) {
-                diffMap.put(key, Long.valueOf((((Long) value2).longValue() - ((Long) value1).longValue())));
+                diffMap.put(key, Long.valueOf(((Long) value2).longValue() - ((Long) value1).longValue()));
             } else if (value1 instanceof Float) {
                 diffMap.put(key, Float.valueOf(((Float) value2).floatValue() - ((Float) value1).floatValue()));
             } else if (value1 instanceof Double) {
-                diffMap.put(key, Double.valueOf((((Double) value2).shortValue() - ((Double) value1).shortValue())));
+                diffMap.put(key, Double.valueOf(((Double) value2).shortValue() - ((Double) value1).shortValue()));
             } else if (value1 instanceof BigDecimal) {
                 diffMap.put(key, ((BigDecimal) value2).subtract((BigDecimal) value1));
             } else if (value1 instanceof BigInteger) {
@@ -288,14 +280,14 @@ public class Util {
 
     /**
      * Recursively checks for interfaces on the given class to determine if it implements a java.sql, javax.sql or com.mysql.cj.jdbc interface.
-     * 
+     *
      * @param clazz
      *            The class to investigate.
      * @return boolean
      */
     public static boolean isJdbcInterface(Class<?> clazz) {
         if (Util.isJdbcInterfaceCache.containsKey(clazz)) {
-            return (Util.isJdbcInterfaceCache.get(clazz));
+            return Util.isJdbcInterfaceCache.get(clazz);
         }
 
         if (clazz.isInterface()) {
@@ -330,7 +322,7 @@ public class Util {
 
     /**
      * Check if the package name is a known JDBC package.
-     * 
+     *
      * @param packageName
      *            The package name to check.
      * @return boolean
@@ -346,7 +338,7 @@ public class Util {
     /**
      * Retrieves a list with all interfaces implemented by the given class. If possible gets this information from a cache instead of navigating through the
      * object hierarchy. Results are stored in a cache for future reference.
-     * 
+     *
      * @param clazz
      *            The class from which the interface list will be retrieved.
      * @return
@@ -375,7 +367,7 @@ public class Util {
 
     /**
      * Computes the number of seconds elapsed since the given time in milliseconds.
-     * 
+     *
      * @param timeInMillis
      *            The past instant in milliseconds.
      * @return
@@ -387,7 +379,7 @@ public class Util {
 
     /**
      * Converts long to int, truncating to maximum/minimum value if needed.
-     * 
+     *
      * @param longValue
      *            long value
      * @return int value
@@ -398,7 +390,7 @@ public class Util {
 
     /**
      * Converts long[] to int[], truncating to maximum/minimum value if needed.
-     * 
+     *
      * @param longArray
      *            log values
      * @return int values
@@ -415,7 +407,7 @@ public class Util {
     /**
      * Returns the package name of the given class.
      * Using clazz.getPackage().getName() is not an alternative because under some class loaders the method getPackage() just returns null.
-     * 
+     *
      * @param clazz
      *            the Class from which to get the package name
      * @return the package name
@@ -431,7 +423,7 @@ public class Util {
 
     /**
      * Checks if the JVM is running on Windows Operating System.
-     * 
+     *
      * @return
      *         <code>true</code> if currently running on Windows, <code>false</code> otherwise.
      */
@@ -442,16 +434,16 @@ public class Util {
     /**
      * Reads length bytes from reader into buf. Blocks until enough input is
      * available
-     * 
+     *
      * @param reader
      *            {@link Reader}
      * @param buf
      *            char array to read into
      * @param length
      *            number of chars to read
-     * 
+     *
      * @return the actual number of chars read
-     * 
+     *
      * @throws IOException
      *             if an error occurs
      */
@@ -486,4 +478,5 @@ public class Util {
             throw ExceptionFactory.createException(Messages.getString("Util.5") + ex.getClass().getName(), exceptionInterceptor);
         }
     }
+
 }

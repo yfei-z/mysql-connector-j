@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc.ha;
@@ -58,6 +49,7 @@ import com.mysql.cj.jdbc.exceptions.SQLError;
  * read-only, and use replica(s) when the connection is read-only.
  */
 public class ReplicationConnectionProxy extends MultiHostConnectionProxy implements PingTarget {
+
     private ReplicationConnection thisAsReplicationConnection;
 
     protected boolean enableJMX = false;
@@ -78,7 +70,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Static factory to create {@link ReplicationConnection} instances.
-     * 
+     *
      * @param connectionUrl
      *            The connection URL containing the hosts in a replication setup.
      * @return A {@link ReplicationConnection} proxy.
@@ -94,7 +86,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
     /**
      * Creates a proxy for java.sql.Connection that routes requests to a load-balanced connection of source servers or a load-balanced connection of replica
      * servers. Each sub-connection is created with its own set of independent properties.
-     * 
+     *
      * @param connectionUrl
      *            The connection URL containing the hosts in a replication setup.
      * @throws SQLException
@@ -201,7 +193,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Wraps this object with a new replication Connection instance.
-     * 
+     *
      * @return
      *         The connection object instance that wraps 'this'.
      */
@@ -212,7 +204,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Propagates the connection proxy down through all live connections.
-     * 
+     *
      * @param proxyConn
      *            The top level connection in the multi-host connections chain.
      */
@@ -228,7 +220,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Has no use in replication connections. Always return <code>false</code>.
-     * 
+     *
      * @param t
      *            The Exception instance to check.
      */
@@ -247,7 +239,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Checks if current connection is the replicas l/b connection.
-     * 
+     *
      * @return true if current connection is the replicas l/b connection
      */
     public boolean isReplicasConnection() {
@@ -256,7 +248,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #isReplicasConnection()} instead.
-     * 
+     *
      * @return true if it's a replicas connection
      * @deprecated
      */
@@ -357,7 +349,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
      * Checks if this connection is in a state capable to invoke the provided method. If the connection is in an inconsistent state, i.e. it has no hosts for
      * both sub-connections, then throw an invalid transaction state exception. Nevertheless, the methods defined in the ReplicationConnection interface will be
      * allowed as they are the only way to leave from an empty hosts lists situation.
-     * 
+     *
      * @param method
      *            method
      * @throws Throwable
@@ -526,7 +518,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #getSourceConnection()} instead.
-     * 
+     *
      * @return {@link JdbcConnection}
      * @deprecated
      */
@@ -554,7 +546,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #promoteReplicaToSource(String)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @throws SQLException
@@ -571,7 +563,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #removeSourceHost(String)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @throws SQLException
@@ -588,7 +580,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #removeSourceHost(String, boolean)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @param waitUntilNotInUse
@@ -636,7 +628,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #removeSourceHost(String, boolean, boolean)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @param waitUntilNotInUse
@@ -660,7 +652,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #isHostSource(String)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @return true if it's a source host
@@ -677,7 +669,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #getReplicasConnection()} instead.
-     * 
+     *
      * @return {@link JdbcConnection}
      * @deprecated
      */
@@ -702,7 +694,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #addReplicaHost(String)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @throws SQLException
@@ -719,7 +711,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #removeReplica(String)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @throws SQLException
@@ -764,7 +756,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #removeReplica(String, boolean)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @param closeGently
@@ -786,7 +778,7 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
 
     /**
      * Use {@link #isHostReplica(String)} instead.
-     * 
+     *
      * @param hostPortPair
      *            host:port
      * @return true if it's a replica
@@ -863,4 +855,5 @@ public class ReplicationConnectionProxy extends MultiHostConnectionProxy impleme
     private ReplicationConnectionUrl getConnectionUrl() {
         return (ReplicationConnectionUrl) this.connectionUrl;
     }
+
 }

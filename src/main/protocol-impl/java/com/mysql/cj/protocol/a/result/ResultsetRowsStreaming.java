@@ -1,35 +1,27 @@
 /*
- * Copyright (c) 2002, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.a.result;
 
 import com.mysql.cj.Messages;
+import com.mysql.cj.Session;
 import com.mysql.cj.conf.PropertyKey;
 import com.mysql.cj.exceptions.CJException;
 import com.mysql.cj.exceptions.ExceptionFactory;
@@ -48,6 +40,10 @@ import com.mysql.cj.protocol.a.NativePacketPayload;
 import com.mysql.cj.protocol.a.NativeProtocol;
 import com.mysql.cj.protocol.a.TextRowFactory;
 import com.mysql.cj.result.Row;
+import com.mysql.cj.telemetry.TelemetryAttribute;
+import com.mysql.cj.telemetry.TelemetryScope;
+import com.mysql.cj.telemetry.TelemetrySpan;
+import com.mysql.cj.telemetry.TelemetrySpanName;
 import com.mysql.cj.util.Util;
 
 /**
@@ -55,7 +51,7 @@ import com.mysql.cj.util.Util;
  * input stream only on {@link #next()} call. Consumed rows are not cached thus
  * we only stream result sets when they are forward-only, read-only, and the
  * fetch size has been set to Integer.MIN_VALUE (rows are read one by one).
- * 
+ *
  * @param <T>
  *            ProtocolEntity type
  */
@@ -81,7 +77,7 @@ public class ResultsetRowsStreaming<T extends ProtocolEntity> extends AbstractRe
 
     /**
      * Creates a new RowDataDynamic object.
-     * 
+     *
      * @param io
      *            the connection to MySQL that this data is coming from
      * @param columnDefinition
@@ -105,7 +101,6 @@ public class ResultsetRowsStreaming<T extends ProtocolEntity> extends AbstractRe
 
     @Override
     public void close() {
-
         Object mutex = this.owner != null && this.owner.getSyncMutex() != null ? this.owner.getSyncMutex() : this;
 
         boolean hadMore = false;
@@ -124,15 +119,34 @@ public class ResultsetRowsStreaming<T extends ProtocolEntity> extends AbstractRe
 
             if (!this.protocol.getPropertySet().getBooleanProperty(PropertyKey.clobberStreamingResults).getValue()
                     && this.protocol.getPropertySet().getIntegerProperty(PropertyKey.netTimeoutForStreamingResults).getValue() > 0) {
-                int oldValue = this.protocol.getServerSession().getServerVariable("net_write_timeout", 60);
+                Session session = this.owner.getSession();
+                TelemetrySpan span = session.getTelemetryHandler().startSpan(TelemetrySpanName.SET_VARIABLE, "net_write_timeout");
+                try (TelemetryScope scope = span.makeCurrent()) {
+                    span.setAttribute(TelemetryAttribute.DB_NAME, session.getHostInfo().getDatabase());
+                    span.setAttribute(TelemetryAttribute.DB_OPERATION, TelemetryAttribute.OPERATION_SET);
+                    span.setAttribute(TelemetryAttribute.DB_STATEMENT, TelemetryAttribute.OPERATION_SET + TelemetryAttribute.STATEMENT_SUFFIX);
+                    span.setAttribute(TelemetryAttribute.DB_SYSTEM, TelemetryAttribute.DB_SYSTEM_DEFAULT);
+                    span.setAttribute(TelemetryAttribute.DB_USER, session.getHostInfo().getUser());
+                    span.setAttribute(TelemetryAttribute.THREAD_ID, Thread.currentThread().getId());
+                    span.setAttribute(TelemetryAttribute.THREAD_NAME, Thread.currentThread().getName());
 
-                this.protocol.clearInputStream();
+                    int oldValue = this.protocol.getServerSession().getServerVariable("net_write_timeout", 60);
 
-                try {
-                    this.protocol.sendCommand(this.commandBuilder.buildComQuery(this.protocol.getSharedSendPacket(), "SET net_write_timeout=" + oldValue,
-                            this.protocol.getPropertySet().getStringProperty(PropertyKey.characterEncoding).getValue()), false, 0);
-                } catch (Exception ex) {
-                    throw ExceptionFactory.createException(ex.getMessage(), ex, this.exceptionInterceptor);
+                    this.protocol.clearInputStream();
+
+                    try {
+                        this.protocol.sendCommand(
+                                this.commandBuilder.buildComQuery(this.protocol.getSharedSendPacket(), session, "SET net_write_timeout=" + oldValue,
+                                        this.protocol.getPropertySet().getStringProperty(PropertyKey.characterEncoding).getValue()),
+                                false, 0);
+                    } catch (Exception ex) {
+                        throw ExceptionFactory.createException(ex.getMessage(), ex, this.exceptionInterceptor);
+                    }
+                } catch (Throwable t) {
+                    span.setError(t);
+                    throw t;
+                } finally {
+                    span.end();
                 }
             }
 
@@ -151,7 +165,7 @@ public class ResultsetRowsStreaming<T extends ProtocolEntity> extends AbstractRe
 
     @Override
     public boolean hasNext() {
-        boolean hasNext = (this.nextRow != null);
+        boolean hasNext = this.nextRow != null;
 
         if (!hasNext && !this.streamerClosed) {
             this.protocol.unsetStreamingData(this);
@@ -244,26 +258,32 @@ public class ResultsetRowsStreaming<T extends ProtocolEntity> extends AbstractRe
         }
     }
 
+    @Override
     public int getPosition() {
         throw ExceptionFactory.createException(Messages.getString("ResultSet.ForwardOnly"));
     }
 
+    @Override
     public void afterLast() {
         throw ExceptionFactory.createException(Messages.getString("ResultSet.ForwardOnly"));
     }
 
+    @Override
     public void beforeFirst() {
         throw ExceptionFactory.createException(Messages.getString("ResultSet.ForwardOnly"));
     }
 
+    @Override
     public void beforeLast() {
         throw ExceptionFactory.createException(Messages.getString("ResultSet.ForwardOnly"));
     }
 
+    @Override
     public void moveRowRelative(int rows) {
         throw ExceptionFactory.createException(Messages.getString("ResultSet.ForwardOnly"));
     }
 
+    @Override
     public void setCurrentRow(int rowNumber) {
         throw ExceptionFactory.createException(Messages.getString("ResultSet.ForwardOnly"));
     }

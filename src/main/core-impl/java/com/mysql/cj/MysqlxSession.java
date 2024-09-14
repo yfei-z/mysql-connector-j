@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj;
@@ -94,13 +85,14 @@ public class MysqlxSession extends CoreSession {
         super.quit();
     }
 
+    @Override
     public boolean isClosed() {
         return !((XProtocol) this.protocol).isOpen();
     }
 
     /**
      * Check if current session is using a MySQL server that supports prepared statements.
-     * 
+     *
      * @return
      *         {@code true} if the MySQL server in use supports prepared statements
      */
@@ -110,7 +102,7 @@ public class MysqlxSession extends CoreSession {
 
     /**
      * Check if enough statements were executed in the underlying MySQL server so that another prepare statement attempt should be done.
-     * 
+     *
      * @return
      *         {@code true} if enough executions have been done since last time a prepared statement failed to be prepared
      */
@@ -120,7 +112,7 @@ public class MysqlxSession extends CoreSession {
 
     /**
      * Return an id to be used as a client-managed prepared statement id.
-     * 
+     *
      * @param preparableStatement
      *            {@link PreparableStatement}
      * @return a new identifier to be used as prepared statement id
@@ -131,7 +123,7 @@ public class MysqlxSession extends CoreSession {
 
     /**
      * Free a prepared statement id so that it can be reused.
-     * 
+     *
      * @param preparedStatementId
      *            the prepared statement id to release
      */
@@ -141,7 +133,7 @@ public class MysqlxSession extends CoreSession {
 
     /**
      * Propagate to the underlying protocol instance that preparing a statement on the connected server failed.
-     * 
+     *
      * @param preparedStatementId
      *            the id of the prepared statement that failed to be prepared
      * @param e
@@ -153,6 +145,7 @@ public class MysqlxSession extends CoreSession {
         return ((XProtocol) this.protocol).failedPreparingStatement(preparedStatementId, e);
     }
 
+    @Override
     public <M extends Message, R, RES> RES query(M message, Predicate<Row> rowFilter, Function<Row, R> rowMapper, Collector<R, ?, RES> collector) {
         this.protocol.send(message, 0);
         ColumnDefinition metadata = this.protocol.readMetadata();
@@ -166,11 +159,14 @@ public class MysqlxSession extends CoreSession {
         return result;
     }
 
+    @Override
     public <M extends Message, R extends QueryResult> R query(M message, ResultBuilder<R> resultBuilder) {
         return ((XProtocol) this.protocol).query(message, resultBuilder);
     }
 
+    @Override
     public <M extends Message, R extends QueryResult> CompletableFuture<R> queryAsync(M message, ResultBuilder<R> resultBuilder) {
         return ((XProtocol) this.protocol).queryAsync(message, resultBuilder);
     }
+
 }

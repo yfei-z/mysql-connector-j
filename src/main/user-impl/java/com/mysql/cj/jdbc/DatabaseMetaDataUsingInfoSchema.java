@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2005, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2005, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -411,26 +402,25 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
                 pStmt.close();
             }
         }
-
     }
 
     private String generateOptionalRefContraintsJoin() {
-        return ("JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS R ON (R.CONSTRAINT_NAME = B.CONSTRAINT_NAME "
-                + "AND R.TABLE_NAME = B.TABLE_NAME AND R.CONSTRAINT_SCHEMA = B.TABLE_SCHEMA) ");
+        return "JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS R ON (R.CONSTRAINT_NAME = B.CONSTRAINT_NAME "
+                + "AND R.TABLE_NAME = B.TABLE_NAME AND R.CONSTRAINT_SCHEMA = B.TABLE_SCHEMA) ";
     }
 
     private String generateDeleteRuleClause() {
-        return ("CASE WHEN R.DELETE_RULE='CASCADE' THEN " + String.valueOf(importedKeyCascade) + " WHEN R.DELETE_RULE='SET NULL' THEN "
+        return "CASE WHEN R.DELETE_RULE='CASCADE' THEN " + String.valueOf(importedKeyCascade) + " WHEN R.DELETE_RULE='SET NULL' THEN "
                 + String.valueOf(importedKeySetNull) + " WHEN R.DELETE_RULE='SET DEFAULT' THEN " + String.valueOf(importedKeySetDefault)
                 + " WHEN R.DELETE_RULE='RESTRICT' THEN " + String.valueOf(importedKeyRestrict) + " WHEN R.DELETE_RULE='NO ACTION' THEN "
-                + String.valueOf(importedKeyRestrict) + " ELSE " + String.valueOf(importedKeyRestrict) + " END ");
+                + String.valueOf(importedKeyRestrict) + " ELSE " + String.valueOf(importedKeyRestrict) + " END ";
     }
 
     private String generateUpdateRuleClause() {
-        return ("CASE WHEN R.UPDATE_RULE='CASCADE' THEN " + String.valueOf(importedKeyCascade) + " WHEN R.UPDATE_RULE='SET NULL' THEN "
+        return "CASE WHEN R.UPDATE_RULE='CASCADE' THEN " + String.valueOf(importedKeyCascade) + " WHEN R.UPDATE_RULE='SET NULL' THEN "
                 + String.valueOf(importedKeySetNull) + " WHEN R.UPDATE_RULE='SET DEFAULT' THEN " + String.valueOf(importedKeySetDefault)
                 + " WHEN R.UPDATE_RULE='RESTRICT' THEN " + String.valueOf(importedKeyRestrict) + " WHEN R.UPDATE_RULE='NO ACTION' THEN "
-                + String.valueOf(importedKeyRestrict) + " ELSE " + String.valueOf(importedKeyRestrict) + " END ");
+                + String.valueOf(importedKeyRestrict) + " ELSE " + String.valueOf(importedKeyRestrict) + " END ";
     }
 
     @Override
@@ -457,7 +447,7 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
         sqlBuf.append(" AS DELETE_RULE, A.CONSTRAINT_NAME AS FK_NAME, R.UNIQUE_CONSTRAINT_NAME AS PK_NAME,");
         sqlBuf.append(importedKeyNotDeferrable);
         sqlBuf.append(" AS DEFERRABILITY FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE A");
-        sqlBuf.append(" JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS B USING (CONSTRAINT_NAME, TABLE_NAME) ");
+        sqlBuf.append(" JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS B USING (CONSTRAINT_SCHEMA, CONSTRAINT_NAME, TABLE_NAME) ");
         sqlBuf.append(generateOptionalRefContraintsJoin());
         sqlBuf.append("WHERE B.CONSTRAINT_TYPE = 'FOREIGN KEY'");
         if (db != null) {
@@ -579,7 +569,6 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
 
     @Override
     public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern) throws SQLException {
-
         String db = getDatabase(catalog, schemaPattern);
 
         db = this.pedantic ? db : StringUtils.unQuoteIdentifier(db, this.quotedId);
@@ -644,7 +633,6 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
 
     @Override
     public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern) throws SQLException {
-
         String db = getDatabase(catalog, schemaPattern);
 
         db = this.pedantic ? db : StringUtils.unQuoteIdentifier(db, this.quotedId);
@@ -943,7 +931,6 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
 
     @Override
     public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
-
         String db = getDatabase(catalog, schemaPattern);
 
         db = this.pedantic ? db : StringUtils.unQuoteIdentifier(db, this.quotedId);
@@ -1094,10 +1081,10 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
 
     /**
      * Getter to DatabaseMetaData.function* constants.
-     * 
+     *
      * @param constant
      *            the constant id from DatabaseMetaData fields to return.
-     * 
+     *
      * @return one of the java.sql.DatabaseMetaData#function* fields.
      */
     protected int getFunctionConstant(FunctionConstant constant) {
@@ -1127,7 +1114,6 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
 
     @Override
     public java.sql.ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
-
         String db = getDatabase(catalog, schemaPattern);
 
         db = this.pedantic ? db : StringUtils.unQuoteIdentifier(db, this.quotedId);
@@ -1206,7 +1192,6 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
     }
 
     private final void appendJdbcTypeMappingQuery(StringBuilder buf, String mysqlTypeColumnName, String fullMysqlTypeColumnName) {
-
         buf.append("CASE ");
         for (MysqlType mysqlType : MysqlType.values()) {
 
@@ -1253,7 +1238,6 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
 
         buf.append(" ELSE 1111");
         buf.append(" END ");
-
     }
 
     @Override
@@ -1285,4 +1269,5 @@ public class DatabaseMetaDataUsingInfoSchema extends DatabaseMetaData {
         // TODO Implement with I_S
         return super.getBestRowIdentifier(catalog, schema, table, scope, nullable);
     }
+
 }

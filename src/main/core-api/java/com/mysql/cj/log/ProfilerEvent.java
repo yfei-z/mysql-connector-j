@@ -1,35 +1,27 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.log;
 
 public interface ProfilerEvent {
+
     /**
      * Profiler event for usage advisor
      */
@@ -72,84 +64,84 @@ public interface ProfilerEvent {
 
     /**
      * Returns the event type
-     * 
+     *
      * @return the event type
      */
     byte getEventType();
 
     /**
      * Returns the host name the event occurred on.
-     * 
+     *
      * @return host name
      */
     String getHostName();
 
     /**
      * Returns the database the event occurred on.
-     * 
+     *
      * @return the database in use
      */
     String getDatabase();
 
     /**
      * Returns the id of the associated connection (-1 for none).
-     * 
+     *
      * @return the connection in use
      */
     long getConnectionId();
 
     /**
      * Returns the id of the associated statement (-1 for none).
-     * 
+     *
      * @return the statement in use
      */
     int getStatementId();
 
     /**
      * Returns the id of the associated result set (-1 for none).
-     * 
+     *
      * @return the result set in use
      */
     int getResultSetId();
 
     /**
      * Returns the time (in System.currentTimeMillis() form) when this event was created.
-     * 
+     *
      * @return the time this event was created
      */
     long getEventCreationTime();
 
     /**
      * Returns the duration of the event in milliseconds
-     * 
+     *
      * @return the duration of the event in milliseconds
      */
     long getEventDuration();
 
     /**
      * Returns the units for getEventDuration()
-     * 
+     *
      * @return name of duration units
      */
     String getDurationUnits();
 
     /**
      * Returns the description of where the event was created.
-     * 
+     *
      * @return a description of where this event was created.
      */
     String getEventCreationPointAsString();
 
     /**
      * Returns the optional message for this event
-     * 
+     *
      * @return the message stored in this event
      */
     String getMessage();
 
     /**
      * Creates a binary representation of this event.
-     * 
+     *
      * @return a binary representation of this event
      */
     byte[] pack();

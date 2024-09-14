@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2016, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2016, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.conf;
@@ -47,6 +38,7 @@ import java.util.Properties;
  * </ul>
  */
 public class HostInfo implements DatabaseUrlContainer {
+
     public static final int NO_PORT = -1;
     private static final String HOST_PORT_SEPARATOR = ":";
 
@@ -66,7 +58,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Constructs a {@link HostInfo} instance initialized with the provided host, port and user info.
-     * 
+     *
      * @param url
      *            a reference to the original database URL that produced this host info
      * @param host
@@ -84,7 +76,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Constructs a {@link HostInfo} instance initialized with the provided host, port, user, password and connection arguments.
-     * 
+     *
      * @param url
      *            a reference to the original database URL that produced this host info
      * @param host
@@ -111,7 +103,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns the host.
-     * 
+     *
      * @return the host
      */
     public String getHost() {
@@ -120,7 +112,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns the port.
-     * 
+     *
      * @return the port
      */
     public int getPort() {
@@ -129,7 +121,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns a host:port representation of this host.
-     * 
+     *
      * @return the host:port representation of this host
      */
     public String getHostPortPair() {
@@ -138,7 +130,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns the user name.
-     * 
+     *
      * @return the user name
      */
     public String getUser() {
@@ -147,7 +139,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns the password.
-     * 
+     *
      * @return the password
      */
     public String getPassword() {
@@ -156,7 +148,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns the properties specific to this host.
-     * 
+     *
      * @return this host specific properties
      */
     public Map<String, String> getHostProperties() {
@@ -165,10 +157,10 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns the connection argument for the given key.
-     * 
+     *
      * @param key
      *            key
-     * 
+     *
      * @return the connection argument for the given key
      */
     public String getProperty(String key) {
@@ -177,7 +169,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Shortcut to the database connection argument.
-     * 
+     *
      * @return the database name
      */
     public String getDatabase() {
@@ -188,7 +180,7 @@ public class HostInfo implements DatabaseUrlContainer {
     /**
      * Exposes this host info as a single properties instance. The values for host, port, user and password are added to the properties map with their standard
      * keys.
-     * 
+     *
      * @return a {@link Properties} instance containing the full host information.
      */
     public Properties exposeAsProperties() {
@@ -207,7 +199,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns the original database URL that produced this host info.
-     * 
+     *
      * @return the original database URL
      */
     @Override
@@ -217,7 +209,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Checks if this {@link HostInfo} has the same host and port pair as the given {@link HostInfo}.
-     * 
+     *
      * @param hi
      *            the {@link HostInfo} to compare with.
      * @return
@@ -229,7 +221,7 @@ public class HostInfo implements DatabaseUrlContainer {
 
     /**
      * Returns a string representation of this object.
-     * 
+     *
      * @return a string representation of this object
      */
     @Override
@@ -238,4 +230,5 @@ public class HostInfo implements DatabaseUrlContainer {
         asStr.append(String.format(" :: {host: \"%s\", port: %d, hostProperties: %s}", this.host, this.port, this.hostProperties));
         return asStr.toString();
     }
+
 }

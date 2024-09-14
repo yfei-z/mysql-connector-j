@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package instrumentation;
@@ -96,7 +87,6 @@ public class TranslateExceptions {
     private static boolean verbose = false;
 
     public static void main(String[] args) throws Exception {
-
         System.out.println("Applying TranslateExceptions.");
 
         verbose = "true".equalsIgnoreCase(args[1]);
@@ -193,7 +183,7 @@ public class TranslateExceptions {
         clazz.writeFile(args[0]);
 
         /*
-         * 
+         *
          * java.sql.Connection extends java.sql.Wrapper
          * ----> com.mysql.cj.jdbc.JdbcConnection extends java.sql.Connection, MysqlConnection
          * ----------> com.mysql.cj.jdbc.ConnectionImpl
@@ -300,14 +290,14 @@ public class TranslateExceptions {
         catchRuntimeException(clazz, clazz.getDeclaredMethod("toString", new CtClass[] {}), EXCEPTION_INTERCEPTOR_GETTER);
         catchRuntimeException(clazz, clazz.getDeclaredMethod("checkBounds", new CtClass[] { CtClass.intType, CtClass.intType }), EXCEPTION_INTERCEPTOR_GETTER);
         catchRuntimeException(clazz, clazz.getDeclaredMethod("checkReadOnlySafeStatement", new CtClass[] {}), EXCEPTION_INTERCEPTOR_GETTER);
-        catchRuntimeException(clazz, clazz.getDeclaredMethod("executeBatchWithMultiValuesClause", new CtClass[] { CtClass.intType }),
+        catchRuntimeException(clazz, clazz.getDeclaredMethod("executeBatchWithMultiValuesClause", new CtClass[] { CtClass.longType }),
                 EXCEPTION_INTERCEPTOR_GETTER);
-        catchRuntimeException(clazz, clazz.getDeclaredMethod("executeBatchSerially", new CtClass[] { CtClass.intType }), EXCEPTION_INTERCEPTOR_GETTER);
+        catchRuntimeException(clazz, clazz.getDeclaredMethod("executeBatchSerially", new CtClass[] { CtClass.longType }), EXCEPTION_INTERCEPTOR_GETTER);
         catchRuntimeException(clazz,
                 clazz.getDeclaredMethod("executeInternal",
                         new CtClass[] { CtClass.intType, ctMessageBody, CtClass.booleanType, CtClass.booleanType, ctColumnDefinition, CtClass.booleanType }),
                 EXCEPTION_INTERCEPTOR_GETTER);
-        catchRuntimeException(clazz, clazz.getDeclaredMethod("executePreparedBatchAsMultiStatement", new CtClass[] { CtClass.intType }),
+        catchRuntimeException(clazz, clazz.getDeclaredMethod("executePreparedBatchAsMultiStatement", new CtClass[] { CtClass.longType }),
                 EXCEPTION_INTERCEPTOR_GETTER);
         catchRuntimeException(clazz, clazz.getDeclaredMethod("executeUpdateInternal", new CtClass[] { CtClass.booleanType, CtClass.booleanType }),
                 EXCEPTION_INTERCEPTOR_GETTER);
@@ -392,7 +382,7 @@ public class TranslateExceptions {
         catchRuntimeException(clazz, clazz.getDeclaredMethod("doPingInstead", new CtClass[] {}), EXCEPTION_INTERCEPTOR_GETTER);
         catchRuntimeException(clazz, clazz.getDeclaredMethod("executeInternal", new CtClass[] { ctString, CtClass.booleanType }), EXCEPTION_INTERCEPTOR_GETTER);
         catchRuntimeException(clazz,
-                clazz.getDeclaredMethod("executeBatchUsingMultiQueries", new CtClass[] { CtClass.booleanType, CtClass.intType, CtClass.intType }),
+                clazz.getDeclaredMethod("executeBatchUsingMultiQueries", new CtClass[] { CtClass.booleanType, CtClass.intType, CtClass.longType }),
                 EXCEPTION_INTERCEPTOR_GETTER);
         catchRuntimeException(clazz, clazz.getDeclaredMethod("executeUpdateInternal", new CtClass[] { ctString, CtClass.booleanType, CtClass.booleanType }),
                 EXCEPTION_INTERCEPTOR_GETTER);
@@ -542,7 +532,7 @@ public class TranslateExceptions {
 
         /*
          * These classes have no implementations in c/J:
-         * 
+         *
          * java.sql.Array
          * java.sql.BatchUpdateException
          * java.sql.ClientInfoStatus
@@ -570,7 +560,7 @@ public class TranslateExceptions {
          * java.sql.Time
          * java.sql.Timestamp
          * java.sql.Types
-         * 
+         *
          * javax.sql.CommonDataSource
          * javax.sql.ConnectionEvent
          * javax.sql.ConnectionEventListener
@@ -583,7 +573,7 @@ public class TranslateExceptions {
          * javax.sql.RowSetWriter
          * javax.sql.StatementEvent
          * javax.sql.StatementEventListener
-         * 
+         *
          * javax.sql.rowset.BaseRowSet
          * javax.sql.rowset.CachedRowSet
          * javax.sql.rowset.FilteredRowSet
@@ -596,7 +586,7 @@ public class TranslateExceptions {
          * javax.sql.rowset.RowSetProvider
          * javax.sql.rowset.RowSetWarning
          * javax.sql.rowset.WebRowSet
-         * 
+         *
          * javax.sql.rowset.serial.SerialArray
          * javax.sql.rowset.serial.SerialBlob
          * javax.sql.rowset.serial.SerialClob
@@ -607,7 +597,7 @@ public class TranslateExceptions {
          * javax.sql.rowset.serial.SerialStruct
          * javax.sql.rowset.serial.SQLInputImpl
          * javax.sql.rowset.serial.SQLOutputImpl
-         * 
+         *
          * javax.sql.rowset.spi.SyncFactory
          * javax.sql.rowset.spi.SyncFactoryException
          * javax.sql.rowset.spi.SyncProvider
@@ -625,7 +615,7 @@ public class TranslateExceptions {
 
     /**
      * Instruments methods of cjClazz defined in jdbcClass.
-     * 
+     *
      * @param cjClazz
      *            CtClass to be instrumented.
      * @param jdbcClass
@@ -682,7 +672,6 @@ public class TranslateExceptions {
             }
             sysOutPrintln("");
         }
-
     }
 
     private static void catchRuntimeException(CtClass clazz, CtMethod m, String exceptionInterceptorStr) throws Exception {
@@ -715,7 +704,7 @@ public class TranslateExceptions {
                 return true;
             }
         } else {
-            processed.put(fileName, new LinkedList<CtMethod>());
+            processed.put(fileName, new LinkedList<>());
         }
         return false;
     }

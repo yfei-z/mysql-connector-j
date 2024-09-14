@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.a;
@@ -99,7 +90,7 @@ public class NativeCapabilities implements ServerCapabilities {
 
             this.serverHasFracSecsSupport = this.serverVersion.meetsMinimum(new ServerVersion(5, 6, 4));
         } catch (Throwable t) {
-            // Chances are that the other end is talking X Protocol instead of MySQL protocol. 
+            // Chances are that the other end is talking X Protocol instead of MySQL protocol.
             // X Protocol message type byte (NOTICE = 11) coincides with MySQL protocol version byte in the Initial Handshake Packet.
             if (this.protocolVersion == 11 && IndexOutOfBoundsException.class.isAssignableFrom(t.getClass())) {
                 throw ExceptionFactory.createException(UnableToConnectException.class,
@@ -124,14 +115,17 @@ public class NativeCapabilities implements ServerCapabilities {
         this.capabilityFlags = capabilityFlags;
     }
 
+    @Override
     public ServerVersion getServerVersion() {
         return this.serverVersion;
     }
 
+    @Override
     public long getThreadId() {
         return this.threadId;
     }
 
+    @Override
     public void setThreadId(long threadId) {
         this.threadId = threadId;
     }
@@ -141,9 +135,10 @@ public class NativeCapabilities implements ServerCapabilities {
     }
 
     /**
-     * 
+     *
      * @return Collation index which server provided in handshake greeting packet
      */
+    @Override
     public int getServerDefaultCollationIndex() {
         return this.serverDefaultCollationIndex;
     }
@@ -160,4 +155,5 @@ public class NativeCapabilities implements ServerCapabilities {
     public boolean serverSupportsFracSecs() {
         return this.serverHasFracSecsSupport;
     }
+
 }

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.a;
@@ -44,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import com.mysql.cj.protocol.MessageSender;
 
 public class CompressedPacketSenderTest extends PacketSenderTestBase {
+
     private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private MessageSender<NativePacketPayload> sender = new CompressedPacketSender(new BufferedOutputStream(this.outputStream));
 
@@ -51,6 +43,7 @@ public class CompressedPacketSenderTest extends PacketSenderTestBase {
      * Test utility to transform a buffer containing compressed packets into a sequence of payloads.
      */
     static class CompressedPackets {
+
         byte[] packetData;
         private ByteArrayOutputStream decompressedStream;
 
@@ -89,6 +82,7 @@ public class CompressedPacketSenderTest extends PacketSenderTestBase {
             this.offset += this.compressedPayloadLen;
             return true;
         }
+
     }
 
     @AfterEach
@@ -125,7 +119,7 @@ public class CompressedPacketSenderTest extends PacketSenderTestBase {
 
     /**
      * Test the situation where a single packet is split into two and the second part doesn't exceed the capacity of the second compressed packet.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -157,14 +151,14 @@ public class CompressedPacketSenderTest extends PacketSenderTestBase {
         // second packet
         assertTrue(packets.nextPayload());
         assertEquals(packetSequence + 1, packets.compressedSequenceId);
-        assertEquals(packetLen - firstPacketUncompressedPayloadLen + (2 * NativeConstants.HEADER_LENGTH), packets.uncompressedPayloadLen);
+        assertEquals(packetLen - firstPacketUncompressedPayloadLen + 2 * NativeConstants.HEADER_LENGTH, packets.uncompressedPayloadLen);
         assertEquals(packets.uncompressedPayloadLen, packets.payload.length);
         assertEquals(43, packets.payload[NativeConstants.HEADER_LENGTH + NativeConstants.HEADER_LENGTH]);
         assertEquals(42, packets.payload[NativeConstants.HEADER_LENGTH - 1]);
         assertEquals(44, packets.payload[packets.uncompressedPayloadLen - 1]);
         int secondPacketUncompressedPayloadLen = packets.uncompressedPayloadLen;
 
-        assertEquals(packetLen, firstPacketUncompressedPayloadLen + secondPacketUncompressedPayloadLen - (2 * NativeConstants.HEADER_LENGTH));
+        assertEquals(packetLen, firstPacketUncompressedPayloadLen + secondPacketUncompressedPayloadLen - 2 * NativeConstants.HEADER_LENGTH);
 
         // done
         assertFalse(packets.nextPayload());
@@ -173,12 +167,12 @@ public class CompressedPacketSenderTest extends PacketSenderTestBase {
     /**
      * Test the situation where a single packet is split into two and the second part exceeds the capacity of the second compressed packet requiring a third
      * compressed packet.
-     * 
+     *
      * @throws IOException
      */
     @Test
     public void twoPacketToThreeCompressedPacketNoBoundary() throws IOException {
-        final int packetLen = (NativeConstants.MAX_PACKET_SIZE * 2) - 1;
+        final int packetLen = NativeConstants.MAX_PACKET_SIZE * 2 - 1;
 
         byte[] packet = new byte[packetLen];
 
@@ -202,7 +196,7 @@ public class CompressedPacketSenderTest extends PacketSenderTestBase {
 
     /**
      * This tests that the splitting of MySQL packets includes an additional empty packet to signal the end of the multi-packet sequence.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -293,4 +287,5 @@ public class CompressedPacketSenderTest extends PacketSenderTestBase {
         assertEquals(packetSequence, sentPacket[CompressedPacketSender.COMP_HEADER_LENGTH + 3]);
         checkSequentiallyFilledPacket(sentPacket, CompressedPacketSender.COMP_HEADER_LENGTH + NativeConstants.HEADER_LENGTH, packetLen);
     }
+
 }

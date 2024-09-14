@@ -1,38 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  Copyright (c) 2002, 2023, Oracle and/or its affiliates.
+  Copyright (c) 2002, 2024, Oracle and/or its affiliates.
 
-  This program is free software; you can redistribute it and/or modify it under
-  the terms of the GNU General Public License, version 2.0, as published by the
-  Free Software Foundation.
+  This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+  the Free Software Foundation.
 
-  This program is also distributed with certain software (including but not
-  limited to OpenSSL) that is licensed under separate terms, as designated in a
-  particular file or component or in included license documentation. The
-  authors of MySQL hereby grant you an additional permission to link the
-  program and your derivative works with the separately licensed software that
-  they have included with MySQL.
+  This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+  included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+  separately licensed software that they have either included with the program or referenced in the documentation.
 
-  Without limiting anything contained in the foregoing, this file, which is
-  part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
-  version 1.0, a copy of which can be found at
-  http://oss.oracle.com/licenses/universal-foss-exception.
+  Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+  version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
 
-  This program is distributed in the hope that it will be useful, but WITHOUT
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-  FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
-  for more details.
+  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
 
-  You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc.,
-  51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+  You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 -->
 <project name="MySQL Connector/J" default="build" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
     <description>
 Compiling MySQL Connector/J
 ===========================
 
-MySQL Connector/J 8.1 supports JDBC4.2 and implements the X DevAPI. This product requires Java 8 for compiling the source code.
+MySQL Connector/J 8.4 supports JDBC4.2 and implements the X DevAPI. This product requires Java 8 for compiling the source code.
 The variable 'com.mysql.cj.build.jdk' is used to specify the compiler when building the driver and the variable 'com.mysql.cj.extra.libs' must point to the
 location of third-party libraries that aren't distributed but are required for compiling the source code. Further details can be found in
 http://dev.mysql.com/doc/connector-j/en/connector-j-installing-source.html.
@@ -43,7 +34,7 @@ Targets: "clean", "compile", "build" (default), "package", "package-no-sources",
 Testing MySQL Connector/J
 =========================
 
-MySQL Connector/J 8.1 ships with an extensive test suite that can be run by providing a MySQL JDBC URL in the variable 'com.mysql.cj.testsuite.url' and by
+MySQL Connector/J 8.4 ships with an extensive test suite that can be run by providing a MySQL JDBC URL in the variable 'com.mysql.cj.testsuite.url' and by
 running the target "test". If nothing else is set, the test suite runs with the JVM referred in the variable 'com.mysql.cj.build.jdk'.
 Alternatively, all tests can be run with a distinct JVM, provided that it is pointed out in the variable 'com.mysql.cj.testsuite.jvm'.
 Running only one test set is possible by setting the variable 'com.mysql.cj.testsuite.test.class' with the class' fully qualified name. If also a comma
@@ -211,7 +202,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
     <property name="com.mysql.cj.build.noCrypto" value="no" />
 
     <property name="com.mysql.cj.build.driver.version.major" value="8" />
-    <property name="com.mysql.cj.build.driver.version.minor" value="1" />
+    <property name="com.mysql.cj.build.driver.version.minor" value="4" />
     <property name="com.mysql.cj.build.driver.version.subminor" value="0" />
     <property name="com.mysql.cj.build.driver.version.status" value="" />
     <property name="com.mysql.cj.build.driver.version.series" value="${com.mysql.cj.build.driver.version.major}.${com.mysql.cj.build.driver.version.minor}" />
@@ -261,11 +252,6 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
     <property name="com.mysql.cj.testsuite.build.dir" value="buildtest" />
     <property name="com.mysql.cj.testsuite.junit.results" value="${com.mysql.cj.testsuite.build.dir}/junit" />
 
-    <!-- TODO: Remove as soon as maven relocation artifacts stop being published -->
-    <property name="com.mysql.cj.build.driver.extendedNameRelocation" value="mysql-connector-java${com.mysql.cj.dist.packageExtraName}" />
-    <property name="com.mysql.cj.dist.packageNameRelocation"
-              value="mysql-connector-java${com.mysql.cj.build.driver.extraName}${com.mysql.cj.dist.packageExtraName}-${com.mysql.cj.build.driver.version.full}" />
-
     <!-- Send class files to correct location if running in eclipse. -->
     <condition property="com.mysql.cj.build.compiler.output" value="bin" else="${com.mysql.cj.build.dir.driver}">
         <or>
@@ -290,7 +276,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
     </propertyset>
 
     <!-- Java compiler arguments to widen warnings detection and fail on warnings. -->
-    <condition property="javac.compilerarg" value="-Xlint:all,-path -Werror" else="">
+    <condition property="javac.compilerarg" value="-Xlint:all,-path,-try -Werror" else="">
         <istrue value="${com.mysql.cj.build.failOnWarnings}" />
     </condition>
 
@@ -299,6 +285,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
         <fileset dir="${com.mysql.cj.extra.libs}">
             <include name="**/*.jar" />
             <exclude name="**/*-sources.jar" />
+            <exclude name="**/*-javadoc.jar" />
             <exclude name="ant/**" />
             <exclude name="jacoco/**" />
             <exclude name="src/**" />
@@ -566,8 +553,6 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
             <filter token="MYSQL_CJ_EXTRA_NAME" value="${com.mysql.cj.build.driver.extraName}" />
             <filter token="MYSQL_CJ_EXTENDED_PROD_NAME" value="${com.mysql.cj.build.driver.extendedName}" />
             <filter token="MYSQL_CJ_EXTENDED_LEGACY_PROD_NAME" value="${com.mysql.cj.build.driver.extendedLegacyName}" />
-            <!-- TODO: Remove as soon as maven relocation artifacts stop being published -->
-            <filter token="MYSQL_CJ_EXTENDED_PROD_NAME_RELOCATION" value="${com.mysql.cj.build.driver.extendedNameRelocation}" />
             <filter token="MYSQL_CJ_FULL_PROD_NAME" value="${com.mysql.cj.build.driver.fullName}" />
             <filter token="MYSQL_CJ_DISPLAY_PROD_NAME" value="${com.mysql.cj.build.driver.displayName}" />
             <filter token="MYSQL_CJ_RPM_RELEASE_FULL" value="${com.mysql.cj.dist.rpm.releaseFull}" />
@@ -641,7 +626,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
         <local name="ls" />
         <property name="ls" value="${line.separator}" />
         <replaceregexp match="([^\r\n]*?)[ \t]*+This program is free software;.*MA 02110-1301  ?USA\r?\n"
-                       replace="\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}"
+                       replace="\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}"
                        flags="s">
             <fileset dir="${com.mysql.cj.build.dir.driver}" includes="**/*" />
         </replaceregexp>
@@ -669,7 +654,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
         <local name="ls" />
         <property name="ls" value="${line.separator}" />
         <replaceregexp match="([^\r\n]*?)[ \t]*+This program is free software;.*MA 02110-1301  ?USA\r?\n"
-                       replace="\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}"
+                       replace="\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}\1${ls}"
                        flags="s">
             <fileset dir="${com.mysql.cj.dist.dir.package}" includes="**/*" excludes="README*, LICENSE*, INFO_BIN, INFO_SRC, CHANGES" />
         </replaceregexp>
@@ -896,7 +881,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
 
 
     <!-- Create archive files with package. -->
-    <target name="-create-archives" depends="-create-portable-archives, -create-maven-archive, -create-maven-relocation-archive" />
+    <target name="-create-archives" depends="-create-portable-archives, -create-maven-archive" />
 
 
     <!-- Create portable archives. -->
@@ -979,7 +964,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
                  overview="src/main/doc/connector-j-overview.html"
                  windowtitle="MySQL Connector/J"
                  header="&lt;b&gt;MySQL Connector/J Reference&lt;br&gt;v${com.mysql.cj.build.driver.version.full}&lt;/b&gt;"
-                 bottom="&lt;center&gt;Copyright &amp;copy; 2016, 2023, Oracle and/or its affiliates.&lt;/center&gt;"
+                 bottom="&lt;center&gt;Copyright &amp;copy; 2016, 2024, Oracle and/or its affiliates.&lt;/center&gt;"
                  linkoffline="https://docs.oracle.com/javase/8/docs/api ${com.mysql.cj.docs.jdk8pkg}">
             <sourcepath>
                 <pathelement path="src/main/user-api/java" />
@@ -1040,77 +1025,6 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
         </condition>
 
         <property name="com.mysql.cj.dist.archiveName" value="${com.mysql.cj.dist.packageName}${com.mysql.cj.dist.archiveSourcesSuffix}" />
-    </target>
-
-
-    <!-- TODO: Remove as soon as maven relocation artifacts stop being published -->
-    <!-- Create a Maven relocation bundle containing all the files to upload into the central or local repository. -->
-    <target name="-create-maven-relocation-archive" depends="-make-packages, -set-archive-name-relocation" unless="${com.mysql.cj.dist.noMaven}">
-        <property name="com.mysql.cj.dist.dir.mavenRelocation"
-                  value="${com.mysql.cj.dist.dir.workspace}/${com.mysql.cj.dist.packageNameRelocation}_maven-relocation" />
-        <mkdir dir="${com.mysql.cj.dist.dir.mavenRelocation}" />
-
-        <copy file="${com.mysql.cj.build.dir.driver}/pom-relocation.xml"
-              tofile="${com.mysql.cj.dist.dir.mavenRelocation}/${com.mysql.cj.dist.packageNameRelocation}.pom" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/${com.mysql.cj.dist.packageNameRelocation}.pom"
-                  forceoverwrite="yes"
-                  fileext=".md5"
-                  algorithm="MD5" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/${com.mysql.cj.dist.packageNameRelocation}.pom"
-                  forceoverwrite="yes"
-                  fileext=".sha1"
-                  algorithm="SHA-1" />
-
-        <copy file="${com.mysql.cj.build.dir.driver}/LICENSE" todir="${com.mysql.cj.dist.dir.mavenRelocation}" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/LICENSE" forceoverwrite="yes" fileext=".md5" algorithm="MD5" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/LICENSE" forceoverwrite="yes" fileext=".sha1" algorithm="SHA-1" />
-
-        <copy file="${com.mysql.cj.build.dir.driver}/README" todir="${com.mysql.cj.dist.dir.mavenRelocation}" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/README" forceoverwrite="yes" fileext=".md5" algorithm="MD5" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/README" forceoverwrite="yes" fileext=".sha1" algorithm="SHA-1" />
-
-        <copy file="${com.mysql.cj.build.dir.driver}/INFO_BIN" todir="${com.mysql.cj.dist.dir.mavenRelocation}" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/INFO_BIN" forceoverwrite="yes" fileext=".md5" algorithm="MD5" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/INFO_BIN" forceoverwrite="yes" fileext=".sha1" algorithm="SHA-1" />
-
-        <copy file="${com.mysql.cj.build.dir.driver}/INFO_SRC" todir="${com.mysql.cj.dist.dir.mavenRelocation}" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/INFO_SRC" forceoverwrite="yes" fileext=".md5" algorithm="MD5" />
-        <checksum file="${com.mysql.cj.dist.dir.mavenRelocation}/INFO_SRC" forceoverwrite="yes" fileext=".sha1" algorithm="SHA-1" />
-
-        <delete file="${com.mysql.cj.dist.dir}/${com.mysql.cj.dist.archiveNameRelocation}_maven-relocation.tar.gz" />
-
-        <tar destfile="${com.mysql.cj.dist.dir}/${com.mysql.cj.dist.archiveNameRelocation}_maven-relocation.tar.gz"
-             basedir="${com.mysql.cj.dist.dir.mavenRelocation}"
-             compression="gzip"
-             longfile="gnu" />
-    </target>
-
-
-    <!-- TODO: Remove as soon as maven relocation artifacts stop being published -->
-    <!-- Compute the archive name, including a reference to whether the package contains sources or not, if not expected by default (GPL package should contain
-         sources, commercial package shouldn't). -->
-    <target name="-set-archive-name-relocation" unless="com.mysql.cj.dist.archiveNameRelocation">
-        <condition property="com.mysql.cj.dist.archiveSourcesSuffixRelocation" value="_src">
-            <and>
-                <not>
-                    <isset property="com.mysql.cj.dist.archiveSourcesSuffixRelocation" />
-                </not>
-                <istrue value="${com.mysql.cj.build.commercial}" />
-                <isfalse value="${com.mysql.cj.dist.noSources}" />
-            </and>
-        </condition>
-        <condition property="com.mysql.cj.dist.archiveSourcesSuffixRelocation" value="_no-src" else="">
-            <and>
-                <not>
-                    <isset property="com.mysql.cj.dist.archiveSourcesSuffixRelocation" />
-                </not>
-                <isfalse value="${com.mysql.cj.build.commercial}" />
-                <istrue value="${com.mysql.cj.dist.noSources}" />
-            </and>
-        </condition>
-
-        <property name="com.mysql.cj.dist.archiveNameRelocation"
-                  value="${com.mysql.cj.dist.packageNameRelocation}${com.mysql.cj.dist.archiveSourcesSuffixRelocation}" />
     </target>
 
 
@@ -1278,7 +1192,7 @@ See also com.mysql.cj.conf.PropertyDefinitions.SYSP_* variables for other test o
                  overview="src/main/doc/mysqlx-overview.html"
                  windowtitle="MySQL Connector/J X DevAPI Reference"
                  header="&lt;b&gt;MySQL Connector/J X DevAPI Reference&lt;br&gt;v${com.mysql.cj.build.driver.version.full}&lt;/b&gt;"
-                 bottom="&lt;center&gt;Copyright &amp;copy; 2016, 2023, Oracle and/or its affiliates.&lt;/center&gt;"
+                 bottom="&lt;center&gt;Copyright &amp;copy; 2016, 2024, Oracle and/or its affiliates.&lt;/center&gt;"
                  linkoffline="https://docs.oracle.com/javase/8/docs/api ${com.mysql.cj.docs.jdk8pkg}">
             <sourcepath>
                 <pathelement path="src/main/user-api/java" />

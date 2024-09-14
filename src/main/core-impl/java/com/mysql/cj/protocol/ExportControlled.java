@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol;
@@ -108,6 +99,7 @@ import com.mysql.cj.util.StringUtils;
  * Holds functionality that falls under export-control regulations.
  */
 public class ExportControlled {
+
     private static final String SSL_CONTEXT_PROTOCOL = "TLS";
 
     private static final String TLSv1 = "TLSv1";
@@ -153,7 +145,7 @@ public class ExportControlled {
 
     /**
      * Converts the socket being used in the given SocketConnection to an SSLSocket by performing the TLS handshake.
-     * 
+     *
      * @param rawSocket
      *            original non-SSL socket
      * @param socketConnection
@@ -162,9 +154,9 @@ public class ExportControlled {
      *            ServerVersion object
      * @param log
      *            Logger
-     * 
+     *
      * @return SSL socket
-     * 
+     *
      * @throws IOException
      *             if an I/O exception occurs
      * @throws SSLParamsException
@@ -410,7 +402,7 @@ public class ExportControlled {
         String enabledSSLCipherSuites = pset.getStringProperty(PropertyKey.tlsCiphersuites).getValue();
         Stream<String> filterStream = StringUtils.isNullOrEmpty(enabledSSLCipherSuites) ? socketCipherSuites.stream()
                 : Arrays.stream(enabledSSLCipherSuites.split("\\s*,\\s*")).filter(socketCipherSuites::contains);
-        List<String> allowedCiphers = filterStream // 
+        List<String> allowedCiphers = filterStream //
                 .filter(ALLOWED_CIPHERS::contains) // filter by mandatory, approved and deprecated ciphers
                 .filter(c -> !UNACCEPTABLE_CIPHER_SUBSTR.stream().filter(c::contains).findFirst().isPresent()) // unacceptable ciphers
                 .collect(Collectors.toList());
@@ -419,6 +411,7 @@ public class ExportControlled {
     }
 
     private static class SslContextBuilder {
+
         private KeyStoreConfigurations keyStoreSettings = null;
         private KeyStoreConfigurations trustStoreSettings = null;
         private boolean verifyServerCertificate = true;
@@ -500,7 +493,7 @@ public class ExportControlled {
                         KeyStore clientKeyStore = StringUtils.isNullOrEmpty(this.keyStoreProvider) ? KeyStore.getInstance(this.keyStoreSettings.keyStoreType)
                                 : KeyStore.getInstance(this.keyStoreSettings.keyStoreType, this.keyStoreProvider);
                         URL ksURL = new URL(this.keyStoreSettings.keyStoreUrl);
-                        char[] password = (this.keyStoreSettings.keyStorePassword == null) ? new char[0] : this.keyStoreSettings.keyStorePassword.toCharArray();
+                        char[] password = this.keyStoreSettings.keyStorePassword == null ? new char[0] : this.keyStoreSettings.keyStorePassword.toCharArray();
                         ksIS = ksURL.openStream();
                         clientKeyStore.load(ksIS, password);
                         kmf.init(clientKeyStore, password);
@@ -545,7 +538,7 @@ public class ExportControlled {
                 if (this.verifyServerCertificate) {
                     KeyStore trustKeyStore = null;
                     if (!StringUtils.isNullOrEmpty(this.trustStoreSettings.keyStoreUrl) && !StringUtils.isNullOrEmpty(this.trustStoreSettings.keyStoreType)) {
-                        char[] trustStorePassword = (this.trustStoreSettings.keyStorePassword == null) ? new char[0]
+                        char[] trustStorePassword = this.trustStoreSettings.keyStorePassword == null ? new char[0]
                                 : this.trustStoreSettings.keyStorePassword.toCharArray();
                         trustStoreIS = new URL(this.trustStoreSettings.keyStoreUrl).openStream();
                         trustKeyStore = StringUtils.isNullOrEmpty(this.keyStoreProvider) ? KeyStore.getInstance(this.trustStoreSettings.keyStoreType)
@@ -554,7 +547,7 @@ public class ExportControlled {
                     }
 
                     if (trustKeyStore != null || this.fallbackToSystemTrustStore) {
-                        tmf.init(trustKeyStore); // If trustKeyStore == null then the TrustManagerFactory is initialized with the system-wide truststore.  
+                        tmf.init(trustKeyStore); // If trustKeyStore == null then the TrustManagerFactory is initialized with the system-wide truststore.
                         tms = tmf.getTrustManagers();
 
                         // Check if there are any X509TrustManagers and wrap original if not operating in FIPS compliant mode.
@@ -570,7 +563,7 @@ public class ExportControlled {
                     }
                 }
 
-                // If no other TrustManagers were found then add a single X509TrustManagerWrapper that just takes care of certificate expiration check. 
+                // If no other TrustManagers were found then add a single X509TrustManagerWrapper that just takes care of certificate expiration check.
                 if (tms.length == 0 && !this.fipsCompliantJsse) {
                     tms = new TrustManager[] { new X509TrustManagerWrapper() };
                 }
@@ -622,12 +615,14 @@ public class ExportControlled {
                 throw new SSLParamsException("KeyManagementException: " + kme.getMessage(), kme);
             }
         }
+
     }
 
     /**
      * X509TrustManager wrapper that allows skipping server certificate validation and adds certificate expiration check.
      */
     public static class X509TrustManagerWrapper implements X509TrustManager {
+
         private static final String CERT_PATH_VALIDATOR_ALGORITHM = "PKIX";
         private static final String CERT_FACTORY_TYPE = "X.509";
 
@@ -640,7 +635,7 @@ public class ExportControlled {
 
         /**
          * Constructor for enabling server certificate validation and certificate expiration check.
-         * 
+         *
          * @param tm
          *            if null then enables just certificate expiration check.
          * @throws CertificateException
@@ -664,17 +659,19 @@ public class ExportControlled {
 
         /**
          * Constructor for enabling just certificate expiration check.
-         * 
+         *
          * @throws CertificateException
          */
         X509TrustManagerWrapper() throws CertificateException {
             this(null);
         }
 
+        @Override
         public X509Certificate[] getAcceptedIssuers() {
             return this.originalTrustManager != null ? this.originalTrustManager.getAcceptedIssuers() : new X509Certificate[0];
         }
 
+        @Override
         public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
             for (int i = 0; i < chain.length; i++) {
                 chain[i].checkValidity();
@@ -691,9 +688,7 @@ public class ExportControlled {
                     CertPathValidatorResult result = this.certPathValidator.validate(certPath, this.pkixParams);
                     // Check expiration for the CA used to validate this path.
                     ((PKIXCertPathValidatorResult) result).getTrustAnchor().getTrustedCert().checkValidity();
-                } catch (InvalidAlgorithmParameterException e) {
-                    throw new CertificateException(e);
-                } catch (CertPathValidatorException e) {
+                } catch (InvalidAlgorithmParameterException | CertPathValidatorException e) {
                     throw new CertificateException(e);
                 }
 
@@ -701,12 +696,15 @@ public class ExportControlled {
             }
         }
 
+        @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
             this.originalTrustManager.checkClientTrusted(chain, authType);
         }
+
     }
 
     private static class KeyStoreConfigurations {
+
         public String keyStoreUrl = null;
         public String keyStorePassword = null;
         public String keyStoreType = KeyStore.getDefaultType();
@@ -719,9 +717,11 @@ public class ExportControlled {
             this.keyStorePassword = keyStorePassword;
             this.keyStoreType = keyStoreType;
         }
+
     }
 
     private static class HostnameChecker {
+
         private String hostname;
 
         public HostnameChecker(String hostname) {
@@ -764,7 +764,7 @@ public class ExportControlled {
             }
 
             if (!hostNameVerified) {
-                // Fall-back to checking the Relative Distinguished Name CN-ID (Common Name/CN) from the certificate 'subject' field.   
+                // Fall-back to checking the Relative Distinguished Name CN-ID (Common Name/CN) from the certificate 'subject' field.
                 // https://tools.ietf.org/html/rfc6125#section-6.4.4
                 final String dn = certificate.getSubjectX500Principal().getName(X500Principal.RFC2253);
                 String cn = null;
@@ -785,7 +785,7 @@ public class ExportControlled {
         /**
          * Verify the host name against the given pattern, using the rules specified in <a href="https://tools.ietf.org/html/rfc6125#section-6.4.3">RFC 6125,
          * Section 6.4.3</a>. Support wildcard character as defined in the RFC.
-         * 
+         *
          * @param ptn
          *            the pattern to match with the host name.
          * @return
@@ -802,5 +802,7 @@ public class ExportControlled {
             }
             return this.hostname.equalsIgnoreCase(ptn);
         }
+
     }
+
 }

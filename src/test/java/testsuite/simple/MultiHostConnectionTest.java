@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.simple;
@@ -53,6 +44,7 @@ import testsuite.BaseTestCase;
 import testsuite.UnreliableSocketFactory;
 
 public class MultiHostConnectionTest extends BaseTestCase {
+
     private static final String HOST_1 = "host1";
     private static final String HOST_2 = "host2";
     private static final String HOST_3 = "host3";
@@ -75,7 +67,7 @@ public class MultiHostConnectionTest extends BaseTestCase {
 
     /**
      * Asserts the execution and return for a simple single value query.
-     * 
+     *
      * @param testStmt
      *            The statement instance that runs the query.
      * @param query
@@ -94,7 +86,7 @@ public class MultiHostConnectionTest extends BaseTestCase {
 
     /**
      * Asserts the SQLException thrown for connection commit() or rollback();
-     * 
+     *
      * @param testConn
      *            The connection instance where to issue the command.
      * @param command
@@ -103,21 +95,19 @@ public class MultiHostConnectionTest extends BaseTestCase {
      *            The expected message regular expression pattern.
      */
     private static void assertSQLException(final Connection testConn, final String command, String messageRegEx) {
-        assertThrows(SQLException.class, messageRegEx, new Callable<Void>() {
-            public Void call() throws Exception {
-                if ("commit".equals(command)) {
-                    testConn.commit();
-                } else if ("rollback".equals(command)) {
-                    testConn.rollback();
-                }
-                return null;
+        assertThrows(SQLException.class, messageRegEx, () -> {
+            if ("commit".equals(command)) {
+                testConn.commit();
+            } else if ("rollback".equals(command)) {
+                testConn.rollback();
             }
+            return null;
         });
     }
 
     /**
      * Asserts the SQLException thrown for a query execution.
-     * 
+     *
      * @param testStmt
      *            The statement instance that runs the query.
      * @param query
@@ -126,17 +116,15 @@ public class MultiHostConnectionTest extends BaseTestCase {
      *            The expected message regular expression pattern.
      */
     private static void assertSQLException(final Statement testStmt, final String query, String messageRegEx) {
-        assertThrows(SQLException.class, messageRegEx, new Callable<Void>() {
-            public Void call() throws Exception {
-                testStmt.execute(query);
-                return null;
-            }
+        assertThrows(SQLException.class, messageRegEx, () -> {
+            testStmt.execute(query);
+            return null;
         });
     }
 
     /**
      * Tests failover connection establishing with multiple up/down combinations of 3 hosts.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -157,11 +145,14 @@ public class MultiHostConnectionTest extends BaseTestCase {
 
         // all hosts down
         assertThrows(SQLException.class, COMM_LINK_ERR_PATTERN, new Callable<Void>() {
+
+            @Override
             @SuppressWarnings("synthetic-access")
             public Void call() throws Exception {
                 getConnectionWithProps(allDownURL, testConnProps);
                 return null;
             }
+
         });
 
         // at least one host up
@@ -186,7 +177,7 @@ public class MultiHostConnectionTest extends BaseTestCase {
 
     /**
      * Tests failover transitions in a default failover connection using three hosts.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -227,7 +218,7 @@ public class MultiHostConnectionTest extends BaseTestCase {
 
     /**
      * Tests a failover transition.
-     * 
+     *
      * @param fromHost
      *            The host where initially connected to. In order to connect to an host other than the primary all previous hosts must be downed (pinpoint them
      *            in the 'downedHosts' set).
@@ -309,9 +300,9 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [/HOST_1 : /HOST_2 : /HOST_3]
      * - [/HOST_1 : /HOST_2 : \HOST_3] --> HOST_2
      * - [/HOST_1 : \HOST_2 : \HOST_3] --> HOST_1
-     * 
+     *
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -441,9 +432,9 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [/HOST_1 : /HOST_2 : /HOST_3]
      * - [/HOST_1 : /HOST_2 : \HOST_3] --> HOST_2
      * - [/HOST_1 : \HOST_2 : \HOST_3] --> HOST_1
-     * 
+     *
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -598,9 +589,9 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [\HOST_1 : /HOST_2 : \HOST_3] --> HOST_2
      * - [/HOST_1 : \HOST_2 : \HOST_3] --> HOST_1
      * - [\HOST_1 : \HOST_2 : /HOST_3] --> HOST_3
-     * 
+     *
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -705,9 +696,9 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [/HOST_1 : /HOST_2 : /HOST_3] --> HOST_1
      * - [\HOST_1 : \HOST_2 : /HOST_3] --> HOST_3
      * - [/HOST_1 : /HOST_2 : \HOST_3] --> HOST_1 vs HOST_2
-     * 
+     *
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -794,9 +785,9 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [/HOST_1 : /HOST_2 : /HOST_3] --> HOST_1
      * - [\HOST_1 : \HOST_2 : /HOST_3] --> HOST_3
      * - [/HOST_1 : /HOST_2 : \HOST_3] --> HOST_1 vs HOST_2
-     * 
+     *
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -895,10 +886,10 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [/HOST_1 : \HOST_2 : /HOST_3] --> HOST_3
      * - [/HOST_1 : /HOST_2 : \HOST_3] --> HOST_1
      * - /HOST_2 & \HOST_3
-     * 
+     *
      * The automatic fall back only happens at transaction boundaries and at least 'queriesBeforeRetrySource' or 'secondsBeforeRetrySource' is greater than 0.
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1060,9 +1051,9 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [/HOST_1 : \HOST_2 : \HOST_3] --> HOST_1
      * - [/HOST_1 : \HOST_2 : /HOST_3]
      * - [\HOST_1 : \HOST_2 : /HOST_3] --> HOST_3
-     * 
+     *
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1195,9 +1186,9 @@ public class MultiHostConnectionTest extends BaseTestCase {
      * - [\HOST_1 : /HOST_2 : \HOST_3] --> HOST_2
      * - [/HOST_1 : \HOST_2 : \HOST_3] --> HOST_1
      * - [\HOST_1 : \HOST_2 : /HOST_3] --> HOST_3
-     * 
+     *
      * [Legend: "/HOST_n" --> HOST_n up; "\HOST_n" --> HOST_n down]
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1329,7 +1320,7 @@ public class MultiHostConnectionTest extends BaseTestCase {
 
     /**
      * Tests "serverAffinity" load-balancing strategy.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1414,4 +1405,5 @@ public class MultiHostConnectionTest extends BaseTestCase {
 
         this.conn.close();
     }
+
 }

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2021, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.simple;
@@ -73,6 +64,7 @@ import com.mysql.cj.jdbc.JdbcStatement;
 import testsuite.BaseTestCase;
 
 public class QueryAttributesTest extends BaseTestCase {
+
     @BeforeEach
     public void setUp() throws Exception {
         assumeTrue(versionMeetsMinimum(8, 0, 26), "MySQL 8.0.26+ is required to run this test.");
@@ -92,7 +84,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests all supported query attributes types when used in plain statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -180,7 +172,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests all supported query attributes types when used in client prepared statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -278,7 +270,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests all supported query attributes types when used in server prepared statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -376,7 +368,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests all supported query attributes types when used in callable statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -470,7 +462,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests if query attributes are preserved between plain statement executions and cleared after calling the 'clearAttributes' method.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -501,7 +493,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests if query attributes are preserved between client prepared statement executions and cleared after calling the 'clearAttributes' method.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -541,7 +533,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests if query attributes are preserved between server prepared statement executions and cleared after calling the 'clearAttributes' method.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -581,7 +573,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests if query attributes are preserved between callable statement executions and cleared after calling the 'clearAttributes' method.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -615,7 +607,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests if query attributes hold in plain statements with multi-queries.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -649,7 +641,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests if query attributes hold in prepared statements with multi-queries.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -685,7 +677,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests whether the query attributes are propagated to the internally created statement on query rewrites in plain statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -734,7 +726,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests whether the query attributes are propagated to the internally created statement on query rewrites in client prepared statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -789,7 +781,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests whether the query attributes are propagated to the internally created statement on query rewrites in server prepared statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -844,7 +836,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests if server prepared statements get their query attributes cleared automatically when cached.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -909,7 +901,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests whether proxied plain statement objects created in multi-host connections handle query attributes correctly.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -965,7 +957,7 @@ public class QueryAttributesTest extends BaseTestCase {
 
     /**
      * Tests whether proxied server prepared statement objects created in multi-host connections handle query attributes correctly.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1023,4 +1015,5 @@ public class QueryAttributesTest extends BaseTestCase {
 
         testConn.close();
     }
+
 }

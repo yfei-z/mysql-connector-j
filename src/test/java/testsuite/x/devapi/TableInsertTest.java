@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.x.devapi;
@@ -40,6 +31,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.mysql.cj.ServerVersion;
 import com.mysql.cj.xdevapi.DbDoc;
 import com.mysql.cj.xdevapi.DbDocImpl;
 import com.mysql.cj.xdevapi.InsertResult;
@@ -52,6 +44,7 @@ import com.mysql.cj.xdevapi.SqlResult;
 import com.mysql.cj.xdevapi.Table;
 
 public class TableInsertTest extends BaseTableTestCase {
+
     @Test
     public void lastInsertId() {
         try {
@@ -274,9 +267,7 @@ public class TableInsertTest extends BaseTableTestCase {
         InsertResult res = null;
         try {
             sqlUpdate("drop table if exists qatable1");
-            sqlUpdate("drop table if exists qatable2");
             sqlUpdate("create table qatable1 (x bigint auto_increment primary key,y double)");
-            sqlUpdate("create table qatable2 (x double auto_increment primary key,y bigint)");
 
             table = this.schema.getTable("qatable1", true);
             res = table.insert("y").values(101.1).execute();
@@ -311,34 +302,41 @@ public class TableInsertTest extends BaseTableTestCase {
             assertEquals(9223372036854775803L, (long) res.getAutoIncrementValue());
             assertEquals(1L, res.getAffectedItemsCount());
 
-            table = this.schema.getTable("qatable2");
-            res = table.insert("y").values(101.1).execute();
-            assertEquals(1L, (long) res.getAutoIncrementValue());
-            assertEquals(1L, res.getAffectedItemsCount());
+            if (!mysqlVersionMeetsMinimum(ServerVersion.parseVersion("8.4.0"))) {
+                // AUTO_INCREMENT for DOUBLE removed in MySQL 8.4.0.
+                sqlUpdate("drop table if exists qatable2");
+                sqlUpdate("create table qatable2 (x double auto_increment primary key,y bigint)");
 
-            res = table.insert("y").values(102.1).values(103.1).values(104.1).execute();
-            assertEquals(2L, (long) res.getAutoIncrementValue());
-            assertEquals(3L, res.getAffectedItemsCount());
+                table = this.schema.getTable("qatable2");
+                res = table.insert("y").values(101.1).execute();
+                assertEquals(1L, (long) res.getAutoIncrementValue());
+                assertEquals(1L, res.getAffectedItemsCount());
 
-            row = new HashMap<>();
-            row.put("y", expr("concat('1','05.1')"));
+                res = table.insert("y").values(102.1).values(103.1).values(104.1).execute();
+                assertEquals(2L, (long) res.getAutoIncrementValue());
+                assertEquals(3L, res.getAffectedItemsCount());
 
-            res = table.insert(row).execute();
-            assertEquals(5L, (long) res.getAutoIncrementValue());
-            assertEquals(1L, res.getAffectedItemsCount());
+                row = new HashMap<>();
+                row.put("y", expr("concat('1','05.1')"));
 
-            this.session.sql("ALTER TABLE qatable2 AUTO_INCREMENT = 4294967299000000").execute();
-            res = table.insert("y").values(102.1).values(103.1).values(104.1).execute();
-            assertEquals(4294967299000000L, (long) res.getAutoIncrementValue());
-            assertEquals(3L, res.getAffectedItemsCount());
+                res = table.insert(row).execute();
+                assertEquals(5L, (long) res.getAutoIncrementValue());
+                assertEquals(1L, res.getAffectedItemsCount());
 
-            this.session.sql("ALTER TABLE qatable2 AUTO_INCREMENT = 4294967299000000").execute();
-            res = table.insert(row).execute();
-            assertEquals(4294967299000003L, (long) res.getAutoIncrementValue());
-            assertEquals(1L, res.getAffectedItemsCount());
+                this.session.sql("ALTER TABLE qatable2 AUTO_INCREMENT = 4294967299000000").execute();
+                res = table.insert("y").values(102.1).values(103.1).values(104.1).execute();
+                assertEquals(4294967299000000L, (long) res.getAutoIncrementValue());
+                assertEquals(3L, res.getAffectedItemsCount());
+
+                this.session.sql("ALTER TABLE qatable2 AUTO_INCREMENT = 4294967299000000").execute();
+                res = table.insert(row).execute();
+                assertEquals(4294967299000003L, (long) res.getAutoIncrementValue());
+                assertEquals(1L, res.getAffectedItemsCount());
+            }
         } finally {
             sqlUpdate("drop table if exists qatable1");
             sqlUpdate("drop table if exists qatable2");
         }
     }
+
 }

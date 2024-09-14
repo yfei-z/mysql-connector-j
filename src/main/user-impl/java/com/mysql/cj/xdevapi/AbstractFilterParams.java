@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.xdevapi;
@@ -46,6 +37,7 @@ import com.mysql.cj.x.protobuf.MysqlxExpr.Expr;
  * Abstract implementation of {@link FilterParams}.
  */
 public abstract class AbstractFilterParams implements FilterParams {
+
     protected Collection collection;
     protected Long limit;
     protected Long offset;
@@ -69,7 +61,7 @@ public abstract class AbstractFilterParams implements FilterParams {
 
     /**
      * Constructor.
-     * 
+     *
      * @param schemaName
      *            Schema name
      * @param collectionName
@@ -85,45 +77,55 @@ public abstract class AbstractFilterParams implements FilterParams {
         this.isRelational = isRelational;
     }
 
+    @Override
     public Object getCollection() {
         return this.collection;
     }
 
+    @Override
     public Object getOrder() {
         // type is reserved as hidden knowledge, don't expose protobuf internals
         return this.order;
     }
 
+    @Override
     public void setOrder(String... orderExpression) {
         this.orderExpr = orderExpression;
         // TODO: does this support placeholders? how do we prevent it?
         this.order = new ExprParser(Arrays.stream(orderExpression).collect(Collectors.joining(", ")), this.isRelational).parseOrderSpec();
     }
 
+    @Override
     public Long getLimit() {
         return this.limit;
     }
 
+    @Override
     public void setLimit(Long limit) {
         this.limit = limit;
     }
 
+    @Override
     public Long getOffset() {
         return this.offset;
     }
 
+    @Override
     public void setOffset(Long offset) {
         this.offset = offset;
     }
 
+    @Override
     public boolean supportsOffset() {
         return this.supportsOffset;
     }
 
+    @Override
     public Object getCriteria() {
         return this.criteria;
     }
 
+    @Override
     public void setCriteria(String criteriaString) {
         this.criteriaStr = criteriaString;
         ExprParser parser = new ExprParser(criteriaString, this.isRelational);
@@ -134,6 +136,7 @@ public abstract class AbstractFilterParams implements FilterParams {
         }
     }
 
+    @Override
     public Object getArgs() {
         if (this.args == null) {
             return null;
@@ -141,6 +144,7 @@ public abstract class AbstractFilterParams implements FilterParams {
         return Arrays.asList(this.args);
     }
 
+    @Override
     public void addArg(String name, Object value) {
         if (this.args == null) {
             throw new WrongArgumentException("No placeholders");
@@ -151,6 +155,7 @@ public abstract class AbstractFilterParams implements FilterParams {
         this.args[this.placeholderNameToPosition.get(name)] = ExprUtil.argObjectToScalar(value);
     }
 
+    @Override
     public void verifyAllArgsBound() {
         if (this.args != null) {
             IntStream.range(0, this.args.length)
@@ -164,53 +169,66 @@ public abstract class AbstractFilterParams implements FilterParams {
         }
     }
 
+    @Override
     public void clearArgs() {
         if (this.args != null) {
             IntStream.range(0, this.args.length).forEach(i -> this.args[i] = null);
         }
     }
 
+    @Override
     public boolean isRelational() {
         return this.isRelational;
     }
 
+    @Override
     public abstract void setFields(String... projection);
 
+    @Override
     public Object getFields() {
         return this.fields;
     }
 
+    @Override
     public void setGrouping(String... groupBy) {
         this.groupBy = groupBy;
         this.grouping = new ExprParser(Arrays.stream(groupBy).collect(Collectors.joining(", ")), isRelational()).parseExprList();
     }
 
+    @Override
     public Object getGrouping() {
         return this.grouping;
     }
 
+    @Override
     public void setGroupingCriteria(String having) {
         this.having = having;
         this.groupingCriteria = new ExprParser(having, isRelational()).parse();
     }
 
+    @Override
     public Object getGroupingCriteria() {
         return this.groupingCriteria;
     }
 
+    @Override
     public RowLock getLock() {
         return this.lock;
     }
 
+    @Override
     public void setLock(RowLock rowLock) {
         this.lock = rowLock;
     }
 
+    @Override
     public RowLockOptions getLockOption() {
         return this.lockOption;
     }
 
+    @Override
     public void setLockOption(RowLockOptions lockOption) {
         this.lockOption = lockOption;
     }
+
 }

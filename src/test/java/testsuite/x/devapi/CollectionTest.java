@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.x.devapi;
@@ -38,7 +29,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -67,6 +57,7 @@ import com.mysql.cj.xdevapi.SqlResult;
 import com.mysql.cj.xdevapi.XDevAPIError;
 
 public class CollectionTest extends BaseCollectionTestCase {
+
     @Test
     public void testCount() {
         if (!mysqlVersionMeetsMinimum(ServerVersion.parseVersion("8.0.5"))) {
@@ -85,11 +76,9 @@ public class CollectionTest extends BaseCollectionTestCase {
         String collName = "testExists";
         dropCollection(collName);
         Collection coll = this.schema.getCollection(collName);
-        assertThrows(XProtocolError.class, "Collection '" + collName + "' does not exist in schema '" + this.schema.getName() + "'", new Callable<Void>() {
-            public Void call() throws Exception {
-                coll.count();
-                return null;
-            }
+        assertThrows(XProtocolError.class, "Collection '" + collName + "' does not exist in schema '" + this.schema.getName() + "'", () -> {
+            coll.count();
+            return null;
         });
     }
 
@@ -266,11 +255,9 @@ public class CollectionTest extends BaseCollectionTestCase {
 
         // FR5_2 Create an index with the name of an index that already exists.
         CollectionTest.this.collection.createIndex("myUniqueIndex", "{\"fields\": [{\"field\": \"$.myField\", \"type\": \"INT\"}]}");
-        assertThrows(XProtocolError.class, "ERROR 1061 \\(42000\\) Duplicate key name 'myUniqueIndex'", new Callable<Void>() {
-            public Void call() throws Exception {
-                CollectionTest.this.collection.createIndex("myUniqueIndex", "{\"fields\": [{\"field\": \"$.myField\", \"type\": \"INT\"}]}");
-                return null;
-            }
+        assertThrows(XProtocolError.class, "ERROR 1061 \\(42000\\) Duplicate key name 'myUniqueIndex'", () -> {
+            CollectionTest.this.collection.createIndex("myUniqueIndex", "{\"fields\": [{\"field\": \"$.myField\", \"type\": \"INT\"}]}");
+            return null;
         });
         this.collection.dropIndex("myUniqueIndex");
 
@@ -688,15 +675,14 @@ public class CollectionTest extends BaseCollectionTestCase {
             }
         }
 
-        if ((indexFound != noFields) || (!arrayExpr)) {
+        if (indexFound != noFields || !arrayExpr) {
             throw new Exception("Index not matching");
         }
-
     }
 
     /**
      * START testArrayIndexBasic tests
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -801,7 +787,7 @@ public class CollectionTest extends BaseCollectionTestCase {
 
     /**
      * START testArrayIndexBasic tests
-     * 
+     *
      * @throws Exception
      */
 
@@ -1479,7 +1465,7 @@ public class CollectionTest extends BaseCollectionTestCase {
 
     /**
      * START testArrayIndexBasic tests
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1879,7 +1865,7 @@ public class CollectionTest extends BaseCollectionTestCase {
             i = 0;
             while (docs.hasNext()) {
                 doc = docs.next();
-                System.out.println((((JsonString) doc.get("dateFieldWOI")).getString()));
+                System.out.println(((JsonString) doc.get("dateFieldWOI")).getString());
                 i++;
             }
             System.out.println("Using NOT IN Without Index");
@@ -2237,14 +2223,14 @@ public class CollectionTest extends BaseCollectionTestCase {
 
         DocResult docs = asyncDocs.get();
         DbDoc doc = docs.next();
-        assertEquals((long) 103, (long) (((JsonNumber) doc.get("F3")).getInteger()));
+        assertEquals((long) 103, (long) ((JsonNumber) doc.get("F3")).getInteger());
         assertFalse(docs.hasNext());
 
         // 6. bind In different order (Success)
         asyncDocs = this.collection.find("F1 like :X and $.F3 =:Y and  $.F3 !=:Z").bind("Y", 103).bind("Z", 104).bind("X", "Field-1-%-3").executeAsync();
         docs = asyncDocs.get();
         doc = docs.next();
-        assertEquals((long) 103, (long) (((JsonNumber) doc.get("F3")).getInteger()));
+        assertEquals((long) 103, (long) ((JsonNumber) doc.get("F3")).getInteger());
         assertFalse(docs.hasNext());
 
         // 7. Using same Bind Variables many times(Success)
@@ -2252,7 +2238,7 @@ public class CollectionTest extends BaseCollectionTestCase {
                 .executeAsync();
         docs = asyncDocs.get();
         doc = docs.next();
-        assertEquals((long) 103, (long) (((JsonNumber) doc.get("F3")).getInteger()));
+        assertEquals((long) 103, (long) ((JsonNumber) doc.get("F3")).getInteger());
         assertFalse(docs.hasNext());
 
         // 1. Incorrect PlaceHolder Name in bind
@@ -2358,7 +2344,7 @@ public class CollectionTest extends BaseCollectionTestCase {
 
         i = 0;
         while (doc != null) {
-            assertEquals((long) (100 + i), (long) (((JsonNumber) doc.get("F3")).getInteger()));
+            assertEquals((long) (100 + i), (long) ((JsonNumber) doc.get("F3")).getInteger());
             i = i + 1;
             doc = docs1.fetchOne();
         }
@@ -2372,7 +2358,7 @@ public class CollectionTest extends BaseCollectionTestCase {
         assertThrows(WrongArgumentException.class, "Cannot fetchAll\\(\\) after starting iteration", () -> docs2.fetchAll());
         i = 0;
         do {
-            assertEquals((long) (100 + i), (long) (((JsonNumber) doc.get("F3")).getInteger()));
+            assertEquals((long) (100 + i), (long) ((JsonNumber) doc.get("F3")).getInteger());
             i = i + 1;
             doc = docs2.next();
         } while (docs2.hasNext());
@@ -2389,7 +2375,7 @@ public class CollectionTest extends BaseCollectionTestCase {
             } else {
                 doc = docs3.fetchOne();
             }
-            assertEquals((long) (100 + i), (long) (((JsonNumber) doc.get("F3")).getInteger()));
+            assertEquals((long) (100 + i), (long) ((JsonNumber) doc.get("F3")).getInteger());
             i = i + 1;
 
         }
@@ -2403,7 +2389,7 @@ public class CollectionTest extends BaseCollectionTestCase {
         assertEquals((long) 5, (long) rowDoc.size());
         for (i = 0; i < rowDoc.size(); i++) {
             doc = rowDoc.get(i);
-            assertEquals((long) (100 + i), (long) (((JsonNumber) doc.get("F3")).getInteger()));
+            assertEquals((long) (100 + i), (long) ((JsonNumber) doc.get("F3")).getInteger());
         }
         doc = docs.fetchOne();
     }
@@ -2468,7 +2454,7 @@ public class CollectionTest extends BaseCollectionTestCase {
                 docs = ((CompletableFuture<DocResult>) futures.get(i)).get();
                 assertTrue(docs.hasNext());
                 doc = docs.next();
-                assertEquals((long) (10), (long) (((JsonNumber) doc.get("T")).getInteger()));
+                assertEquals((long) 10, (long) ((JsonNumber) doc.get("T")).getInteger());
                 assertFalse(docs.hasNext());
             } else if (i % 10 == 3) {
                 assertThrows(ExecutionException.class, ".*Document contains a field value that is not unique but required to be.*",
@@ -2496,13 +2482,14 @@ public class CollectionTest extends BaseCollectionTestCase {
         }
 
         if ((NUMBER_OF_QUERIES - 1) % 10 < 9) {
-            assertEquals((1), this.collection.count());
+            assertEquals(1, this.collection.count());
             asyncDocs = this.collection.find("$.T = :X ").bind("X", 10).fields(expr("{'cnt':count($.T)}")).executeAsync();
             docs = asyncDocs.get();
             doc = docs.next();
-            assertEquals((long) (1), (long) (((JsonNumber) doc.get("cnt")).getInteger()));
+            assertEquals((long) 1, (long) ((JsonNumber) doc.get("cnt")).getInteger());
         } else {
-            assertEquals((0), this.collection.count());
+            assertEquals(0, this.collection.count());
         }
     }
+
 }

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.log;
@@ -50,7 +41,7 @@ public class ProfilerEventImpl implements ProfilerEvent {
 
     /**
      * Creates a new profiler event
-     * 
+     *
      * @param eventType
      *            the event type (from the constants TYPE_????)
      * @param hostName
@@ -151,7 +142,7 @@ public class ProfilerEventImpl implements ProfilerEvent {
 
     /**
      * Returns a representation of this event as a String.
-     * 
+     *
      * @return a String representation of this event.
      */
     @Override
@@ -207,7 +198,7 @@ public class ProfilerEventImpl implements ProfilerEvent {
 
     /**
      * Unpacks a binary representation of this event.
-     * 
+     *
      * @param buf
      *            the binary representation of this event
      * @return the unpacked Event
@@ -249,8 +240,8 @@ public class ProfilerEventImpl implements ProfilerEvent {
                 StringUtils.toString(eventCreationAsBytes, "ISO8859_1"), StringUtils.toString(message, "ISO8859_1"));
     }
 
+    @Override
     public byte[] pack() {
-
         // TODO charset (Bug#41172 ?)
         byte[] hostNameAsBytes = StringUtils.getBytes(this.hostName, "ISO8859_1");
         byte[] dbAsBytes = StringUtils.getBytes(this.database, "ISO8859_1");
@@ -258,10 +249,9 @@ public class ProfilerEventImpl implements ProfilerEvent {
         byte[] eventCreationAsBytes = StringUtils.getBytes(this.eventCreationPointDesc, "ISO8859_1");
         byte[] messageAsBytes = StringUtils.getBytes(this.message, "ISO8859_1");
 
-        int len = /* eventType */ 1 + /* hostName */ (4 + hostNameAsBytes.length) + + /* db */ (4 + dbAsBytes.length) + /* connectionId */ 8
-                + /* statementId */ 4 + /* resultSetId */ 4 + /* eventCreationTime */ 8 + /* eventDuration */ 8
-                + /* durationUnits */ (4 + durationUnitsAsBytes.length) + /* eventCreationPointDesc */ (4 + eventCreationAsBytes.length)
-                + /* message */ (4 + messageAsBytes.length);
+        int len = /* eventType */ 1 + /* hostName */ 4 + hostNameAsBytes.length + + /* db */ (4 + dbAsBytes.length) + /* connectionId */ 8 + /* statementId */ 4
+                + /* resultSetId */ 4 + /* eventCreationTime */ 8 + /* eventDuration */ 8 + /* durationUnits */ 4 + durationUnitsAsBytes.length
+                + /* eventCreationPointDesc */ 4 + eventCreationAsBytes.length + /* message */ 4 + messageAsBytes.length;
 
         byte[] buf = new byte[len];
         int pos = 0;
@@ -307,13 +297,12 @@ public class ProfilerEventImpl implements ProfilerEvent {
     }
 
     private static int readInt(byte[] buf, int pos) {
-        return (buf[pos++] & 0xff) | ((buf[pos++] & 0xff) << 8) | ((buf[pos++] & 0xff) << 16) | ((buf[pos++] & 0xff) << 24);
+        return buf[pos++] & 0xff | (buf[pos++] & 0xff) << 8 | (buf[pos++] & 0xff) << 16 | (buf[pos++] & 0xff) << 24;
     }
 
     private static long readLong(byte[] buf, int pos) {
-        return (buf[pos++] & 0xff) | ((long) (buf[pos++] & 0xff) << 8) | ((long) (buf[pos++] & 0xff) << 16) | ((long) (buf[pos++] & 0xff) << 24)
-                | ((long) (buf[pos++] & 0xff) << 32) | ((long) (buf[pos++] & 0xff) << 40) | ((long) (buf[pos++] & 0xff) << 48)
-                | ((long) (buf[pos++] & 0xff) << 56);
+        return buf[pos++] & 0xff | (long) (buf[pos++] & 0xff) << 8 | (long) (buf[pos++] & 0xff) << 16 | (long) (buf[pos++] & 0xff) << 24
+                | (long) (buf[pos++] & 0xff) << 32 | (long) (buf[pos++] & 0xff) << 40 | (long) (buf[pos++] & 0xff) << 48 | (long) (buf[pos++] & 0xff) << 56;
     }
 
     private static byte[] readBytes(byte[] buf, int pos) {
@@ -322,4 +311,5 @@ public class ProfilerEventImpl implements ProfilerEvent {
         System.arraycopy(buf, pos + 4, msg, 0, length);
         return msg;
     }
+
 }

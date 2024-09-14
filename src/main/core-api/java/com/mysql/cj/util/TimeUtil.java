@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.util;
@@ -59,6 +50,7 @@ import com.mysql.cj.exceptions.WrongArgumentException;
  * Time zone conversion routines and other time related methods
  */
 public class TimeUtil {
+
     static final TimeZone GMT_TIMEZONE = TimeZone.getTimeZone("GMT");
 
     public static final LocalDate DEFAULT_DATE = LocalDate.of(1970, 1, 1);
@@ -111,9 +103,7 @@ public class TimeUtil {
 
         try {
             aMethod = System.class.getMethod("nanoTime", (Class[]) null);
-        } catch (SecurityException e) {
-            aMethod = null;
-        } catch (NoSuchMethodException e) {
+        } catch (SecurityException | NoSuchMethodException e) {
             aMethod = null;
         }
 
@@ -128,11 +118,7 @@ public class TimeUtil {
         if (systemNanoTimeMethod != null) {
             try {
                 return ((Long) systemNanoTimeMethod.invoke(null, (Object[]) null)).longValue();
-            } catch (IllegalArgumentException e) {
-                // ignore - fall through to currentTimeMillis()
-            } catch (IllegalAccessException e) {
-                // ignore - fall through to currentTimeMillis()
-            } catch (InvocationTargetException e) {
+            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                 // ignore - fall through to currentTimeMillis()
             }
         }
@@ -142,12 +128,12 @@ public class TimeUtil {
 
     /**
      * Returns the 'official' Java timezone name for the given timezone
-     * 
+     *
      * @param timezoneStr
      *            the 'common' timezone name
      * @param exceptionInterceptor
      *            exception interceptor
-     * 
+     *
      * @return the Java timezone name for the given timezone
      */
     public static String getCanonicalTimeZone(String timezoneStr, ExceptionInterceptor exceptionInterceptor) {
@@ -181,7 +167,7 @@ public class TimeUtil {
 
     /**
      * Return a new Timestamp object which value is adjusted according to known DATE, DATETIME or TIMESTAMP field precision.
-     * 
+     *
      * @param ts
      *            an original Timestamp object, not modified by this method
      * @param fsp
@@ -209,7 +195,7 @@ public class TimeUtil {
 
     /**
      * Return a new LocalDateTime object which value is adjusted according to known DATE, DATETIME or TIMESTAMP field precision.
-     * 
+     *
      * @param x
      *            an original LocalDateTime object, not modified by this method
      * @param fsp
@@ -268,7 +254,7 @@ public class TimeUtil {
     /**
      * Return a string representation of a fractional seconds part. This method assumes that all Timestamp adjustments are already done before,
      * thus no rounding is needed, only a proper "0" padding to be done.
-     * 
+     *
      * @param nanos
      *            fractional seconds value
      * @param fsp
@@ -282,7 +268,7 @@ public class TimeUtil {
     /**
      * Return a string representation of a fractional seconds part. This method assumes that all Timestamp adjustments are already done before,
      * thus no rounding is needed, only a proper "0" padding to be done.
-     * 
+     *
      * @param nanos
      *            fractional seconds value
      * @param fsp
@@ -326,7 +312,7 @@ public class TimeUtil {
 
     /**
      * Loads a properties file that contains all kinds of time zone mappings.
-     * 
+     *
      * @param exceptionInterceptor
      *            exception interceptor
      */
@@ -352,7 +338,7 @@ public class TimeUtil {
     }
 
     public static Time truncateFractionalSeconds(Time time) {
-        Time truncatedTime = new Time((time.getTime() / 1000) * 1000);
+        Time truncatedTime = new Time(time.getTime() / 1000 * 1000);
         return truncatedTime;
     }
 
@@ -365,7 +351,7 @@ public class TimeUtil {
      * <p>
      * Note: The SimpleDateFormat object returned by this method contains a default Calendar with an altered TimeZone. It's safe to cache it between this method
      * calls because the Calendar object itself is not altered.
-     * 
+     *
      * @param cachedSimpleDateFormat
      *            existing SimpleDateFormat to use instead of creating a new one
      * @param pattern
@@ -388,7 +374,7 @@ public class TimeUtil {
      * <p>
      * Note: Don't cache the SimpleDateFormat object returned by this method. Other methods could rely on assumption that the cached SimpleDateFormat has a
      * default Calendar and that it is safe to change only it's time zone (see {@link #getSimpleDateFormat(SimpleDateFormat, String, TimeZone)}.
-     * 
+     *
      * @param pattern
      *            format pattern
      * @param cal
@@ -518,4 +504,5 @@ public class TimeUtil {
         }
         return s;
     }
+
 }

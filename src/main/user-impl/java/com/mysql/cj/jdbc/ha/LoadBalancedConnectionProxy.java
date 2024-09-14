@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2007, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2007, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc.ha;
@@ -70,17 +61,18 @@ import com.mysql.cj.util.Util;
  * A proxy for a dynamic com.mysql.cj.jdbc.JdbcConnection implementation that load balances requests across a series of MySQL JDBC connections, where the
  * balancing
  * takes place at transaction commit.
- * 
+ *
  * Therefore, for this to work (at all), you must use transactions, even if only reading data.
- * 
+ *
  * This implementation will invalidate connections that it detects have had communication errors when processing a request. Problematic hosts will be added to a
  * global blocklist for loadBalanceBlocklistTimeout ms, after which they will be removed from the blocklist and made eligible once again to be selected for new
  * connections.
- * 
+ *
  * This implementation is thread-safe, but it's questionable whether sharing a connection instance amongst threads is a good idea, given that transactions are
  * scoped to connections in JDBC.
  */
 public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implements PingTarget {
+
     private ConnectionGroup connectionGroup = null;
     private long connectionGroupProxyID = 0;
 
@@ -109,7 +101,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Static factory to create {@link LoadBalancedConnection} instances.
-     * 
+     *
      * @param connectionUrl
      *            The connection URL containing the hosts in a load-balance setup.
      * @return A {@link LoadBalancedConnection} proxy.
@@ -123,7 +115,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Creates a proxy for java.sql.Connection that routes requests between the hosts in the connection URL.
-     * 
+     *
      * @param connectionUrl
      *            The connection URL containing the hosts to load balance.
      * @throws SQLException
@@ -223,7 +215,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
         }
 
         String autoCommitSwapRegex = props.getProperty(PropertyKey.loadBalanceAutoCommitStatementRegex.getKeyName(), "");
-        if (!("".equals(autoCommitSwapRegex))) {
+        if (!"".equals(autoCommitSwapRegex)) {
             try {
                 "".matches(autoCommitSwapRegex);
             } catch (Exception e) {
@@ -247,7 +239,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Wraps this object with a new load balanced Connection instance.
-     * 
+     *
      * @return
      *         The connection object instance that wraps 'this'.
      * @throws SQLException
@@ -260,7 +252,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Propagates the connection proxy down through all live connections.
-     * 
+     *
      * @param proxyConn
      *            The top level connection in the multi-host connections chain.
      */
@@ -278,7 +270,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Consults the registered LoadBalanceExceptionChecker if the given exception should trigger a connection fail-over.
-     * 
+     *
      * @param t
      *            The Exception instance to check.
      * @return true if the given exception should trigger a connection fail-over
@@ -298,7 +290,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Closes specified connection and removes it from required mappings.
-     * 
+     *
      * @param conn
      *            connection
      * @throws SQLException
@@ -330,7 +322,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Picks the "best" connection to use for the next transaction based on the BalanceStrategy in use.
-     * 
+     *
      * @throws SQLException
      *             if an error occurs
      */
@@ -340,7 +332,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
             return;
         }
 
-        List<String> hostPortList = Collections.unmodifiableList(this.hostsList.stream().map(hi -> hi.getHostPortPair()).collect(Collectors.toList()));
+        List<String> hostPortList = Collections.unmodifiableList(this.hostsList.stream().map(HostInfo::getHostPortPair).collect(Collectors.toList()));
 
         if (this.currentConnection == null) { // startup
             this.currentConnection = this.balancer.pickConnection(this, hostPortList, Collections.unmodifiableMap(this.liveConnections),
@@ -387,7 +379,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Creates a new physical connection for the given {@link HostInfo} and updates required internal mappings and statistics for that connection.
-     * 
+     *
      * @param hostInfo
      *            The host info instance.
      * @return
@@ -435,7 +427,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
     /**
      * Creates a new physical connection for the given host:port info. If the this connection's connection URL knows about this host:port then its host info is
      * used, otherwise a new host info based on current connection URL defaults is spawned.
-     * 
+     *
      * @param hostPortPair
      *            The host:port pair identifying the host to connect to.
      * @return
@@ -590,7 +582,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
                 // avoid NPE if the connection has already been removed from connectionsToHostsMap in invalidateCurrenctConnection()
                 if (host != null) {
                     synchronized (this.responseTimes) {
-                        Integer hostIndex = (this.hostsToListIndexMap.get(host));
+                        Integer hostIndex = this.hostsToListIndexMap.get(host);
 
                         if (hostIndex != null && hostIndex < this.responseTimes.length) {
                             this.responseTimes[hostIndex] = System.nanoTime() - this.transactionStartTime;
@@ -606,7 +598,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Pings live connections.
-     * 
+     *
      * @throws SQLException
      *             if an error occurs
      */
@@ -674,7 +666,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Adds a host to the blocklist with the given timeout.
-     * 
+     *
      * @param host
      *            The host to be blocklisted.
      * @param timeout
@@ -704,7 +696,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Use {@link #removeFromGlobalBlocklist(String)} instead.
-     * 
+     *
      * @param host
      *            host
      * @deprecated
@@ -716,7 +708,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Use {@link #addToGlobalBlocklist(String, long)} instead.
-     * 
+     *
      * @param host
      *            The host to be blocklisted.
      * @param timeout
@@ -730,7 +722,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Adds a host to the blocklist.
-     * 
+     *
      * @param host
      *            The host to be blocklisted.
      */
@@ -740,7 +732,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Use {@link #addToGlobalBlocklist(String)} instead.
-     * 
+     *
      * @param host
      *            The host to be blocklisted.
      * @deprecated
@@ -752,16 +744,16 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Checks if host blocklist management was enabled.
-     * 
+     *
      * @return true if host blocklist management was enabled
      */
     public boolean isGlobalBlocklistEnabled() {
-        return (this.globalBlocklistTimeout > 0);
+        return this.globalBlocklistTimeout > 0;
     }
 
     /**
      * Use {@link #isGlobalBlocklistEnabled()} instead.
-     * 
+     *
      * @return true if host blocklist management was enabled
      * @deprecated
      */
@@ -772,7 +764,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Returns a local hosts blocklist, while cleaning up expired records from the global blocklist, or a blocklist with the hosts to be removed.
-     * 
+     *
      * @return
      *         A local hosts blocklist.
      */
@@ -797,7 +789,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
         Set<String> keys = blocklistClone.keySet();
 
         // We're only interested in blocklisted hosts that are in the hostList
-        keys.retainAll(this.hostsList.stream().map(hi -> hi.getHostPortPair()).collect(Collectors.toList()));
+        keys.retainAll(this.hostsList.stream().map(HostInfo::getHostPortPair).collect(Collectors.toList()));
 
         // Don't need to synchronize here as we using a local copy
         for (Iterator<String> i = keys.iterator(); i.hasNext();) {
@@ -824,7 +816,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Use {@link #getGlobalBlocklist()} instead.
-     * 
+     *
      * @return
      *         A local hosts blocklist.
      * @deprecated
@@ -836,7 +828,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Removes a host from the host list, allowing it some time to be released gracefully if needed.
-     * 
+     *
      * @param hostPortPair
      *            The host to be removed.
      * @throws SQLException
@@ -876,7 +868,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Removes a host from the host list.
-     * 
+     *
      * @param hostPortPair
      *            The host to be removed.
      * @throws SQLException
@@ -916,7 +908,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
 
     /**
      * Adds a host to the hosts list.
-     * 
+     *
      * @param hostPortPair
      *            The host to be added.
      * @return true if host was added and false if the host list already contains it
@@ -982,6 +974,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
      * LoadBalancedConnection object cannot be effectively <b>null</b> because that would be a potential source of NPEs.
      */
     private static class NullLoadBalancedConnectionProxy implements InvocationHandler {
+
         public NullLoadBalancedConnectionProxy() {
         }
 
@@ -997,6 +990,7 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
             }
             throw new IllegalStateException(exceptionToThrow.getMessage(), exceptionToThrow);
         }
+
     }
 
     private static LoadBalancedConnection nullLBConnectionInstance = null;
@@ -1008,4 +1002,5 @@ public class LoadBalancedConnectionProxy extends MultiHostConnectionProxy implem
         }
         return nullLBConnectionInstance;
     }
+
 }

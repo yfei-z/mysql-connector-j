@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2016, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2016, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.result;
@@ -67,10 +58,12 @@ public class DefaultColumnDefinition implements ColumnDefinition {
         this.fields = fields;
     }
 
+    @Override
     public Field[] getFields() {
         return this.fields;
     }
 
+    @Override
     public void setFields(Field[] fields) {
         this.fields = fields;
     }
@@ -116,42 +109,52 @@ public class DefaultColumnDefinition implements ColumnDefinition {
         this.builtIndexMapping = true;
     }
 
+    @Override
     public boolean hasBuiltIndexMapping() {
         return this.builtIndexMapping;
     }
 
+    @Override
     public Map<String, Integer> getColumnLabelToIndex() {
         return this.columnLabelToIndex;
     }
 
+    @Override
     public void setColumnLabelToIndex(Map<String, Integer> columnLabelToIndex) {
         this.columnLabelToIndex = columnLabelToIndex;
     }
 
+    @Override
     public Map<String, Integer> getFullColumnNameToIndex() {
         return this.fullColumnNameToIndex;
     }
 
+    @Override
     public void setFullColumnNameToIndex(Map<String, Integer> fullColNameToIndex) {
         this.fullColumnNameToIndex = fullColNameToIndex;
     }
 
+    @Override
     public Map<String, Integer> getColumnNameToIndex() {
         return this.columnNameToIndex;
     }
 
+    @Override
     public void setColumnNameToIndex(Map<String, Integer> colNameToIndex) {
         this.columnNameToIndex = colNameToIndex;
     }
 
+    @Override
     public Map<String, Integer> getColumnToIndexCache() {
         return this.columnToIndexCache;
     }
 
+    @Override
     public void setColumnToIndexCache(Map<String, Integer> columnToIndexCache) {
         this.columnToIndexCache = columnToIndexCache;
     }
 
+    @Override
     public void initializeFrom(ColumnDefinition columnDefinition) {
         this.fields = columnDefinition.getFields();
         this.columnLabelToIndex = columnDefinition.getColumnNameToIndex();
@@ -159,14 +162,15 @@ public class DefaultColumnDefinition implements ColumnDefinition {
         this.builtIndexMapping = true;
     }
 
+    @Override
     public void exportTo(ColumnDefinition columnDefinition) {
         columnDefinition.setFields(this.fields);
         columnDefinition.setColumnNameToIndex(this.columnLabelToIndex);
         columnDefinition.setFullColumnNameToIndex(this.fullColumnNameToIndex);
     }
 
+    @Override
     public int findColumn(String columnName, boolean useColumnNamesInFindColumn, int indexBase) {
-
         Integer index;
 
         if (!hasBuiltIndexMapping()) {
@@ -209,13 +213,12 @@ public class DefaultColumnDefinition implements ColumnDefinition {
     }
 
     /**
-     * Check if fields with type BLOB, MEDIUMBLOB, LONGBLOB, TEXT, MEDIUMTEXT or LONGTEXT
-     * exist in this ColumnDefinition.
-     * This check is used for making a decision about whether we want to force a
-     * buffer row (better for rows with large fields).
-     * 
+     * Check if fields with type BLOB, MEDIUMBLOB, LONGBLOB, TEXT, MEDIUMTEXT, LONGTEXT, or VECTOR exist in this ColumnDefinition.
+     * This check is used for making a decision about whether we want to force a buffer row (better for rows with large fields).
+     *
      * @return true if this ColumnDefinition has large fields
      */
+    @Override
     public boolean hasLargeFields() {
         if (this.fields != null) {
             for (int i = 0; i < this.fields.length; i++) {
@@ -227,6 +230,7 @@ public class DefaultColumnDefinition implements ColumnDefinition {
                     case MEDIUMTEXT:
                     case LONGTEXT:
                     case JSON:
+                    case VECTOR:
                         return true;
                     default:
                         break;

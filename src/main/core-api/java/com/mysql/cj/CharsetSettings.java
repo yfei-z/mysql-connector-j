@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj;
@@ -54,25 +45,25 @@ public interface CharsetSettings {
      * </ol>
      * otherwise it will be set to utf8mb4_general_ci or utf8mb4_0900_ai_ci depending on server version.
      * <p>
-     * Since Protocol::HandshakeV10 and Protocol::HandshakeResponse41 has only one byte for the collation it's not possible to use indexes &gt; 255 during the
+     * Since Protocol::HandshakeV10 and Protocol::HandshakeResponse41 use only one byte for the collation it's not possible to use indexes &gt; 255 during the
      * handshake.
      * Also, ucs2, utf16, utf16le and utf32 character sets are impermissible here. Connector/J will try to use utf8mb4 instead.
      * </p>
-     * 
+     *
      * @param reset
-     *            reset the charsets configuration; needed for changeUser call.
-     * 
+     *            reset the charsets configuration; needed for changeUser and resetServerState call.
+     *
      * @return MySQL collation index to be used during the handshake.
      */
     int configurePreHandshake(boolean reset);
 
     /**
      * Sets up client character set. This must be done before any further communication with the server!
-     * 
+     *
      * The 'collation_connection', 'character_set_client', 'character_set_connection' and 'character_set_results' server variables are set
      * according to the collation index selected by {@link #configurePreHandshake(boolean)} and sent in the Protocol::HandshakeV10 packet.
      * Here Connector/J alters these server variables if needed.
-     * 
+     *
      * @param dontCheckServerMatch
      *            if true then send the SET NAMES query even if server charset already matches the new value; needed for changeUser call.
      */
@@ -111,4 +102,5 @@ public interface CharsetSettings {
     String getMysqlCharsetForJavaEncoding(String javaEncoding, ServerVersion version);
 
     boolean isMultibyteCharset(String javaEncodingName);
+
 }

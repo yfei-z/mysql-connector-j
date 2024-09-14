@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2019, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2019, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.xdevapi;
@@ -39,11 +30,12 @@ import com.mysql.cj.protocol.x.XProtocolError;
 
 /**
  * Abstract class, common to all X DevAPI statement classes that can be prepared.
- * 
+ *
  * @param <RES_T>
  *            result interface
  */
 public abstract class PreparableStatement<RES_T> {
+
     protected enum PreparedState {
         UNSUPPORTED, // Preparing statements is completely unsupported in the server currently being used.
         UNPREPARED, // Statement is not prepared yet, next execution will run unprepared.
@@ -61,7 +53,7 @@ public abstract class PreparableStatement<RES_T> {
 
     /**
      * Helper method to return an {@link XMessageBuilder} instance from {@link MysqlxSession} in use.
-     * 
+     *
      * @return
      *         the {@link XMessageBuilder} instance from current {@link MysqlxSession}
      */
@@ -93,7 +85,7 @@ public abstract class PreparableStatement<RES_T> {
      * Executes synchronously this statement either directly or using prepared statements if:
      * 1. Prepared statements are supported by the server.
      * 2. The statement is executed repeatedly without changing its structure.
-     * 
+     *
      * @return
      *         the object returned from the low level statement execution
      */
@@ -143,7 +135,7 @@ public abstract class PreparableStatement<RES_T> {
 
     /**
      * Executes the statement directly (non-prepared). Implementation is dependent on the statement type.
-     * 
+     *
      * @return
      *         the object returned from the lower level statement execution
      */
@@ -151,7 +143,7 @@ public abstract class PreparableStatement<RES_T> {
 
     /**
      * Returns the {@link XMessage} needed to prepare this statement. Implementation is dependent on the statement type.
-     * 
+     *
      * @return
      *         the {@link XMessage} that prepares this statement
      */
@@ -159,7 +151,7 @@ public abstract class PreparableStatement<RES_T> {
 
     /**
      * Prepares a statement on the server to be later executed.
-     * 
+     *
      * @return
      *         <code>true</code> if the statement was successfully prepared, <code>false</code> otherwise
      */
@@ -186,7 +178,7 @@ public abstract class PreparableStatement<RES_T> {
 
     /**
      * Executes a previously server-prepared statement. Implementation is dependent on the statement type.
-     * 
+     *
      * @return
      *         the object returned from the lower level statement execution
      */
@@ -212,6 +204,7 @@ public abstract class PreparableStatement<RES_T> {
      * destructed by using a {@link ReferenceQueue}.
      */
     public static class PreparableStatementFinalizer extends PhantomReference<PreparableStatement<?>> {
+
         int prepredStatementId;
 
         public PreparableStatementFinalizer(PreparableStatement<?> referent, ReferenceQueue<? super PreparableStatement<?>> q, int preparedStatementId) {
@@ -222,5 +215,7 @@ public abstract class PreparableStatement<RES_T> {
         public int getPreparedStatementId() {
             return this.prepredStatementId;
         }
+
     }
+
 }

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj;
@@ -33,6 +24,7 @@ package com.mysql.cj;
  * A server version.
  */
 public class ServerVersion implements Comparable<ServerVersion> {
+
     private String completeVersion;
     private Integer major;
     private Integer minor;
@@ -64,7 +56,7 @@ public class ServerVersion implements Comparable<ServerVersion> {
     /**
      * A string representation of this version. If this version was parsed from, or provided with, a "complete" string which may contain more than just the
      * version number, this string is returned verbatim. Otherwise, a string representation of the version numbers is given.
-     * 
+     *
      * @return string version representation
      */
     @Override
@@ -99,6 +91,7 @@ public class ServerVersion implements Comparable<ServerVersion> {
         return hash;
     }
 
+    @Override
     public int compareTo(ServerVersion other) {
         int c;
         if ((c = this.major.compareTo(other.getMajor())) != 0) {
@@ -122,7 +115,7 @@ public class ServerVersion implements Comparable<ServerVersion> {
 
     /**
      * Parse the server version into major/minor/subminor.
-     * 
+     *
      * @param versionString
      *            string version representation
      * @return {@link ServerVersion}
@@ -145,7 +138,7 @@ public class ServerVersion implements Comparable<ServerVersion> {
                     int pos = 0;
 
                     while (pos < remaining.length()) {
-                        if ((remaining.charAt(pos) < '0') || (remaining.charAt(pos) > '9')) {
+                        if (remaining.charAt(pos) < '0' || remaining.charAt(pos) > '9') {
                             break;
                         }
 
@@ -163,4 +156,5 @@ public class ServerVersion implements Comparable<ServerVersion> {
         // can't parse the server version
         return new ServerVersion(0, 0, 0);
     }
+
 }

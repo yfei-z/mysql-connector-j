@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2020, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.sasl;
@@ -47,12 +38,13 @@ import com.mysql.cj.exceptions.ExceptionFactory;
 /**
  * A {@link SaslClient} implementation for SCRAM-SHA-256, as specified in <a href="https://tools.ietf.org/html/rfc5802">RFC 5802</a> and <a
  * href="https://tools.ietf.org/html/rfc7677">RFC 7677</a>.
- * 
+ *
  * The IANA-registered mechanism was renamed to "MYSQLCJ-SCRAM-SHA-256" in order to avoid future conflicts with an officially supported implementation.
  * When there is a Java-supported implementation for SCRAM-SHA-256, it will have to be thoroughly tested with Connector/J and if that works, this code can be
  * obsoleted.
  */
 public class ScramSha256SaslClient extends ScramShaSaslClient {
+
     public static final String IANA_MECHANISM_NAME = "SCRAM-SHA-256";
     public static final String MECHANISM_NAME = "MYSQLCJ-" + IANA_MECHANISM_NAME;
 
@@ -78,7 +70,7 @@ public class ScramSha256SaslClient extends ScramShaSaslClient {
     /**
      * The "H(str)" cryptographic hash function as described in <a href="https://tools.ietf.org/html/rfc5802#section-2.2">RFC 5802, Section 2.2</a> and <a
      * href="https://tools.ietf.org/html/rfc7677#section-3">RFC 7677, Section 3</a>. This implementation corresponds to SHA-256.
-     * 
+     *
      * @param str
      *            the string to hash.
      * @return
@@ -97,7 +89,7 @@ public class ScramSha256SaslClient extends ScramShaSaslClient {
     /**
      * The "HMAC(key, str)" HMAC keyed hash algorithm as described in <a href="https://tools.ietf.org/html/rfc5802#section-2.2">RFC 5802, Section 2.2</a> and <a
      * href="https://tools.ietf.org/html/rfc7677#section-3">RFC 7677, Section 3</a>. This implementation corresponds to 'HmacSHA256'.
-     * 
+     *
      * @param key
      *            the hash key.
      * @param str
@@ -121,14 +113,14 @@ public class ScramSha256SaslClient extends ScramShaSaslClient {
     /**
      * The "Hi(str, salt, i)" PBKDF2 function as described in <a href="https://tools.ietf.org/html/rfc5802#section-2.2">RFC 5802, Section 2.2</a> and <a
      * href="https://tools.ietf.org/html/rfc7677#section-3">RFC 7677, Section 3</a>. This implementation corresponds to 'PBKDF2WithHmacSHA256'.
-     * 
+     *
      * @param str
      *            the string value to use as the internal HMAC key.
      * @param salt
      *            the input string to hash in the initial iteration.
      * @param iterations
      *            the number of iterations to run the algorithm.
-     * 
+     *
      * @return
      *         an hash value with an output length equal to the length of H(str).
      */
@@ -142,4 +134,5 @@ public class ScramSha256SaslClient extends ScramShaSaslClient {
             throw ExceptionFactory.createException(e.getMessage());
         }
     }
+
 }

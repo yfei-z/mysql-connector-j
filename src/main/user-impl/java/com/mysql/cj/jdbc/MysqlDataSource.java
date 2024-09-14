@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc;
@@ -139,7 +130,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Sets the database name.
-     * 
+     *
      * @param dbName
      *            the name of the database
      */
@@ -149,11 +140,11 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Gets the name of the database
-     * 
+     *
      * @return the name of the database for this data source
      */
     public String getDatabaseName() {
-        return (this.databaseName != null) ? this.databaseName : "";
+        return this.databaseName != null ? this.databaseName : "";
     }
 
     @Override
@@ -178,7 +169,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Sets the password
-     * 
+     *
      * @param pass
      *            the password
      */
@@ -188,7 +179,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Get the password.
-     * 
+     *
      * @return password
      */
     public String getPassword() {
@@ -197,7 +188,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Sets the database port.
-     * 
+     *
      * @param p
      *            the port
      */
@@ -208,7 +199,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Returns the port number
-     * 
+     *
      * @return the port number
      */
     public int getPort() {
@@ -217,7 +208,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Sets the port number
-     * 
+     *
      * @param p
      *            the port
      */
@@ -227,7 +218,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Returns the port number
-     * 
+     *
      * @return the port number
      */
     public int getPortNumber() {
@@ -238,7 +229,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
      * Initializes driver properties that come from a JNDI reference (in the
      * case of a javax.sql.DataSource bound into some name service that doesn't
      * handle Java objects directly).
-     * 
+     *
      * @param ref
      *            The JNDI Reference that holds RefAddrs for all properties
      * @throws SQLException
@@ -258,9 +249,9 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Required method to support this class as a <CODE>Referenceable</CODE>.
-     * 
+     *
      * @return a Reference to this data source
-     * 
+     *
      * @throws NamingException
      *             if a JNDI error occurs
      */
@@ -295,7 +286,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Sets the server name.
-     * 
+     *
      * @param serverName
      *            the server name
      */
@@ -305,11 +296,11 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Returns the name of the database server
-     * 
+     *
      * @return the name of the database server
      */
     public String getServerName() {
-        return (this.hostName != null) ? this.hostName : "";
+        return this.hostName != null ? this.hostName : "";
     }
 
     //
@@ -318,7 +309,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Sets the URL for this connection
-     * 
+     *
      * @param url
      *            the URL for this connection
      */
@@ -328,7 +319,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Returns the URL for this connection
-     * 
+     *
      * @return the URL for this connection
      */
     public String getURL() {
@@ -339,7 +330,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
      * This method is used by the app server to set the url string specified
      * within the datasource deployment descriptor. It is discovered using
      * introspection and matches if property name in descriptor is "url".
-     * 
+     *
      * @param url
      *            url to be used within driver.connect
      */
@@ -350,7 +341,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Returns the JDBC URL that will be used to create the database connection.
-     * 
+     *
      * @return the URL for this connection
      */
     public String getUrl() {
@@ -373,7 +364,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Sets the user ID.
-     * 
+     *
      * @param userID
      *            the User ID
      */
@@ -383,7 +374,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Returns the configured user for this connection
-     * 
+     *
      * @return the user for this connection
      */
     public String getUser() {
@@ -392,12 +383,12 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Creates a connection using the specified properties.
-     * 
+     *
      * @param props
      *            the properties to connect with
-     * 
+     *
      * @return a connection to the database
-     * 
+     *
      * @throws SQLException
      *             if an error occurs
      */
@@ -434,7 +425,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties getters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name property name
      * @return property value
@@ -447,7 +438,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties setters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @param value
@@ -461,7 +452,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties getters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @return property value
@@ -474,7 +465,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties setters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @param value
@@ -488,7 +479,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties getters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @return property value
@@ -501,7 +492,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties setters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @param value
@@ -515,7 +506,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties getters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @return property value
@@ -528,7 +519,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties setters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @param value
@@ -542,7 +533,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties getters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @return property value
@@ -555,7 +546,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties setters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @param value
@@ -569,7 +560,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties getters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @return property value
@@ -582,7 +573,7 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
     /**
      * Used in properties setters added by instrumentation.
-     * 
+     *
      * @param name
      *            property name
      * @param value
@@ -610,4 +601,5 @@ public class MysqlDataSource extends JdbcPropertySetImpl implements DataSource, 
 
         return props;
     }
+
 }

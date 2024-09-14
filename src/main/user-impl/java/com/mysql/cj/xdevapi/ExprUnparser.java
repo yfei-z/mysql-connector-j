@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.xdevapi;
@@ -49,6 +40,7 @@ import com.mysql.cj.x.protobuf.MysqlxExpr.Operator;
  * Serializer utility for dealing with X Protocol expression trees.
  */
 public class ExprUnparser {
+
     /**
      * List of operators which will be serialized as infix operators.
      */
@@ -73,7 +65,7 @@ public class ExprUnparser {
 
     /**
      * Scalar to string.
-     * 
+     *
      * @param e
      *            {@link Scalar}
      * @return scalar string
@@ -99,7 +91,7 @@ public class ExprUnparser {
 
     /**
      * JSON document path to string.
-     * 
+     *
      * @param items
      *            list of {@link DocumentPathItem} objects
      * @return JSON document path string
@@ -130,7 +122,7 @@ public class ExprUnparser {
 
     /**
      * Column identifier (or JSON path) to string.
-     * 
+     *
      * @param e
      *            {@link ColumnIdentifier}
      * @return Column identifier or JSON path string.
@@ -154,7 +146,7 @@ public class ExprUnparser {
 
     /**
      * Function call to string.
-     * 
+     *
      * @param e
      *            {@link FunctionCall}
      * @return Function call string
@@ -188,7 +180,7 @@ public class ExprUnparser {
 
     /**
      * Create a string from a list of (already stringified) parameters. Surround by parens and separate by commas.
-     * 
+     *
      * @param params
      *            list of param strings
      * @return param list string
@@ -208,7 +200,7 @@ public class ExprUnparser {
 
     /**
      * Convert an operator to a string. Includes special cases for chosen infix operators (AND, OR) and special forms such as LIKE and BETWEEN.
-     * 
+     *
      * @param e
      *            {@link Operator}
      * @return Operator string
@@ -266,7 +258,7 @@ public class ExprUnparser {
 
     /**
      * Escape a string literal.
-     * 
+     *
      * @param s
      *            literal
      * @return escaped literal
@@ -277,7 +269,7 @@ public class ExprUnparser {
 
     /**
      * Quote a named identifier.
-     * 
+     *
      * @param ident
      *            identifier
      * @return quoted identifier
@@ -292,7 +284,7 @@ public class ExprUnparser {
 
     /**
      * Quote a JSON document field key.
-     * 
+     *
      * @param key
      *            key
      * @return quoted key
@@ -303,7 +295,7 @@ public class ExprUnparser {
 
     /**
      * Quote a JSON document path member.
-     * 
+     *
      * @param member
      *            path member
      * @return quoted path member
@@ -317,7 +309,7 @@ public class ExprUnparser {
 
     /**
      * Serialize an expression to a string.
-     * 
+     *
      * @param e
      *            {@link Expr}
      * @return string expression
@@ -342,4 +334,5 @@ public class ExprUnparser {
                 throw new IllegalArgumentException("Unknown type tag: " + e.getType());
         }
     }
+
 }

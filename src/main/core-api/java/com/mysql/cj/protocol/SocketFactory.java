@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol;
@@ -47,15 +38,15 @@ public interface SocketFactory extends SocketMetadata {
      * socket factory with the class name given in the property
      * &quot;socketFactory&quot;, where the standard is <code>com.mysql.cj.protocol.StandardSocketFactory</code> Implementing classes
      * are responsible for handling synchronization of this method (if needed).
-     * 
+     *
      * @param host
      *            the hostname passed in the URL. It will be a single
      *            hostname, as the driver parses multi-hosts (for failover) and
      *            calls this method for each host connection attempt.
-     * 
+     *
      * @param portNumber
      *            the port number to connect to (if required).
-     * 
+     *
      * @param props
      *            properties passed to the driver via the URL and/or properties
      *            instance.
@@ -63,7 +54,7 @@ public interface SocketFactory extends SocketMetadata {
      *            login timeout in milliseconds
      * @param <T>
      *            result type
-     * 
+     *
      * @return a socket connected to the given host
      * @throws IOException
      *             if an I/O error occurs
@@ -72,7 +63,7 @@ public interface SocketFactory extends SocketMetadata {
 
     /**
      * Called by the driver before issuing the MySQL protocol handshake.
-     * 
+     *
      * @throws IOException
      *             if an I/O error occurs
      */
@@ -82,7 +73,7 @@ public interface SocketFactory extends SocketMetadata {
     /**
      * If required, called by the driver during MySQL protocol handshake to transform
      * original socket to SSL socket and perform TLS handshake.
-     * 
+     *
      * @param socketConnection
      *            current SocketConnection
      * @param serverSession
@@ -98,7 +89,7 @@ public interface SocketFactory extends SocketMetadata {
     /**
      * If required, called by the driver during MySQL protocol handshake to transform
      * original socket to SSL socket and perform TLS handshake.
-     * 
+     *
      * @param socketConnection
      *            current SocketConnection
      * @param serverSession
@@ -118,10 +109,11 @@ public interface SocketFactory extends SocketMetadata {
     /**
      * Called by the driver after completing the MySQL protocol handshake and
      * reading the results of the authentication.
-     * 
+     *
      * @throws IOException
      *             if an I/O error occurs
      */
     default void afterHandshake() throws IOException {
     }
+
 }

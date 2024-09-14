@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.xdevapi;
@@ -41,6 +32,7 @@ import com.mysql.cj.exceptions.AssertionFailedException;
  * Internally-used object passing index creation parameters to XMessageBuilder.
  */
 public class CreateIndexParams {
+
     public static final String INDEX = "INDEX";
     public static final String SPATIAL = "SPATIAL";
     public static final String GEOJSON = "GEOJSON";
@@ -52,7 +44,7 @@ public class CreateIndexParams {
 
     /**
      * Constructor.
-     * 
+     *
      * @param indexName
      *            index name
      * @param indexDefinition
@@ -64,7 +56,7 @@ public class CreateIndexParams {
 
     /**
      * Constructor.
-     * 
+     *
      * @param indexName
      *            index name
      * @param jsonIndexDefinition
@@ -132,7 +124,7 @@ public class CreateIndexParams {
 
     /**
      * Get index name.
-     * 
+     *
      * @return index name
      */
     public String getIndexName() {
@@ -141,7 +133,7 @@ public class CreateIndexParams {
 
     /**
      * Get index type.
-     * 
+     *
      * @return index type
      */
     public String getIndexType() {
@@ -150,7 +142,7 @@ public class CreateIndexParams {
 
     /**
      * Get index fields.
-     * 
+     *
      * @return List of {@link IndexField} objects
      */
     public List<IndexField> getFields() {
@@ -161,6 +153,7 @@ public class CreateIndexParams {
      * Internally used object parsed from indexDefinition; see {@link Collection#createIndex(String, DbDoc)} description.
      */
     public static class IndexField {
+
         private static final String FIELD = "field";
         private static final String TYPE = "type";
         private static final String REQUIRED = "required";
@@ -192,7 +185,7 @@ public class CreateIndexParams {
 
         /**
          * Constructor.
-         * 
+         *
          * @param indexField
          *            a special JSON document, part of indexDefinition document, consisting of the following fields:
          *            <ul>
@@ -288,7 +281,7 @@ public class CreateIndexParams {
 
         /**
          * Get the full document path to the document member or field to be indexed.
-         * 
+         *
          * @return field string
          */
         public String getField() {
@@ -297,7 +290,7 @@ public class CreateIndexParams {
 
         /**
          * Get column type.
-         * 
+         *
          * @return column type
          */
         public String getType() {
@@ -306,7 +299,7 @@ public class CreateIndexParams {
 
         /**
          * Is the field required to exist in the document?
-         * 
+         *
          * @return true if required
          */
         public Boolean isRequired() {
@@ -315,7 +308,7 @@ public class CreateIndexParams {
 
         /**
          * Get options for decoding GEOJSON data.
-         * 
+         *
          * @return options
          */
         public Integer getOptions() {
@@ -324,7 +317,7 @@ public class CreateIndexParams {
 
         /**
          * Get srid for decoding GEOJSON data.
-         * 
+         *
          * @return srid
          */
         public Integer getSrid() {
@@ -333,11 +326,13 @@ public class CreateIndexParams {
 
         /**
          * Is the field an array?
-         * 
+         *
          * @return true if the field is an array
          */
         public Boolean isArray() {
             return this.array;
         }
+
     }
+
 }

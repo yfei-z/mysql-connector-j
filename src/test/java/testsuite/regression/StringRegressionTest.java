@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.regression;
@@ -57,7 +48,7 @@ public class StringRegressionTest extends BaseTestCase {
 
     /**
      * Tests newline being treated correctly.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -80,7 +71,7 @@ public class StringRegressionTest extends BaseTestCase {
 
     /**
      * Tests that single-byte character conversion works correctly.
-     * 
+     *
      * @throws Exception
      */
     // TODO: Use Unicode Literal escapes for this, for now, this test is broken :(
@@ -93,7 +84,7 @@ public class StringRegressionTest extends BaseTestCase {
 
     /**
      * Tests fix for BUG#7601, '+' duplicated in fixDecimalExponent().
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -106,6 +97,7 @@ public class StringRegressionTest extends BaseTestCase {
     @Test
     public void testBug11629() throws Exception {
         class TeeByteArrayOutputStream extends ByteArrayOutputStream {
+
             PrintStream branch;
             StackTraceElement[] callStackTrace = null;
 
@@ -147,6 +139,7 @@ public class StringRegressionTest extends BaseTestCase {
                     }
                 }
             }
+
         }
 
         PrintStream oldOut = System.out;
@@ -190,7 +183,7 @@ public class StringRegressionTest extends BaseTestCase {
 
     /**
      * Tests fix for BUG#11614 - StringUtils.getBytes() doesn't work when using multibyte character encodings and a length in _characters_ is specified.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -244,9 +237,9 @@ public class StringRegressionTest extends BaseTestCase {
 
     /**
      * Tests fix for BUG#25047 - StringUtils.indexOfIgnoreCaseRespectQuotes() isn't case-insensitive on the first character of the target.
-     * 
+     *
      * UPD: Method StringUtils.indexOfIgnoreCaseRespectQuotes() was replaced by StringUtils.indexOfIgnoreCase()
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -262,7 +255,7 @@ public class StringRegressionTest extends BaseTestCase {
 
     /**
      * Tests fix for BUG#64731 - StringUtils.getBytesWrapped throws StringIndexOutOfBoundsException.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -310,4 +303,5 @@ public class StringRegressionTest extends BaseTestCase {
     private void testBase64DecoderItem(String source, String expected) throws Exception {
         assertEquals(expected, new String(Base64Decoder.decode(source.getBytes(), 0, source.length())));
     }
+
 }

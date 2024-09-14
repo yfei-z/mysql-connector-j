@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.xdevapi;
@@ -51,6 +42,7 @@ import com.mysql.cj.result.ValueFactory;
  * {@link Schema} implementation.
  */
 public class SchemaImpl implements Schema {
+
     private MysqlxSession mysqlxSession;
     private XMessageBuilder xbuilder;
     private Session session;
@@ -65,18 +57,22 @@ public class SchemaImpl implements Schema {
         this.svf = new StringValueFactory(this.mysqlxSession.getPropertySet());
     }
 
+    @Override
     public Session getSession() {
         return this.session;
     }
 
+    @Override
     public Schema getSchema() {
         return this;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
 
+    @Override
     public DbObjectStatus existsInDatabase() {
         StringBuilder stmt = new StringBuilder("select count(*) from information_schema.schemata where schema_name = '");
         // TODO: verify quoting rules
@@ -85,37 +81,43 @@ public class SchemaImpl implements Schema {
         return this.mysqlxSession.getDataStoreMetadata().schemaExists(this.name) ? DbObjectStatus.EXISTS : DbObjectStatus.NOT_EXISTS;
     }
 
+    @Override
     public List<Collection> getCollections() {
         return getCollections(null);
     }
 
+    @Override
     public List<Collection> getCollections(String pattern) {
         Set<String> strTypes = Arrays.stream(new DbObjectType[] { DbObjectType.COLLECTION }).map(DatabaseObject.DbObjectType::toString)
                 .collect(Collectors.toSet());
-        Predicate<com.mysql.cj.result.Row> rowFiler = r -> (strTypes).contains(r.getValue(1, this.svf));
+        Predicate<com.mysql.cj.result.Row> rowFiler = r -> strTypes.contains(r.getValue(1, this.svf));
         Function<com.mysql.cj.result.Row, String> rowToName = r -> r.getValue(0, this.svf);
         List<String> objectNames = this.mysqlxSession.query(this.xbuilder.buildListObjects(this.name, pattern), rowFiler, rowToName, Collectors.toList());
         return objectNames.stream().map(this::getCollection).collect(Collectors.toList());
     }
 
+    @Override
     public List<Table> getTables() {
         // TODO we need to consider lower_case_table_names server variable for some cases
         return getTables(null);
     }
 
+    @Override
     public List<Table> getTables(String pattern) {
         Set<String> strTypes = Arrays.stream(new DbObjectType[] { DbObjectType.TABLE, DbObjectType.VIEW, DbObjectType.COLLECTION_VIEW })
                 .map(DatabaseObject.DbObjectType::toString).collect(Collectors.toSet());
-        Predicate<com.mysql.cj.result.Row> rowFiler = r -> (strTypes).contains(r.getValue(1, this.svf));
+        Predicate<com.mysql.cj.result.Row> rowFiler = r -> strTypes.contains(r.getValue(1, this.svf));
         Function<com.mysql.cj.result.Row, String> rowToName = r -> r.getValue(0, this.svf);
         List<String> objectNames = this.mysqlxSession.query(this.xbuilder.buildListObjects(this.name, pattern), rowFiler, rowToName, Collectors.toList());
         return objectNames.stream().map(this::getTable).collect(Collectors.toList());
     }
 
+    @Override
     public Collection getCollection(String collectionName) {
         return new CollectionImpl(this.mysqlxSession, this, collectionName);
     }
 
+    @Override
     public Collection getCollection(String collectionName, boolean requireExists) {
         CollectionImpl coll = new CollectionImpl(this.mysqlxSession, this, collectionName);
         if (requireExists && coll.existsInDatabase() != DbObjectStatus.EXISTS) {
@@ -124,14 +126,17 @@ public class SchemaImpl implements Schema {
         return coll;
     }
 
+    @Override
     public Table getCollectionAsTable(String collectionName) {
         return getTable(collectionName);
     }
 
+    @Override
     public Table getTable(String tableName) {
         return new TableImpl(this.mysqlxSession, this, tableName);
     }
 
+    @Override
     public Table getTable(String tableName, boolean requireExists) {
         TableImpl table = new TableImpl(this.mysqlxSession, this, tableName);
         if (requireExists && table.existsInDatabase() != DbObjectStatus.EXISTS) {
@@ -140,11 +145,13 @@ public class SchemaImpl implements Schema {
         return table;
     }
 
+    @Override
     public Collection createCollection(String collectionName) {
         this.mysqlxSession.query(this.xbuilder.buildCreateCollection(this.name, collectionName), new UpdateResultBuilder<>());
         return new CollectionImpl(this.mysqlxSession, this, collectionName);
     }
 
+    @Override
     public Collection createCollection(String collectionName, boolean reuseExisting) {
         try {
             return createCollection(collectionName);
@@ -213,4 +220,5 @@ public class SchemaImpl implements Schema {
             }
         }
     }
+
 }

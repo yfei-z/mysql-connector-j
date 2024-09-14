@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2020, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2020, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.x.devapi;
@@ -73,6 +64,7 @@ import com.mysql.cj.xdevapi.Session;
 import com.mysql.cj.xdevapi.SqlResult;
 
 public class CompressionTest extends DevApiBaseTestCase {
+
     private final Properties compressFreeTestProperties = (Properties) this.testProperties.clone();
     private String compressFreeBaseUrl = this.baseUrl;
 
@@ -87,6 +79,7 @@ public class CompressionTest extends DevApiBaseTestCase {
     private CompressionCounters counters = null;
 
     private class CompressionCounters {
+
         private static final String MYSQLX_BYTES_RECEIVED = "Mysqlx_bytes_received";
         private static final String MYSQLX_BYTES_RECEIVED_COMPRESSED_PAYLOAD = "Mysqlx_bytes_received_compressed_payload";
         private static final String MYSQLX_BYTES_RECEIVED_UNCOMPRESSED_FRAME = "Mysqlx_bytes_received_uncompressed_frame";
@@ -94,8 +87,8 @@ public class CompressionTest extends DevApiBaseTestCase {
         private static final String MYSQLX_BYTES_SENT_COMPRESSED_PAYLOAD = "Mysqlx_bytes_sent_compressed_payload";
         private static final String MYSQLX_BYTES_SENT_UNCOMPRESSED_FRAME = "Mysqlx_bytes_sent_uncompressed_frame";
 
-        private final Map<String, Integer> countersMap;
-        private final Map<String, Integer> deltasMap;
+        private final Map<String, Long> countersMap;
+        private final Map<String, Long> deltasMap;
 
         private Connection conn;
 
@@ -103,8 +96,8 @@ public class CompressionTest extends DevApiBaseTestCase {
             this.countersMap = new HashMap<>();
             this.deltasMap = new HashMap<>();
             Arrays.asList(MYSQLX_BYTES_RECEIVED, MYSQLX_BYTES_RECEIVED_COMPRESSED_PAYLOAD, MYSQLX_BYTES_RECEIVED_UNCOMPRESSED_FRAME, MYSQLX_BYTES_SENT,
-                    MYSQLX_BYTES_SENT_COMPRESSED_PAYLOAD, MYSQLX_BYTES_SENT_UNCOMPRESSED_FRAME).stream().peek(e -> this.countersMap.put(e, 0))
-                    .forEach(e -> this.deltasMap.put(e, 0));
+                    MYSQLX_BYTES_SENT_COMPRESSED_PAYLOAD, MYSQLX_BYTES_SENT_UNCOMPRESSED_FRAME).stream().peek(e -> this.countersMap.put(e, 0L))
+                    .forEach(e -> this.deltasMap.put(e, 0L));
 
             // Counters must be consulted using a classic connection due to Bug#30121765.
             String classicUrl = System.getProperty(PropertyDefinitions.SYSP_testsuite_url);
@@ -125,21 +118,21 @@ public class CompressionTest extends DevApiBaseTestCase {
                 ResultSet rs = this.conn.createStatement().executeQuery(
                         "SHOW GLOBAL STATUS WHERE Variable_name IN " + this.countersMap.keySet().stream().collect(Collectors.joining("', '", "('", "')")));
                 while (rs.next()) {
-                    this.deltasMap.put(rs.getString(1), rs.getInt(2) - this.countersMap.get(rs.getString(1)));
-                    this.countersMap.put(rs.getString(1), rs.getInt(2));
+                    this.deltasMap.put(rs.getString(1), rs.getLong(2) - this.countersMap.get(rs.getString(1)));
+                    this.countersMap.put(rs.getString(1), rs.getLong(2));
                 }
             } catch (SQLException | InterruptedException e) {
                 fail(e.getMessage());
             }
-            return this.deltasMap.get(MYSQLX_BYTES_RECEIVED) > 0 || this.deltasMap.get(MYSQLX_BYTES_SENT) > 0;
+            return this.deltasMap.get(MYSQLX_BYTES_RECEIVED) > 0L || this.deltasMap.get(MYSQLX_BYTES_SENT) > 0L;
         }
 
         boolean downlinkCompressionUsed() {
-            return this.deltasMap.get(MYSQLX_BYTES_SENT_COMPRESSED_PAYLOAD) > 0;
+            return this.deltasMap.get(MYSQLX_BYTES_SENT_COMPRESSED_PAYLOAD) > 0L;
         }
 
         boolean uplinkCompressionUsed() {
-            return this.deltasMap.get(MYSQLX_BYTES_RECEIVED_COMPRESSED_PAYLOAD) > 0;
+            return this.deltasMap.get(MYSQLX_BYTES_RECEIVED_COMPRESSED_PAYLOAD) > 0L;
         }
 
         boolean usedCompression() {
@@ -153,11 +146,13 @@ public class CompressionTest extends DevApiBaseTestCase {
                 fail(e.getMessage());
             }
         }
+
     }
 
     private CompressionSettings compressionSettings = null;
 
     private class CompressionSettings {
+
         private final boolean serverSupportsCompression;
         private final String compressionAlgorithms;
 
@@ -181,33 +176,40 @@ public class CompressionTest extends DevApiBaseTestCase {
         void resetCompressionSettings() {
             setCompressionAlgorithms(this.compressionAlgorithms);
         }
+
     }
 
     public static class TestInflaterInputStream extends InflaterInputStream {
+
         public static boolean instantiatedAtLeastOnce = false;
 
         public TestInflaterInputStream(InputStream in) {
             super(in);
             instantiatedAtLeastOnce = true;
         }
+
     }
 
     public static class TestSyncFlushDeflaterOutputStream extends SyncFlushDeflaterOutputStream {
+
         public static boolean instantiatedAtLeastOnce = false;
 
         public TestSyncFlushDeflaterOutputStream(OutputStream out) {
             super(out);
             instantiatedAtLeastOnce = true;
         }
+
     }
 
     public static class TestInputStream extends FilterInputStream {
+
         public static boolean instantiatedAtLeastOnce = false;
 
         public TestInputStream(InputStream in) {
             super(in);
             instantiatedAtLeastOnce = true;
         }
+
     }
 
     private String compressionAlgorithmAgreed(Session sess) {
@@ -334,7 +336,6 @@ public class CompressionTest extends DevApiBaseTestCase {
             assertEquals("deflate_stream", compressionAlgorithmAgreed(testSession));
             testSession.close();
         }
-
     }
 
     /**
@@ -785,10 +786,10 @@ public class CompressionTest extends DevApiBaseTestCase {
 
     /**
      * Test fix for Bug#99708 (31510398), mysql-connector-java 8.0.20 ASSERTION FAILED: Unknown message type: 57 s.close.
-     * 
+     *
      * This test is not entirely deterministic, since it depends on the size of the compressed data returned from the server. Observations showed that it fails
      * in pretty close to 100% of executions.
-     * 
+     *
      * The test fails by throwing an exception.
      */
     @Test
@@ -815,4 +816,5 @@ public class CompressionTest extends DevApiBaseTestCase {
             dropCollection("testBug99708");
         }
     }
+
 }

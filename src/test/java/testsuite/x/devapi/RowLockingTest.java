@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.x.devapi;
@@ -59,6 +50,7 @@ public class RowLockingTest extends BaseCollectionTestCase {
     static Throwable initException[] = null;
 
     static class MyUncaughtExceptionHandler implements UncaughtExceptionHandler {
+
         private int index = 0;
 
         MyUncaughtExceptionHandler(int n) {
@@ -70,9 +62,11 @@ public class RowLockingTest extends BaseCollectionTestCase {
             System.out.println("I caught the exception");
             initException[this.index] = e;
         }
+
     }
 
     public class SelectRowLock extends Thread {
+
         private int action;
         private int lock;
         private int shouldWait;
@@ -172,12 +166,12 @@ public class RowLockingTest extends BaseCollectionTestCase {
                     sess.close();
                 }
             }
-
         }
 
     }
 
     public class FindRowLock extends Thread {
+
         private int action;
         private int lock;
         private int shouldWait;
@@ -267,12 +261,12 @@ public class RowLockingTest extends BaseCollectionTestCase {
                     sess.close();
                 }
             }
-
         }
 
     }
 
     public class SelectRowDeadLock extends Thread {
+
         private int action;
         private int lock;
         private String condition;
@@ -364,12 +358,12 @@ public class RowLockingTest extends BaseCollectionTestCase {
                     sess.close();
                 }
             }
-
         }
 
     }
 
     public class FindRowDeadLock extends Thread {
+
         private int action;
         private int lock;
         private String condition;
@@ -450,14 +444,13 @@ public class RowLockingTest extends BaseCollectionTestCase {
                     sess.close();
                 }
             }
-
         }
 
     }
 
     /**
      * START collection.find() tests
-     * 
+     *
      * @throws Exception
      */
 
@@ -474,13 +467,13 @@ public class RowLockingTest extends BaseCollectionTestCase {
                 DbDoc newDoc2 = new DbDocImpl();
                 newDoc2.add("F1", new JsonNumber().setValue(String.valueOf(i)));
                 newDoc2.add("F2", new JsonString().setValue("Field-1-Data-" + i));
-                newDoc2.add("F3", new JsonNumber().setValue(String.valueOf(10 * (i) + 0.1234)));
+                newDoc2.add("F3", new JsonNumber().setValue(String.valueOf(10 * i + 0.1234)));
                 jsonlist[i - 1] = newDoc2;
                 newDoc2 = null;
             }
             this.collection.add(jsonlist).execute();
 
-            assertEquals((10), this.collection.count());
+            assertEquals(10, this.collection.count());
 
             /* Two threads with same conditions, select for update in one and update in second */
             this.CheckFlag = 0;
@@ -612,13 +605,13 @@ public class RowLockingTest extends BaseCollectionTestCase {
                 DbDoc newDoc2 = new DbDocImpl();
                 newDoc2.add("F1", new JsonNumber().setValue(String.valueOf(i)));
                 newDoc2.add("F2", new JsonString().setValue("Field-1-Data-" + i));
-                newDoc2.add("F3", new JsonNumber().setValue(String.valueOf(10 * (i) + 0.1234)));
+                newDoc2.add("F3", new JsonNumber().setValue(String.valueOf(10 * i + 0.1234)));
                 jsonlist[i - 1] = newDoc2;
                 newDoc2 = null;
             }
             this.collection.add(jsonlist).execute();
 
-            assertEquals((10), this.collection.count());
+            assertEquals(10, this.collection.count());
             this.CheckFlag = 0;
             initException = new Throwable[2];
             SelectRowLock[] Thrd = new SelectRowLock[2];

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.admin;
@@ -91,9 +82,9 @@ public class ServerController {
 
     /**
      * Creates a ServerController with the directory for the MySQL server.
-     * 
+     *
      * The 'datadir' is set to the same directory.
-     * 
+     *
      * @param baseDir
      *            the base directory for the MySQL server.
      */
@@ -104,7 +95,7 @@ public class ServerController {
     /**
      * Creates a server controller for the MySQL server with the given basedir
      * and datadir.
-     * 
+     *
      * @param basedir
      *            the basedir to use when starting MySQL.
      * @param datadir
@@ -115,7 +106,7 @@ public class ServerController {
 
     /**
      * Sets the basedir to use when starting MySQL.
-     * 
+     *
      * @param baseDir
      *            the basedir to use when starting MySQL.
      */
@@ -125,7 +116,7 @@ public class ServerController {
 
     /**
      * Sets the data to use when starting MySQL.
-     * 
+     *
      * @param dataDir
      *            the basedir to use when starting MySQL.
      */
@@ -136,7 +127,7 @@ public class ServerController {
     /**
      * Starts the server, returning a java.lang.Process instance that represents
      * the mysql server.
-     * 
+     *
      * @return Process a java.lang.Process instance representing the mysql
      *         server process.
      * @throws IOException
@@ -153,10 +144,10 @@ public class ServerController {
 
     /**
      * Stops the server (if started)
-     * 
+     *
      * @param forceIfNecessary
      *            use forceStop if mysqladmin doesn't shut the server down
-     * 
+     *
      * @throws IOException
      *             if an error occurs while stopping the server
      */
@@ -211,7 +202,7 @@ public class ServerController {
     /**
      * Returns the list of properties that will be used to start/control the
      * server.
-     * 
+     *
      * @return Properties the list of properties.
      */
     public synchronized Properties getServerProps() {
@@ -225,7 +216,7 @@ public class ServerController {
     /**
      * Returns the full commandline used to start the mysql server, including
      * and arguments to be passed to the server process.
-     * 
+     *
      * @return String the commandline used to start the mysql server.
      */
     private String getCommandLine() {
@@ -237,7 +228,7 @@ public class ServerController {
 
     /**
      * Returns the fully-qualifed path to the 'mysqld' executable
-     * 
+     *
      * @return String the path to the server executable.
      */
     private String getFullExecutablePath() {
@@ -279,7 +270,7 @@ public class ServerController {
     /**
      * Builds the list of command-line arguments that will be passed to the
      * mysql server to be started.
-     * 
+     *
      * @return String the list of command-line arguments.
      */
     private String buildOptionalCommandLine() {
@@ -312,10 +303,10 @@ public class ServerController {
 
     /**
      * Returns true if the property does not belong as a command-line argument
-     * 
+     *
      * @param propName
      *            property name
-     * 
+     *
      * @return boolean if the property should not be a command-line argument.
      */
     private boolean isNonCommandLineArgument(String propName) {
@@ -324,10 +315,11 @@ public class ServerController {
 
     /**
      * Is this ServerController running on a Windows operating system?
-     * 
+     *
      * @return boolean if this ServerController is running on Windows
      */
     private boolean runningOnWindows() {
         return StringUtils.indexOfIgnoreCase(Constants.OS_NAME, "WINDOWS") != -1;
     }
+
 }

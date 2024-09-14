@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2002, 2023, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package testsuite.simple;
@@ -75,7 +66,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -127,9 +117,10 @@ import testsuite.TestUtils;
  * Tests java.sql.Connection functionality
  */
 public class ConnectionTest extends BaseTestCase {
+
     /**
      * Tests catalog functionality
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -147,7 +138,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests a cluster connection for failover, requires a two-node cluster URL specified in com.mysql.jdbc.testsuite.ClusterUrl system property.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -159,7 +150,7 @@ public class ConnectionTest extends BaseTestCase {
 
         Object versionNumObj = getSingleValueWithQuery("SHOW VARIABLES LIKE 'version'");
 
-        if ((versionNumObj != null) && (versionNumObj.toString().indexOf("cluster") != -1)) {
+        if (versionNumObj != null && versionNumObj.toString().indexOf("cluster") != -1) {
             Connection clusterConn = null;
             Statement clusterStmt = null;
 
@@ -218,7 +209,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Old test was passing due to http://bugs.mysql.com/bug.php?id=989 which is fixed for 5.5+
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -282,7 +273,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests isolation level functionality
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -317,63 +308,62 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests the savepoint functionality in MySQL.
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testSavepoint() throws Exception {
-        DatabaseMetaData dbmd = this.conn.getMetaData();
+        assumeTrue(this.conn.getMetaData().supportsSavepoints(), "Savepoints not supported");
 
-        if (dbmd.supportsSavepoints()) {
-            System.out.println("Testing SAVEPOINTs");
+        try {
+            this.conn.setAutoCommit(true);
 
-            try {
-                this.conn.setAutoCommit(true);
+            createTable("testSavepoints", "(field1 int)", "InnoDB");
 
-                createTable("testSavepoints", "(field1 int)", "InnoDB");
+            // Try with named save points
+            this.conn.setAutoCommit(false);
+            this.stmt.executeUpdate("INSERT INTO testSavepoints VALUES (1)");
 
-                // Try with named save points
-                this.conn.setAutoCommit(false);
-                this.stmt.executeUpdate("INSERT INTO testSavepoints VALUES (1)");
+            Savepoint afterInsert = this.conn.setSavepoint("afterInsert");
+            this.stmt.executeUpdate("UPDATE testSavepoints SET field1=2");
 
-                Savepoint afterInsert = this.conn.setSavepoint("afterInsert");
-                this.stmt.executeUpdate("UPDATE testSavepoints SET field1=2");
+            Savepoint afterUpdate = this.conn.setSavepoint("afterUpdate");
+            this.stmt.executeUpdate("DELETE FROM testSavepoints");
 
-                Savepoint afterUpdate = this.conn.setSavepoint("afterUpdate");
-                this.stmt.executeUpdate("DELETE FROM testSavepoints");
+            assertEquals(0, getRowCount("testSavepoints"), "Row count should be 0");
+            this.conn.rollback(afterUpdate);
+            assertEquals(1, getRowCount("testSavepoints"), "Row count should be 1");
+            assertEquals("2", getSingleValue("testSavepoints", "field1", null).toString(), "Value should be 2");
+            this.conn.rollback(afterInsert);
+            assertEquals("1", getSingleValue("testSavepoints", "field1", null).toString(), "Value should be 1");
+            this.conn.rollback();
+            assertEquals(0, getRowCount("testSavepoints"), "Row count should be 0");
 
-                assertTrue(getRowCount("testSavepoints") == 0, "Row count should be 0");
-                this.conn.rollback(afterUpdate);
-                assertTrue(getRowCount("testSavepoints") == 1, "Row count should be 1");
-                assertTrue("2".equals(getSingleValue("testSavepoints", "field1", null).toString()), "Value should be 2");
-                this.conn.rollback(afterInsert);
-                assertTrue("1".equals(getSingleValue("testSavepoints", "field1", null).toString()), "Value should be 1");
-                this.conn.rollback();
-                assertTrue(getRowCount("testSavepoints") == 0, "Row count should be 0");
+            // Try with 'anonymous' save points
+            this.conn.rollback();
 
-                // Try with 'anonymous' save points
-                this.conn.rollback();
+            this.stmt.executeUpdate("INSERT INTO testSavepoints VALUES (1)");
+            afterInsert = this.conn.setSavepoint();
+            this.stmt.executeUpdate("UPDATE testSavepoints SET field1=2");
+            afterUpdate = this.conn.setSavepoint();
+            this.stmt.executeUpdate("DELETE FROM testSavepoints");
 
-                this.stmt.executeUpdate("INSERT INTO testSavepoints VALUES (1)");
-                afterInsert = this.conn.setSavepoint();
-                this.stmt.executeUpdate("UPDATE testSavepoints SET field1=2");
-                afterUpdate = this.conn.setSavepoint();
-                this.stmt.executeUpdate("DELETE FROM testSavepoints");
+            assertEquals(0, getRowCount("testSavepoints"), "Row count should be 0");
+            this.conn.rollback(afterUpdate);
+            assertEquals(1, getRowCount("testSavepoints"), "Row count should be 1");
+            assertEquals("2", getSingleValue("testSavepoints", "field1", null).toString(), "Value should be 2");
+            this.conn.rollback(afterInsert);
+            assertEquals("1", getSingleValue("testSavepoints", "field1", null).toString(), "Value should be 1");
+            this.conn.rollback();
 
-                assertTrue(getRowCount("testSavepoints") == 0, "Row count should be 0");
-                this.conn.rollback(afterUpdate);
-                assertTrue(getRowCount("testSavepoints") == 1, "Row count should be 1");
-                assertTrue("2".equals(getSingleValue("testSavepoints", "field1", null).toString()), "Value should be 2");
-                this.conn.rollback(afterInsert);
-                assertTrue("1".equals(getSingleValue("testSavepoints", "field1", null).toString()), "Value should be 1");
-                this.conn.rollback();
-
-                this.conn.releaseSavepoint(this.conn.setSavepoint());
-            } finally {
-                this.conn.setAutoCommit(true);
-            }
-        } else {
-            System.out.println("MySQL version does not support SAVEPOINTs");
+            Savepoint savepoint = this.conn.setSavepoint();
+            this.conn.releaseSavepoint(savepoint);
+            assertThrows(SQLException.class, "SAVEPOINT .* does not exist", () -> {
+                this.conn.rollback(savepoint);
+                return null;
+            });
+        } finally {
+            this.conn.setAutoCommit(true);
         }
     }
 
@@ -418,7 +408,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests functionality of the ConnectionPropertiesTransform interface.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -436,7 +426,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests functionality of using URLs in 'LOAD DATA LOCAL INFILE' statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -502,7 +492,7 @@ public class ConnectionTest extends BaseTestCase {
             loadStmt.execute("LOAD DATA LOCAL INFILE 'foo:///' INTO TABLE testLocalInfileWithUrl" + charset);
         } catch (SQLException sqlEx) {
             assertTrue(sqlEx.getMessage() != null);
-            assertTrue(sqlEx.getMessage().indexOf("FileNotFoundException") != -1);
+            assertTrue(sqlEx.getMessage().indexOf(isServerRunningOnWindows() ? "IOException" : "FileNotFoundException") != -1);
         }
     }
 
@@ -592,7 +582,7 @@ public class ConnectionTest extends BaseTestCase {
     /**
      * Tests whether or not the configuration 'useLocalSessionState' actually prevents non-needed 'set autocommit=', 'set session transaction isolation ...'
      * and 'show variables like tx_isolation' queries.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -625,12 +615,11 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests whether re-connect with non-read-only connection can happen.
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testFailoverConnection() throws Exception {
-
         if (!isServerRunningOnWindows()) { // windows sockets don't work for this test
             Properties props = new Properties();
             props.setProperty(PropertyKey.sslMode.getKeyName(), SslMode.DISABLED.name());
@@ -687,22 +676,20 @@ public class ConnectionTest extends BaseTestCase {
         assertTrue("false".equals(cannedProps.getProperty(PropertyKey.failOverReadOnly.getKeyName())));
 
         // this will fail, but we test that too
-        assertThrows(InvalidConnectionAttributeException.class, "Can't find configuration template named 'clusterBase2'", new Callable<Void>() {
-            public Void call() throws Exception {
-                try {
-                    ConnectionUrl.getConnectionUrlInstance("jdbc:mysql:///?useConfigs=clusterBase,clusterBase2", null);
-                    return null;
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                    throw t;
-                }
+        assertThrows(InvalidConnectionAttributeException.class, "Can't find configuration template named 'clusterBase2'", () -> {
+            try {
+                ConnectionUrl.getConnectionUrlInstance("jdbc:mysql:///?useConfigs=clusterBase,clusterBase2", null);
+                return null;
+            } catch (Throwable t) {
+                t.printStackTrace();
+                throw t;
             }
         });
     }
 
     /**
      * Checks implementation of 'dontTrackOpenResources' property.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -791,7 +778,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests setting profileSQL on/off in the span of one connection.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -825,7 +812,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests if gatherPerfMetrics works.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -854,7 +841,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests if useCompress works.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -875,7 +862,7 @@ public class ConnectionTest extends BaseTestCase {
             this.rs = this.stmt.executeQuery("SHOW VARIABLES LIKE 'innodb_log_file_size'");
             this.rs.next();
             assumeFalse(this.rs.getInt(2) < 1024 * 1024 * 32 * 10,
-                    "You need to increase innodb_log_file_size to at least " + (1024 * 1024 * 32 * 10) + " before running this test!");
+                    "You need to increase innodb_log_file_size to at least " + 1024 * 1024 * 32 * 10 + " before running this test!");
         }
 
         try {
@@ -901,7 +888,7 @@ public class ConnectionTest extends BaseTestCase {
     /**
      * @param useCompression
      * @param maxPayloadSize
-     * 
+     *
      * @throws Exception
      */
     private void testCompressionWith(String useCompression, int maxPayloadSize) throws Exception {
@@ -911,7 +898,7 @@ public class ConnectionTest extends BaseTestCase {
         File testBlobFile = File.createTempFile("cmj-testblob", ".dat");
         testBlobFile.deleteOnExit();
 
-        // TODO: following cleanup doesn't work correctly during concurrent execution of testsuite 
+        // TODO: following cleanup doesn't work correctly during concurrent execution of testsuite
         // cleanupTempFiles(testBlobFile, "cmj-testblob");
 
         BufferedOutputStream bOut = new BufferedOutputStream(new FileOutputStream(testBlobFile));
@@ -966,7 +953,7 @@ public class ConnectionTest extends BaseTestCase {
      * Tests feature of "localSocketAddress", by enumerating local IF's and trying each one in turn. This test might take a long time to run, since we can't set
      * timeouts if we're using localSocketAddress. We try and keep the time down on the testcase by spawning the checking of each interface off into separate
      * threads.
-     * 
+     *
      * @throws Exception
      *             if the test can't use at least one of the local machine's interfaces to make an outgoing connection to the server.
      */
@@ -1019,6 +1006,7 @@ public class ConnectionTest extends BaseTestCase {
     }
 
     class SpawnedWorkerCounter {
+
         protected int workerCount = 0;
 
         synchronized void setWorkerCount(int i) {
@@ -1029,9 +1017,11 @@ public class ConnectionTest extends BaseTestCase {
             this.workerCount--;
             notify();
         }
+
     }
 
     class LocalSocketAddressCheckThread extends Thread {
+
         boolean atLeastOneWorked = false;
         Enumeration<InetAddress> allAddresses = null;
         SpawnedWorkerCounter counter = null;
@@ -1043,7 +1033,6 @@ public class ConnectionTest extends BaseTestCase {
 
         @Override
         public void run() {
-
             while (this.allAddresses.hasMoreElements()) {
                 InetAddress addr = this.allAddresses.nextElement();
 
@@ -1065,6 +1054,7 @@ public class ConnectionTest extends BaseTestCase {
 
             this.counter.decrementWorkerCount();
         }
+
     }
 
     @Test
@@ -1149,10 +1139,10 @@ public class ConnectionTest extends BaseTestCase {
 
         // space is important here, we don't want to count occurrences in stack traces
         while (rollbackPos != -1) {
-            rollbackPos = searchIn.indexOf(" rollback", rollbackPos);
+            rollbackPos = searchIn.indexOf(" ROLLBACK", rollbackPos);
 
             if (rollbackPos != -1) {
-                rollbackPos += "rollback".length();
+                rollbackPos += "ROLLBACK".length();
                 rollbackCount++;
             }
         }
@@ -1164,10 +1154,10 @@ public class ConnectionTest extends BaseTestCase {
 
         // space is important here, we don't want to count "autocommit" nor occurrences in stack traces
         while (commitPos != -1) {
-            commitPos = searchIn.indexOf(" commit", commitPos);
+            commitPos = searchIn.indexOf(" COMMIT", commitPos);
 
             if (commitPos != -1) {
-                commitPos += " commit".length();
+                commitPos += " COMMIT".length();
                 commitCount++;
             }
         }
@@ -1177,7 +1167,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Checks if setting useCursorFetch to "true" automatically enables server-side prepared statements.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1263,11 +1253,7 @@ public class ConnectionTest extends BaseTestCase {
 
             try {
                 toMatch.invoke(invokeOn, args);
-            } catch (IllegalArgumentException e) {
-
-            } catch (IllegalAccessException e) {
-
-            } catch (InvocationTargetException e) {
+            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 
             } catch (java.lang.AbstractMethodError e) {
                 throw e;
@@ -1422,7 +1408,7 @@ public class ConnectionTest extends BaseTestCase {
             this.rs.next();
             String str = this.rs.getString(1);
 
-            assertEquals((256 * 256 * 256 - 5), str.length());
+            assertEquals(256 * 256 * 256 - 5, str.length());
 
             for (int i = 0; i < str.length(); i++) {
                 if (str.charAt(i) != 'a') {
@@ -1463,16 +1449,16 @@ public class ConnectionTest extends BaseTestCase {
             for (int i = 0; i < 2; i++) {
                 BufferingLogger.startLoggingToBuffer();
                 notLocalState.setReadOnly(true);
-                assertTrue(BufferingLogger.getBuffer().toString().indexOf("set session transaction read only") != -1);
-                notLocalState.createStatement().execute("set session transaction read write");
+                assertTrue(BufferingLogger.getBuffer().toString().indexOf("SET SESSION TRANSACTION READ ONLY") != -1);
+                notLocalState.createStatement().execute("SET SESSION TRANSACTION READ WRITE");
                 assertFalse(notLocalState.isReadOnly());
             }
 
             for (int i = 0; i < 2; i++) {
                 BufferingLogger.startLoggingToBuffer();
                 notLocalState.setReadOnly(false);
-                assertTrue(BufferingLogger.getBuffer().toString().indexOf("set session transaction read write") != -1);
-                notLocalState.createStatement().execute("set session transaction read only");
+                assertTrue(BufferingLogger.getBuffer().toString().indexOf("SET SESSION TRANSACTION READ WRITE") != -1);
+                notLocalState.createStatement().execute("SET SESSION TRANSACTION READ ONLY");
                 assertTrue(notLocalState.isReadOnly());
             }
 
@@ -1485,9 +1471,9 @@ public class ConnectionTest extends BaseTestCase {
                 BufferingLogger.startLoggingToBuffer();
                 localState.setReadOnly(true);
                 if (i == 0) {
-                    assertTrue(BufferingLogger.getBuffer().toString().indexOf("set session transaction read only") != -1);
+                    assertTrue(BufferingLogger.getBuffer().toString().indexOf("SET SESSION TRANSACTION READ ONLY") != -1);
                 } else {
-                    assertTrue(BufferingLogger.getBuffer().toString().indexOf("set session transaction read only") == -1);
+                    assertTrue(BufferingLogger.getBuffer().toString().indexOf("SET SESSION TRANSACTION READ ONLY") == -1);
                 }
                 BufferingLogger.startLoggingToBuffer();
                 localState.isReadOnly();
@@ -1501,7 +1487,7 @@ public class ConnectionTest extends BaseTestCase {
             for (int i = 0; i < 2; i++) {
                 BufferingLogger.startLoggingToBuffer();
                 noOptimization.setReadOnly(true);
-                assertTrue(BufferingLogger.getBuffer().toString().indexOf("set session transaction read only") == -1);
+                assertTrue(BufferingLogger.getBuffer().toString().indexOf("SET SESSION TRANSACTION READ ONLY") == -1);
                 BufferingLogger.startLoggingToBuffer();
                 noOptimization.isReadOnly();
                 assertTrue(BufferingLogger.getBuffer().toString().indexOf("select @@session." + s) == -1);
@@ -1513,7 +1499,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * IPv6 Connection test.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1531,7 +1517,7 @@ public class ConnectionTest extends BaseTestCase {
         connProps.setProperty(PropertyKey.PASSWORD.getKeyName(), testUser);
 
         List<Inet6Address> ipv6List = isMysqlRunningLocally() ? TestUtils.getIpv6List() : TestUtils.getIpv6List(getHostFromTestsuiteUrl());
-        List<String> ipv6Addrs = ipv6List.stream().map((e) -> e.getHostAddress()).collect(Collectors.toList());
+        List<String> ipv6Addrs = ipv6List.stream().map(Inet6Address::getHostAddress).collect(Collectors.toList());
         if (isMysqlRunningLocally()) {
             ipv6Addrs.add("::1"); // IPv6 loopback
         }
@@ -1572,56 +1558,48 @@ public class ConnectionTest extends BaseTestCase {
      */
     @Test
     public void testDriverAcceptsURLNullArgument() {
-        assertThrows(SQLException.class, "The database URL cannot be null.", new Callable<Void>() {
-            public Void call() throws Exception {
-                Driver mysqlDriver = new Driver();
-                mysqlDriver.acceptsURL(null);
-                return null;
-            }
+        assertThrows(SQLException.class, "The database URL cannot be null.", () -> {
+            Driver mysqlDriver = new Driver();
+            mysqlDriver.acceptsURL(null);
+            return null;
         });
     }
 
     /**
      * Test for Driver.connect() behavior clarifications:
      * - connect() throws SQLException if URL is null.
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testDriverConnectNullArgument() throws Exception {
         assertThrows(SQLException.class,
                 "Cannot load connection class because of underlying exception: com.mysql.cj.exceptions.WrongArgumentException: The database URL cannot be null.",
-                new Callable<Void>() {
-                    public Void call() throws Exception {
-                        Driver mysqlDriver = new Driver();
-                        mysqlDriver.connect(null, null);
-                        return null;
-                    }
+                () -> {
+                    Driver mysqlDriver = new Driver();
+                    mysqlDriver.connect(null, null);
+                    return null;
                 });
 
-        assertThrows(SQLException.class, "The url cannot be null", new Callable<Void>() {
-            public Void call() throws Exception {
-                DriverManager.getConnection(null);
-                return null;
-            }
+        assertThrows(SQLException.class, "The url cannot be null", () -> {
+            DriverManager.getConnection(null);
+            return null;
         });
     }
 
     /**
      * Test for Driver.connect() behavior clarifications:
      * - connect() properties precedence is implementation-defined.
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testDriverConnectPropertiesPrecedence() throws Exception {
-        assertThrows(SQLException.class, "Access denied for user 'dummy'@'[^']+' \\(using password: YES\\)", new Callable<Void>() {
-            public Void call() throws Exception {
-                DriverManager.getConnection(
-                        (BaseTestCase.dbUrl.endsWith("?") ? BaseTestCase.dbUrl : BaseTestCase.dbUrl + "&") + "sslMode=DISABLED&allowPublicKeyRetrieval=true",
-                        "dummy", "dummy");
-                return null;
-            }
+        assertThrows(SQLException.class, "Access denied for user 'dummy'@'[^']+' \\(using password: YES\\)", () -> {
+            DriverManager.getConnection(
+                    (BaseTestCase.dbUrl.endsWith("?") ? BaseTestCase.dbUrl : BaseTestCase.dbUrl + "&") + "sslMode=DISABLED&allowPublicKeyRetrieval=true",
+                    "dummy", "dummy");
+            return null;
         });
 
         // make sure the connection string doesn't contain 'maxRows'
@@ -1669,7 +1647,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Test for REF_CURSOR support checking.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1680,11 +1658,11 @@ public class ConnectionTest extends BaseTestCase {
     /**
      * Test the new connection property 'enableEscapeProcessing', as well as the old connection property 'processEscapeCodesForPrepStmts' and interrelation
      * between them.
-     * 
+     *
      * This test uses a QueryInterceptor to capture the query sent to the server and assert whether escape processing has been done in the client side or if
      * the query is sent untouched and escape processing will be done at server side, according to provided connection properties and type of Statement objects
      * in use.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -1762,12 +1740,13 @@ public class ConnectionTest extends BaseTestCase {
     }
 
     public static class TestEnableEscapeProcessingQueryInterceptor extends BaseQueryInterceptor {
+
         @Override
         public <T extends Resultset> T preProcess(Supplier<String> str, Query interceptedQuery) {
             String sql = str == null ? null : str.get();
             if (sql == null) {
                 if (interceptedQuery instanceof ClientPreparedStatement) {
-                    sql = ((PreparedQuery) ((ClientPreparedStatement) interceptedQuery)).asSql();
+                    sql = ((PreparedQuery) (ClientPreparedStatement) interceptedQuery).asSql();
                 } else if (interceptedQuery instanceof PreparedQuery) {
                     sql = ((PreparedQuery) interceptedQuery).asSql();
                 }
@@ -1790,10 +1769,9 @@ public class ConnectionTest extends BaseTestCase {
                         || !isPreparedStatement && enableEscapeProcessing == escapeProcessingDone, testCase);
             }
             final String fsql = sql;
-            return super.preProcess(() -> {
-                return fsql;
-            }, interceptedQuery);
+            return super.preProcess(() -> fsql, interceptedQuery);
         }
+
     }
 
     @Test
@@ -1918,7 +1896,7 @@ public class ConnectionTest extends BaseTestCase {
     /**
      * Tests "LOAD DATA LOCAL INFILE" statements when enabled but restricted to a specific path, by specifying a path in the connection property
      * 'allowLoadLocalInfileInPath'.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -2217,7 +2195,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests WL#14392, Improve timeout error messages [classic].
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -2238,7 +2216,7 @@ public class ConnectionTest extends BaseTestCase {
         Thread.sleep(1500 * seconds);
         if (versionMeetsMinimum(8, 0, 24) && !(isServerRunningOnWindows() && System.getProperty("os.name").contains("Windows"))) { // server reports timeout
             // TS.1.1 Create a connection to a MySQL configured with a short session timeout value.
-            // Sleep for a time longer than the specified timeout and assess that the error message obtained is the new one.        
+            // Sleep for a time longer than the specified timeout and assess that the error message obtained is the new one.
             assertThrows(CommunicationsException.class,
                     "The client was disconnected by the server because of inactivity. See wait_timeout and interactive_timeout for configuring this behavior.",
                     () -> timeoutConn.createStatement().executeQuery("SELECT 1"));
@@ -2267,7 +2245,7 @@ public class ConnectionTest extends BaseTestCase {
 
     /**
      * Tests WL#14805, Remove support for TLS 1.0 and 1.1.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -2279,44 +2257,52 @@ public class ConnectionTest extends BaseTestCase {
         assumeTrue(supportsTestCertificates(this.stmt),
                 "This test requires the server configured with SSL certificates from ConnectorJ/src/test/config/ssl-test-certs");
 
+        String testCipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"; // TLSv1.2 IANA Cipher name.
+        String expectedCipher = "ECDHE-RSA-AES128-GCM-SHA256"; // TLSv1.2 OpenSSL Cipher name.
+        String testTlsVersion = getHighestCommonTlsVersion(); // At least TLSv1.2 is expected to be supported.
+        if ("TLSv1.3".equalsIgnoreCase(testTlsVersion)) {
+            testCipher = "TLS_AES_256_GCM_SHA384"; // TLSv1.3 IANA Cipher name.
+            expectedCipher = "TLS_AES_256_GCM_SHA384"; // TLSv1.3 IANA Cipher name.
+        }
+
         Connection con = null;
         Properties props = new Properties();
         props.setProperty(PropertyKey.sslMode.getKeyName(), SslMode.REQUIRED.name());
         props.setProperty(PropertyKey.allowPublicKeyRetrieval.getKeyName(), "true");
 
-        // TS.FR.1_1. Create a Connection with the connection property tlsVersions=TLSv1.2. Assess that the connection is created successfully and it is using 
-        // TLSv1.2.
-        props.setProperty(PropertyKey.tlsVersions.getKeyName(), "TLSv1.2");
+        // TS.FR.1_1. Create a Connection with the connection property tlsVersions=TLSv1.2/TLSv1.3. Assess that the connection is created successfully and it is
+        //            using TLSv1.2/TLSv1.3.
+        props.setProperty(PropertyKey.tlsVersions.getKeyName(), testTlsVersion);
         con = getConnectionWithProps(props);
         assertTrue(((MysqlConnection) con).getSession().isSSLEstablished());
-        assertSessionStatusEquals(con.createStatement(), "ssl_version", "TLSv1.2");
+        assertSessionStatusEquals(con.createStatement(), "ssl_version", testTlsVersion);
         con.close();
 
-        // TS.FR.1_2. Create a Connection with the connection property enabledTLSProtocols=TLSv1.2. Assess that the connection is created successfully and it is
-        //            using TLSv1.2.
+        // TS.FR.1_2. Create a Connection with the connection property enabledTLSProtocols=TLSv1.2/TLSv1.3. Assess that the connection is created successfully
+        //            and it is using TLSv1.2.
         props.remove(PropertyKey.tlsVersions.getKeyName());
-        props.setProperty("enabledTLSProtocols", "TLSv1.2");
+        props.setProperty("enabledTLSProtocols", testTlsVersion);
         con = getConnectionWithProps(props);
         assertTrue(((MysqlConnection) con).getSession().isSSLEstablished());
-        assertSessionStatusEquals(con.createStatement(), "ssl_version", "TLSv1.2");
+        assertSessionStatusEquals(con.createStatement(), "ssl_version", testTlsVersion);
         con.close();
         props.remove("enabledTLSProtocols");
 
         // TS.FR.2_1. Create a Connection with the connection property tlsCiphersuites=[valid-cipher-suite]. Assess that the connection is created successfully
         //            and it is using the cipher suite specified.
-        props.setProperty(PropertyKey.tlsCiphersuites.getKeyName(), "TLS_DHE_RSA_WITH_AES_128_CBC_SHA");
+        props.setProperty(PropertyKey.tlsCiphersuites.getKeyName(), testCipher);
         con = getConnectionWithProps(props);
         assertTrue(((MysqlConnection) con).getSession().isSSLEstablished());
-        assertSessionStatusEquals(con.createStatement(), "ssl_cipher", "DHE-RSA-AES128-SHA");
+        assertSessionStatusEquals(con.createStatement(), "ssl_cipher", expectedCipher);
         con.close();
 
         // TS.FR.2_2. Create a Connection with the connection property enabledSSLCipherSuites=[valid-cipher-suite] . Assess that the connection is created
         //            successfully and it is using the cipher suite specified.
         props.remove(PropertyKey.tlsCiphersuites.getKeyName());
-        props.setProperty("enabledSSLCipherSuites", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA");
+        props.setProperty("enabledSSLCipherSuites", testCipher);
         con = getConnectionWithProps(props);
         assertTrue(((MysqlConnection) con).getSession().isSSLEstablished());
-        assertSessionStatusEquals(con.createStatement(), "ssl_cipher", "DHE-RSA-AES128-SHA");
+        assertSessionStatusEquals(con.createStatement(), "ssl_cipher", expectedCipher);
         con.close();
         props.remove("enabledSSLCipherSuites");
 
@@ -2402,4 +2388,5 @@ public class ConnectionTest extends BaseTestCase {
         assertSessionStatusEquals(con.createStatement(), "ssl_version", "TLSv1.2");
         con.close();
     }
+
 }

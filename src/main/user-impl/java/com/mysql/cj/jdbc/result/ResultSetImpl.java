@@ -1,39 +1,27 @@
 /*
- * Copyright (c) 2002, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.jdbc.result;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -216,11 +204,13 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
     private ValueFactory<ZonedDateTime> defaultZonedDateTimeValueFactory;
 
     protected RuntimeProperty<Boolean> emulateLocators;
+
+    protected boolean treatMysqlDatetimeAsTimestamp = false;
     protected boolean yearIsDateType = true;
 
     /**
      * Create a result set for an executeUpdate statement.
-     * 
+     *
      * @param ok
      *            {@link OkPacket}
      * @param conn
@@ -244,14 +234,14 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     /**
      * Creates a new ResultSet object.
-     * 
+     *
      * @param tuples
      *            actual row data
      * @param conn
      *            the Connection that created us.
      * @param creatorStmt
      *            the Statement that created us.
-     * 
+     *
      * @throws SQLException
      *             if an error occurs
      */
@@ -267,6 +257,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
         PropertySet pset = this.connection.getPropertySet();
         this.emulateLocators = pset.getBooleanProperty(PropertyKey.emulateLocators);
         this.padCharsWithSpace = pset.getBooleanProperty(PropertyKey.padCharsWithSpace).getValue();
+        this.treatMysqlDatetimeAsTimestamp = pset.getBooleanProperty(PropertyKey.treatMysqlDatetimeAsTimestamp).getValue();
         this.yearIsDateType = pset.getBooleanProperty(PropertyKey.yearIsDateType).getValue();
         this.useUsageAdvisor = pset.getBooleanProperty(PropertyKey.useUsageAdvisor).getValue();
         this.gatherPerfMetrics = pset.getBooleanProperty(PropertyKey.gatherPerfMetrics).getValue();
@@ -384,35 +375,31 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
             if (this.rowData.size() == 0) {
                 b = false;
-            } else {
-                if (row == 0) {
+            } else if (row == 0) {
+                beforeFirst();
+                b = false;
+            } else if (row == 1) {
+                b = first();
+            } else if (row == -1) {
+                b = last();
+            } else if (row > this.rowData.size()) {
+                afterLast();
+                b = false;
+            } else if (row < 0) {
+                // adjust to reflect after end of result set
+                int newRowPosition = this.rowData.size() + row + 1;
+
+                if (newRowPosition <= 0) {
                     beforeFirst();
                     b = false;
-                } else if (row == 1) {
-                    b = first();
-                } else if (row == -1) {
-                    b = last();
-                } else if (row > this.rowData.size()) {
-                    afterLast();
-                    b = false;
                 } else {
-                    if (row < 0) {
-                        // adjust to reflect after end of result set
-                        int newRowPosition = this.rowData.size() + row + 1;
-
-                        if (newRowPosition <= 0) {
-                            beforeFirst();
-                            b = false;
-                        } else {
-                            b = absolute(newRowPosition);
-                        }
-                    } else {
-                        row--; // adjust for index difference
-                        this.rowData.setCurrentRow(row);
-                        this.thisRow = this.rowData.get(row);
-                        b = true;
-                    }
+                    b = absolute(newRowPosition);
                 }
+            } else {
+                row--; // adjust for index difference
+                this.rowData.setCurrentRow(row);
+                this.thisRow = this.rowData.get(row);
+                b = true;
             }
 
             setRowPositionValidity();
@@ -472,9 +459,9 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     /**
      * Ensures that the result set is not closed
-     * 
+     *
      * @return connection
-     * 
+     *
      * @throws SQLException
      *             if the result set is closed
      */
@@ -491,21 +478,21 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     /**
      * Checks if columnIndex is within the number of columns in this result set.
-     * 
+     *
      * @param columnIndex
      *            the index to check
-     * 
+     *
      * @throws SQLException
      *             if the index is out of bounds
      */
     protected final void checkColumnBounds(int columnIndex) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
-            if ((columnIndex < 1)) {
+            if (columnIndex < 1) {
                 throw SQLError.createSQLException(
                         Messages.getString("ResultSet.Column_Index_out_of_range_low",
                                 new Object[] { Integer.valueOf(columnIndex), Integer.valueOf(this.columnDefinition.getFields().length) }),
                         MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, getExceptionInterceptor());
-            } else if ((columnIndex > this.columnDefinition.getFields().length)) {
+            } else if (columnIndex > this.columnDefinition.getFields().length) {
                 throw SQLError.createSQLException(
                         Messages.getString("ResultSet.Column_Index_out_of_range_high",
                                 new Object[] { Integer.valueOf(columnIndex), Integer.valueOf(this.columnDefinition.getFields().length) }),
@@ -521,7 +508,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
     /**
      * Ensures that the cursor is positioned on a valid row and that the result
      * set is not closed
-     * 
+     *
      * @throws SQLException
      *             if the result set is not in a valid state for traversal
      */
@@ -529,26 +516,27 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
         checkClosed();
 
         if (!this.onValidRow) {
-            throw SQLError.createSQLException(this.invalidRowReason, MysqlErrorNumbers.SQL_STATE_GENERAL_ERROR, getExceptionInterceptor());
+            throw SQLError.createSQLException(Messages.getString(this.invalidRowReasonMessageKey), MysqlErrorNumbers.SQL_STATE_GENERAL_ERROR,
+                    getExceptionInterceptor());
         }
     }
 
     private boolean onValidRow = false;
-    private String invalidRowReason = null;
+    private String invalidRowReasonMessageKey = null;
 
-    private void setRowPositionValidity() throws SQLException {
-        if (!this.rowData.isDynamic() && (this.rowData.size() == 0)) {
-            this.invalidRowReason = Messages.getString("ResultSet.Illegal_operation_on_empty_result_set");
+    private void setRowPositionValidity() {
+        if (!this.rowData.isDynamic() && this.rowData.size() == 0) {
+            this.invalidRowReasonMessageKey = "ResultSet.Illegal_operation_on_empty_result_set";
             this.onValidRow = false;
         } else if (this.rowData.isBeforeFirst()) {
-            this.invalidRowReason = Messages.getString("ResultSet.Before_start_of_result_set_146");
+            this.invalidRowReasonMessageKey = "ResultSet.Before_start_of_result_set_146";
             this.onValidRow = false;
         } else if (this.rowData.isAfterLast()) {
-            this.invalidRowReason = Messages.getString("ResultSet.After_end_of_result_set_148");
+            this.invalidRowReasonMessageKey = "ResultSet.After_end_of_result_set_148";
             this.onValidRow = false;
         } else {
             this.onValidRow = true;
-            this.invalidRowReason = null;
+            this.invalidRowReasonMessageKey = null;
         }
     }
 
@@ -1069,7 +1057,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     @Override
     public int getConcurrency() throws SQLException {
-        return (CONCUR_READ_ONLY);
+        return CONCUR_READ_ONLY;
     }
 
     @Override
@@ -1130,33 +1118,6 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
                 // TODO Field sets binary and blob flags if the length of BIT field is > 1; is it needed at all?
                 if (field.isBinary() || field.isBlob()) {
                     byte[] data = getBytes(columnIndex);
-
-                    if (this.connection.getPropertySet().getBooleanProperty(PropertyKey.autoDeserialize).getValue()) {
-                        Object obj = data;
-
-                        if ((data != null) && (data.length >= 2)) {
-                            if ((data[0] == -84) && (data[1] == -19)) {
-                                // Serialized object?
-                                try {
-                                    ByteArrayInputStream bytesIn = new ByteArrayInputStream(data);
-                                    ObjectInputStream objIn = new ObjectInputStream(bytesIn);
-                                    obj = objIn.readObject();
-                                    objIn.close();
-                                    bytesIn.close();
-                                } catch (ClassNotFoundException cnfe) {
-                                    throw SQLError.createSQLException(Messages.getString("ResultSet.Class_not_found___91") + cnfe.toString()
-                                            + Messages.getString("ResultSet._while_reading_serialized_object_92"), getExceptionInterceptor());
-                                } catch (IOException ex) {
-                                    obj = data; // not serialized?
-                                }
-                            } else {
-                                return getString(columnIndex);
-                            }
-                        }
-
-                        return obj;
-                    }
-
                     return data;
                 }
 
@@ -1232,38 +1193,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
             case MEDIUMBLOB:
             case LONGBLOB:
             case BLOB:
-                if (field.isBinary() || field.isBlob()) {
-                    byte[] data = getBytes(columnIndex);
-
-                    if (this.connection.getPropertySet().getBooleanProperty(PropertyKey.autoDeserialize).getValue()) {
-                        Object obj = data;
-
-                        if ((data != null) && (data.length >= 2)) {
-                            if ((data[0] == -84) && (data[1] == -19)) {
-                                // Serialized object?
-                                try {
-                                    ByteArrayInputStream bytesIn = new ByteArrayInputStream(data);
-                                    ObjectInputStream objIn = new ObjectInputStream(bytesIn);
-                                    obj = objIn.readObject();
-                                    objIn.close();
-                                    bytesIn.close();
-                                } catch (ClassNotFoundException cnfe) {
-                                    throw SQLError.createSQLException(Messages.getString("ResultSet.Class_not_found___91") + cnfe.toString()
-                                            + Messages.getString("ResultSet._while_reading_serialized_object_92"), getExceptionInterceptor());
-                                } catch (IOException ex) {
-                                    obj = data; // not serialized?
-                                }
-                            } else {
-                                return getString(columnIndex);
-                            }
-                        }
-
-                        return obj;
-                    }
-
-                    return data;
-                }
-
+            case VECTOR:
                 return getBytes(columnIndex);
 
             case YEAR:
@@ -1279,7 +1209,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
                 return getTimestamp(columnIndex);
 
             case DATETIME:
-                return getLocalDateTime(columnIndex);
+                return this.treatMysqlDatetimeAsTimestamp ? getTimestamp(columnIndex) : getLocalDateTime(columnIndex);
 
             default:
                 return getString(columnIndex);
@@ -1412,18 +1342,6 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
                 checkRowPos();
                 checkColumnBounds(columnIndex);
                 return (T) this.thisRow.getValue(columnIndex - 1, new DurationValueFactory(this.session.getPropertySet()));
-            }
-
-            if (this.connection.getPropertySet().getBooleanProperty(PropertyKey.autoDeserialize).getValue()) {
-                try {
-                    return (T) getObject(columnIndex);
-                } catch (ClassCastException cce) {
-                    SQLException sqlEx = SQLError.createSQLException("Conversion not supported for type " + type.getName(),
-                            MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, getExceptionInterceptor());
-                    sqlEx.initCause(cce);
-
-                    throw sqlEx;
-                }
             }
 
             throw SQLError.createSQLException("Conversion not supported for type " + type.getName(), MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT,
@@ -1608,7 +1526,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
         // Non-dynamic result sets can be interrogated for this information
         if (!this.rowData.isDynamic()) {
-            if ((currentRowNumber < 0) || this.rowData.isAfterLast() || this.rowData.isEmpty()) {
+            if (currentRowNumber < 0 || this.rowData.isAfterLast() || this.rowData.isEmpty()) {
                 row = 0;
             } else {
                 row = currentRowNumber + 1;
@@ -1636,7 +1554,6 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
             throw SQLError.createSQLException("Operation not allowed on closed ResultSet.", MysqlErrorNumbers.SQL_STATE_GENERAL_ERROR,
                     getExceptionInterceptor());
         }
-
     }
 
     @Override
@@ -1751,7 +1668,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     /**
      * Checks whether this ResultSet is scrollable even if its type is ResultSet.TYPE_FORWARD_ONLY. Required for backwards compatibility.
-     * 
+     *
      * @return
      *         <code>true</code> if this result set type is ResultSet.TYPE_FORWARD_ONLY and the connection property 'scrollTolerantForwardOnly' has not been set
      *         to <code>true</code>.
@@ -1831,13 +1748,13 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
     /**
      * The <i>prev</i> method is not part of JDBC, but because of the architecture of this driver it is possible to move both forward and backward within the
      * result set.
-     * 
+     *
      * <p>
      * If an input stream from the previous row is open, it is implicitly closed. The ResultSet's warning chain is cleared when a new row is read
      * </p>
-     * 
+     *
      * @return true if the new current is valid; false if there are no more rows
-     * 
+     *
      * @exception java.sql.SQLException
      *                if a database access error occurs
      */
@@ -1848,13 +1765,13 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
             boolean b = true;
 
-            if ((rowIndex - 1) >= 0) {
+            if (rowIndex - 1 >= 0) {
                 rowIndex--;
                 this.rowData.setCurrentRow(rowIndex);
                 this.thisRow = this.rowData.get(rowIndex);
 
                 b = true;
-            } else if ((rowIndex - 1) == -1) {
+            } else if (rowIndex - 1 == -1) {
                 rowIndex--;
                 this.rowData.setCurrentRow(rowIndex);
                 this.thisRow = null;
@@ -1915,7 +1832,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
                                         new Object[] { Integer.valueOf(this.rowData.size()), Integer.valueOf(resultSetSizeThreshold) }));
                     }
 
-                    if (!isLast() && !isAfterLast() && (this.rowData.size() != 0)) {
+                    if (!isLast() && !isAfterLast() && this.rowData.size() != 0) {
                         this.eventSink.processEvent(ProfilerEvent.TYPE_USAGE, this.session, this.owningStatement, this, 0, new Throwable(),
                                 Messages.getString("ResultSet.Possible_incomplete_traversal_of_result_set",
                                         new Object[] { Integer.valueOf(getRow()), Integer.valueOf(this.rowData.size()) }));
@@ -2020,7 +1937,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
             setRowPositionValidity();
 
-            return (!this.rowData.isAfterLast() && !this.rowData.isBeforeFirst());
+            return !this.rowData.isAfterLast() && !this.rowData.isBeforeFirst();
         }
     }
 
@@ -2042,7 +1959,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
     @Override
     public void setFetchDirection(int direction) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
-            if ((direction != FETCH_FORWARD) && (direction != FETCH_REVERSE) && (direction != FETCH_UNKNOWN)) {
+            if (direction != FETCH_FORWARD && direction != FETCH_REVERSE && direction != FETCH_UNKNOWN) {
                 throw SQLError.createSQLException(Messages.getString("ResultSet.Illegal_value_for_fetch_direction_64"),
                         MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, getExceptionInterceptor());
             }
@@ -2059,7 +1976,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
     @Override
     public void setFetchSize(int rows) throws SQLException {
         synchronized (checkClosed().getConnectionMutex()) {
-            if (rows < 0) { /* || rows > getMaxRows() */
+            if (rows < 0 && rows != Integer.MIN_VALUE) { /* || rows > getMaxRows() */
                 throw SQLError.createSQLException(Messages.getString("ResultSet.Value_must_be_between_0_and_getMaxRows()_66"),
                         MysqlErrorNumbers.SQL_STATE_ILLEGAL_ARGUMENT, getExceptionInterceptor());
             }
@@ -2092,7 +2009,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     /**
      * Sets the concurrency
-     * 
+     *
      * @param concurrencyFlag
      *            CONCUR_UPDATABLE or CONCUR_READONLY
      */
@@ -2108,7 +2025,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     /**
      * Sets the result set type
-     * 
+     *
      * @param typeFlag
      *            SCROLL_SENSITIVE or SCROLL_INSENSITIVE (we only support
      *            SCROLL_INSENSITIVE)
@@ -2125,7 +2042,7 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
 
     /**
      * Sets server info (if any)
-     * 
+     *
      * @param info
      *            the server info message
      */
@@ -2269,7 +2186,6 @@ public class ResultSetImpl extends NativeResultset implements ResultSetInternalM
     @Override
     public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException {
         throw new NotUpdatable(Messages.getString("NotUpdatable.0"));
-
     }
 
     @Override

@@ -1,30 +1,21 @@
 /*
- * Copyright (c) 2020, 2022, Oracle and/or its affiliates.
+ * Copyright (c) 2020, 2024, Oracle and/or its affiliates.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2.0, as published by the
- * Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 2.0, as published by
+ * the Free Software Foundation.
  *
- * This program is also distributed with certain software (including but not
- * limited to OpenSSL) that is licensed under separate terms, as designated in a
- * particular file or component or in included license documentation. The
- * authors of MySQL hereby grant you an additional permission to link the
- * program and your derivative works with the separately licensed software that
- * they have included with MySQL.
+ * This program is designed to work with certain software that is licensed under separate terms, as designated in a particular file or component or in
+ * included license documentation. The authors of MySQL hereby grant you an additional permission to link the program and your derivative works with the
+ * separately licensed software that they have either included with the program or referenced in the documentation.
  *
- * Without limiting anything contained in the foregoing, this file, which is
- * part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
- * version 1.0, a copy of which can be found at
- * http://oss.oracle.com/licenses/universal-foss-exception.
+ * Without limiting anything contained in the foregoing, this file, which is part of MySQL Connector/J, is also subject to the Universal FOSS Exception,
+ * version 1.0, a copy of which can be found at http://oss.oracle.com/licenses/universal-foss-exception.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
- * for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0, for more details.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package com.mysql.cj.protocol.a.authentication;
@@ -70,12 +61,14 @@ import com.mysql.cj.util.StringUtils;
  * MySQL 'authentication_ldap_sasl_client' authentication plugin.
  */
 public class AuthenticationLdapSaslClientPlugin implements AuthenticationPlugin<NativePacketPayload> {
+
     public static String PLUGIN_NAME = "authentication_ldap_sasl_client";
 
     private static final String LOGIN_CONFIG_ENTRY = "MySQLConnectorJ";
     private static final String LDAP_SERVICE_NAME = "ldap";
 
     private enum AuthenticationMechanisms {
+
         SCRAM_SHA_1(ScramSha1SaslClient.IANA_MECHANISM_NAME, ScramSha1SaslClient.MECHANISM_NAME), //
         SCRAM_SHA_256(ScramSha256SaslClient.IANA_MECHANISM_NAME, ScramSha256SaslClient.MECHANISM_NAME), //
         GSSAPI("GSSAPI", "GSSAPI");
@@ -104,6 +97,7 @@ public class AuthenticationLdapSaslClientPlugin implements AuthenticationPlugin<
         String getSaslServiceName() {
             return this.saslServiceName;
         }
+
     }
 
     private Protocol<?> protocol = null;
@@ -243,6 +237,7 @@ public class AuthenticationLdapSaslClientPlugin implements AuthenticationPlugin<
                             final String localUser = this.user;
                             final boolean debug = Boolean.getBoolean("sun.security.jgss.debug");
                             loginConfig = new Configuration() {
+
                                 @Override
                                 public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
                                     Map<String, String> options = new HashMap<>();
@@ -253,6 +248,7 @@ public class AuthenticationLdapSaslClientPlugin implements AuthenticationPlugin<
                                     return new AppConfigurationEntry[] { new AppConfigurationEntry("com.sun.security.auth.module.Krb5LoginModule",
                                             AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options) };
                                 }
+
                             };
                         }
 
@@ -268,7 +264,7 @@ public class AuthenticationLdapSaslClientPlugin implements AuthenticationPlugin<
                                     (PrivilegedExceptionAction<SaslClient>) () -> Sasl.createSaslClient(new String[] { this.authMech.getSaslServiceName() },
                                             null, LDAP_SERVICE_NAME, localLdapServerHostname, null, null));
                         } catch (PrivilegedActionException e) {
-                            // SaslException is the only checked exception that can be thrown. 
+                            // SaslException is the only checked exception that can be thrown.
                             throw (SaslException) e.getException();
                         }
                         break;
@@ -310,4 +306,5 @@ public class AuthenticationLdapSaslClientPlugin implements AuthenticationPlugin<
         }
         return true;
     }
+
 }
